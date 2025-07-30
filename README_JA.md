@@ -13,6 +13,10 @@ Kasane は、ドローンの航路を安全かつ効率的に管理すること�
 
 これらの動的な情報を一元的に管理するために、IPA が提唱する[4 次元時空間情報利活用のための空間 ID ガイドライン](https://www.ipa.go.jp/digital/architecture/guidelines/4dspatio-temporal-guideline.html)に基づき、**時空間に関わるデータを多層的に統合・管理**できるデータベースエンジン **「Kasane」** を開発しました。
 
+## 時空間IDのプレビュー
+
+[https://voxel.airbee.xyz/](https://voxel.airbee.xyz/) を用いて、時空間IDをプレビューすることができます。このツールを使用することで、Kasaneが利用する4次元空間ID構造を視覚化し、操作することができます。
+
 [🇬🇧 English Version](./README.md)
 
 [ドキュメント](https://kasane.dev)
@@ -36,8 +40,22 @@ Kasane は、ドローン航路管理のみならず、都市計画、災害対�
 
 # 開発環境
 
-//TODO
-Rust を整備する旨、ワークスペースの使い方、テスト、ベンチマークの使い方を記述する
+このプロジェクトはRustワークスペース構成を使用しています。開発環境をセットアップするには：
+
+```bash
+# リポジトリをクローン
+git clone https://github.com/Tomoro0726/Kasane.git
+cd Kasane
+
+# プロジェクトをビルド
+cargo build
+
+# テストを実行
+cargo test
+
+# ベンチマークを実行
+cargo bench
+```
 
 ## [logic](/logic/README_JA.md)
 
