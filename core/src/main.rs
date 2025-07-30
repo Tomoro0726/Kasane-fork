@@ -1,13 +1,14 @@
 use crate::{
     interface::input::json_file::json_file,
-    parser::parser::Command,
-    parser::parser::{Packet, parser},
+    parser::Command,
+    parser::{Packet, parser},
 };
 
 pub mod command;
 pub mod interface;
 pub mod io;
 pub mod parser;
+pub mod role;
 
 #[cfg(not(feature = "BuildJsonSchema"))]
 
@@ -25,6 +26,7 @@ fn main() {
         }
     };
 
+    //PacketのJSONをパースしてみる
     let packet = match parser(&packet_raw) {
         Ok(v) => v,
         Err(e) => {
@@ -34,6 +36,7 @@ fn main() {
     };
 
     //ユーザー情報確認レイヤー
+    //存在しないユーザーははじく
     //Wasm用の段階ではdefault以外に受け付けない
     if packet.user != "default" {
         println!("ユーザーが違うな...")
