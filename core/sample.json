@@ -1,0 +1,56 @@
+{
+  "$schema": "./schema.json",
+  "user": "default",
+  "commands": [
+    {
+      "AddSpace": {
+        "spacename": "space1"
+      }
+    },
+    {
+      "Transaction": {
+        "action": "Start"
+      }
+    },
+    {
+      "AddKeys": {
+        "spacename": "space1",
+        "keys": [
+          {
+            "name": "temperature",
+            "type": "Int"
+          },
+          {
+            "name": "active",
+            "type": "Boolean"
+          }
+        ]
+      }
+    },
+    {
+      "PutValue": {
+        "select": {
+          "Function": {
+            "Line": {
+              "start_x": 1,
+              "start_y": 2,
+              "start_z": 3,
+              "end_x": 4,
+              "end_y": 5,
+              "end_z": 6,
+              "zoom": 1
+            }
+          }
+        },
+        "keys": [
+          {
+            "name": "temperature"
+          },
+          {
+            "name": "active"
+          }
+        ]
+      }
+    }
+  ]
+}

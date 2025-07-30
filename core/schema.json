@@ -1,0 +1,440 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Packet",
+  "type": "object",
+  "properties": {
+    "commands": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Command"
+      }
+    },
+    "user": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "user",
+    "commands"
+  ],
+  "$defs": {
+    "AddKeyInfo": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/KeyType"
+        }
+      },
+      "required": [
+        "name",
+        "type"
+      ]
+    },
+    "AddKeys": {
+      "type": "object",
+      "properties": {
+        "keys": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AddKeyInfo"
+          }
+        },
+        "spacename": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "spacename",
+        "keys"
+      ]
+    },
+    "AddSpace": {
+      "type": "object",
+      "properties": {
+        "spacename": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "spacename"
+      ]
+    },
+    "Command": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "AddSpace": {
+              "$ref": "#/$defs/AddSpace"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "AddSpace"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "DeleteSpace": {
+              "$ref": "#/$defs/DeleteSpace"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "DeleteSpace"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "AddKeys": {
+              "$ref": "#/$defs/AddKeys"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "AddKeys"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "DeleteKeys": {
+              "$ref": "#/$defs/DeleteKeys"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "DeleteKeys"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "PutValue": {
+              "$ref": "#/$defs/PutValue"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "PutValue"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "SetValue": {
+              "$ref": "#/$defs/SetValue"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "SetValue"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "DeleteValue": {
+              "$ref": "#/$defs/DeleteValue"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "DeleteValue"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "Transaction": {
+              "$ref": "#/$defs/Transaction"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "Transaction"
+          ]
+        }
+      ]
+    },
+    "DeleteKeyInfo": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "DeleteKeys": {
+      "type": "object",
+      "properties": {
+        "keys": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DeleteKeyInfo"
+          }
+        },
+        "spacename": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "spacename",
+        "keys"
+      ]
+    },
+    "DeleteSpace": {
+      "type": "object",
+      "properties": {
+        "spacename": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "spacename"
+      ]
+    },
+    "DeleteValue": {
+      "type": "object",
+      "properties": {
+        "keys": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SelectKeyInfo"
+          }
+        },
+        "select": {
+          "$ref": "#/$defs/Select"
+        }
+      },
+      "required": [
+        "select",
+        "keys"
+      ]
+    },
+    "Function": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "Line": {
+              "$ref": "#/$defs/Line"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "Line"
+          ]
+        }
+      ]
+    },
+    "KeyType": {
+      "type": "string",
+      "enum": [
+        "Int",
+        "Boolean",
+        "Text"
+      ]
+    },
+    "Line": {
+      "type": "object",
+      "properties": {
+        "end_x": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_y": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_z": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "start_x": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "start_y": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "start_z": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "zoom": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "start_x",
+        "start_y",
+        "start_z",
+        "end_x",
+        "end_y",
+        "end_z",
+        "zoom"
+      ]
+    },
+    "Prefix": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "AND": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Select"
+              }
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "AND"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "OR": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Select"
+              }
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "OR"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "NOT": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Select"
+              }
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "NOT"
+          ]
+        }
+      ]
+    },
+    "PutValue": {
+      "type": "object",
+      "properties": {
+        "keys": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SelectKeyInfo"
+          }
+        },
+        "select": {
+          "$ref": "#/$defs/Select"
+        }
+      },
+      "required": [
+        "select",
+        "keys"
+      ]
+    },
+    "Select": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "Function": {
+              "$ref": "#/$defs/Function"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "Function"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "Prefix": {
+              "$ref": "#/$defs/Prefix"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "Prefix"
+          ]
+        }
+      ]
+    },
+    "SelectKeyInfo": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "SetValue": {
+      "type": "object",
+      "properties": {
+        "keys": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SelectKeyInfo"
+          }
+        },
+        "select": {
+          "$ref": "#/$defs/Select"
+        }
+      },
+      "required": [
+        "select",
+        "keys"
+      ]
+    },
+    "Transaction": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/TransactionAction"
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "TransactionAction": {
+      "type": "string",
+      "enum": [
+        "Start",
+        "Commit",
+        "Rollback"
+      ]
+    }
+  }
+}
