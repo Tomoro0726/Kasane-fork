@@ -1,6 +1,6 @@
-# Kasane-Logic
+# Kasane Logic
 
-**Kasane-logic** is a Rust library that extends the 4-dimensional spatial information notation defined by IPA (Information-technology Promotion Agency) and enables logical operations on space-time IDs. The calculations are implemented using pure Rust functions, and operate correctly and quickly in any environment without any external dependencies.
+**Kasane Logic** is a Rust library that extends the 4-dimensional spatial information notation defined by IPA (Information-technology Promotion Agency) and enables logical operations on space-time IDs. The calculations are implemented using pure Rust functions, and operate correctly and efficiently in any environment without external dependencies.
 
 [🇯🇵 日本語版](./README_JA.md)
 

@@ -1,384 +1,135 @@
-# Kasane-logic
+# Kasane Core
 
-**Kasane-logic** は、IPA（独立行政法人情報処理推進機構）が定義した 4 次元空間情報の記法を拡張し、時空間 ID に対する論理演算を可能にする Rust ライブラリです。 純粋な Rust の機能のみで実装されており、外部依存なくあらゆる環境で正確かつ高速に動作します。
+**Kasane Core** は、Kasaneのデータベース実装であり、4次元時空間データの効率的な保存と管理を提供します。ドローンの航路管理やその他の時空間情報をトランザクションサポートと型安全性により管理するための基盤レイヤーとして機能します。
 
 [🇬🇧 English Version](./README.md)
 
 ## 🌱 特長
 
-- `SpaceTimeId` による 4 次元（X, Y, F, T）空間の表現
-- `DimensionRange` による範囲指定、無限範囲の柔軟な記述
-- `SpaceTimeIdSet` による集合管理と重複排除
-- 和集合（OR）、積集合（AND）、補集合（NOT）などの演算子サポート
-- 実行環境に依存しない軽量な構成
+- **4次元データストレージ**: 時空間IDを用いた時空間データの効率的な保存と検索
+- **トランザクションサポート**: データの整合性と安全性を保証するACIDトランザクション
+- **型安全性**: データの破損を防ぎ、信頼性を確保する強い型システム
+- **パフォーマンス最適化**: 大規模な時空間データセットでの高性能操作に最適化
+- **WebAssembly対応**: ブラウザやエッジ環境でのデプロイ用にWebAssemblyにコンパイル可能
 
-## 📦 `SpaceTimeId` 型
+## 🏗️ アーキテクチャ
 
-`SpaceTimeId` は 4 次元空間（X, Y, F, T）に加え、ズームレベルと時間間隔を持つ領域を表します。
+Kasane Coreデータベースは以下のコンポーネントで構築されています：
 
-### 時空間 ID
+### ストレージエンジン
+- 時空間IDの効率的なインデックス化と保存
+- 範囲クエリと空間操作に最適化
+- トランザクションログと復旧メカニズム
 
-```rust
-let stid = SpaceTimeId::new(
-    4,                                      // ズームレベル
-    DimensionRange::Single(5),              // x座標
-    DimensionRange::Single(3),              // y座標
-    DimensionRange::AfterUnLimitRange(10),  // 高さ（f）: 10以上
-    60,                                     // 時間間隔（秒）
-    DimensionRange::LimitRange(100, 200),   // 時間インデックス（t）
-).unwrap();
+### パーサー
+- コマンドの解析と検証
+- 時空間クエリ用のSQL類似構文
+- 型チェックとエラーハンドリング
+
+### トランザクションマネージャー
+- ACIDトランザクションサポート
+- 並行アクセス制御
+- ロールバックと復旧機能
+
+## 🚀 はじめに
+
+### ビルド
+
+```bash
+# コアデータベースをビルド
+cargo build --package kasane
+
+# データベースを実行
+cargo run --package kasane
 ```
 
-### 空間 ID
+### テスト
 
-空間 ID は全ての時間において有効なオブジェクトを表します。
+```bash
+# 全てのテストを実行
+cargo test --package kasane
 
-```rust
-let stid = SpaceTimeId::new(
-    4,                                      // ズームレベル
-    DimensionRange::Single(5),              // x座標
-    DimensionRange::Single(3),              // y座標
-    DimensionRange::AfterUnLimitRange(10),  // 高さ（f）: 10以上
-    0,                                      // i=0で空間IDを指定
-    DimensionRange::Any,                    // 時間インデックスは全ての値を示すAny
-).unwrap();
+# 詳細出力付きで実行
+cargo test --package kasane -- --nocapture
 ```
 
-## ✍️ 記法
+### ベンチマーク
 
-独自に以下の拡張記法を導入しています：
-
-### 欠けた次元の表現
-
-特定の次元に制約がない（すべての値が対象）場合は、`-` を使用します。
-
-例：F 次元が未定義の場合
-
-```
-2/1/3/-
+```bash
+# パフォーマンスベンチマークを実行
+cargo bench --package kasane
 ```
 
-これは次の集合と等価です：
+## 🔧 使用方法
 
-```
-2/1/3/-4, 2/1/3/-3, ..., 2/1/3/3
-```
+Kasane Coreデータベースは時空間データ管理用のコマンドラインインターフェースを提供します：
 
-### 範囲の指定
+```bash
+# データベースを開始
+./target/release/kasane
 
-`:` を使って区間を示します：
-
-```
-2/1/3/1:5
-```
-
-これは以下と等価です：
-
-```
-2/1/3/1, 2/1/3/2, 2/1/3/3, 2/1/3/4, 2/1/3/5
+# 例のコマンド（データベースCLI内で）:
+ADD_SPACE space_name;
+ADD_KEYS key1 key2 key3;
+PUT_VALUE space_name key1 "value1";
 ```
 
-### 以降すべての値
-
-始点から無限大を意味するには `:` と `-` を併用します：
-
-```
-2/1/3/1:-
-```
-
-これは
-
-```
-2/1/3/1, 2/1/3/2, 2/1/3/3, ...
-```
-
-を意味します。
-
-## 📐 `DimensionRange<T>` 型
-
-各次元（X, Y, F, T）の値を表す汎用範囲型：
-
-- `Single(v)`：単一の値
-- `LimitRange(start, end)`：開始～終了の閉区間
-- `BeforeUnLimitRange(end)`：値の下限から `end` まで
-- `AfterUnLimitRange(start)`：`start` から値の上限まで
-- `Any`：すべての値にマッチ（全領域）
-
----
-
-## 🔧 `SpaceTimeId` の関数・メソッド
-
-### 📍 座標取得関数
-
-#### `coordinates() -> Coordinates`
-
-SpaceTimeId を地理座標（緯度、経度、高度）に変換します。
-
-```rust
-let stid = SpaceTimeId::new(4, DimensionRange::Single(5), DimensionRange::Single(3), DimensionRange::Single(10), 60, DimensionRange::Single(100)).unwrap();
-let coords = stid.coordinates();
-println!("緯度: {:?}, 経度: {:?}, 高度: {:?}", coords.latitude, coords.longitude, coords.altitude);
-```
-
-#### `center() -> Point`
-
-空間領域の中心点を返します。
-
-```rust
-let center = stid.center();
-println!("中心点 - 緯度: {}, 経度: {}, 高度: {}", center.latitude, center.longitude, center.altitude);
-```
-
-#### `vertex() -> [Point; 8]`
-
-空間領域の 8 つの角の頂点を返します。
-
-```rust
-let vertices = stid.vertex();
-for (i, vertex) in vertices.iter().enumerate() {
-    println!("頂点{}: 緯度={}, 経度={}, 高度={}", i, vertex.latitude, vertex.longitude, vertex.altitude);
-}
-```
-
-### 🔄 スケール変換
-
-#### `change_scale(z: Option<u16>, i: Option<u32>) -> Result<SpaceTimeId, String>`
-
-空間解像度（ズームレベル）や時間解像度（時間間隔）を変更します。
-
-```rust
-// ズームレベルを6に変更
-let scaled = stid.change_scale(Some(6), None)?;
-
-// 時間間隔を30秒に変更
-let time_scaled = stid.change_scale(None, Some(30))?;
-```
-
-### 🎯 包含関係
-
-#### `containment_relation(&other: &SpaceTimeId) -> Containment`
-
-他の SpaceTimeId との包含関係を判定します。
-
-```rust
-let containment = stid1.containment_relation(&stid2);
-match containment {
-    Containment::Full => println!("stid1 は stid2 を完全に含んでいます"),
-    Containment::Partial(intersection) => println!("部分的に重複しています: {}", intersection),
-    Containment::None => println!("重複していません"),
-}
-```
-
-### ✂️ 補集合演算
-
-#### `complement(&self) -> SpaceTimeIdSet`
-
-この SpaceTimeId の補集合（含まれていない領域）を返します。
-
-```rust
-let complement_set = stid.complement();
-println!("補集合: {}", complement_set);
-```
-
-### 📊 値取得メソッド
-
-各次元の値や属性にアクセスするためのゲッターメソッド：
-
-- `x() -> DimensionRange<u64>`：X 次元の値
-- `y() -> DimensionRange<u64>`：Y 次元の値
-- `f() -> DimensionRange<i64>`：F 次元（高度）の値
-- `t() -> DimensionRange<u32>`：T 次元（時間インデックス）の値
-- `z() -> u16`：ズームレベル
-- `i() -> u32`：時間間隔（秒）
-
----
-
-## 🏗️ 補助型
-
-### `Point` 構造体
-
-3 次元空間内の点を表します。
-
-```rust
-pub struct Point {
-    pub latitude: f64,   // 緯度
-    pub longitude: f64,  // 経度
-    pub altitude: f64,   // 高度
-}
-```
-
-### `Coordinates` 構造体
-
-空間領域の座標範囲を表します。
-
-```rust
-pub struct Coordinates {
-    pub latitude: (f64, f64),   // 緯度の範囲 (最小, 最大)
-    pub longitude: (f64, f64),  // 経度の範囲 (最小, 最大)
-    pub altitude: (f64, f64),   // 高度の範囲 (最小, 最大)
-}
-```
-
-### `Containment` 列挙型
-
-包含関係の種類を表します。
-
-```rust
-pub enum Containment {
-    Full,                    // 完全包含
-    Partial(SpaceTimeId),   // 部分重複（交差領域を含む）
-    None,                   // 重複なし
-}
-```
-
----
-
-## 📚 `SpaceTimeIdSet` 型
-
-複数の `SpaceTimeId` を集合として管理します。追加時に重複や重なりがある場合は自動的に調整され、物理的な空間に対して一意な ID のみが残ります。
-
-### 🧭 基本的な使い方
-
-```rust
-let mut set = SpaceTimeIdSet::new();
-set.insert(stid);
-```
-
-### 🛠️ `SpaceTimeIdSet` のメソッド
-
-#### `new() -> SpaceTimeIdSet`
-
-新しい空の集合を作成します。
-
-```rust
-let mut set = SpaceTimeIdSet::new();
-```
-
-#### `insert(&mut self, other: SpaceTimeId)`
-
-SpaceTimeId を集合に追加します。重複や重なりがある場合は自動的に調整されます。
-
-```rust
-set.insert(stid);
-```
-
-#### `iter() -> impl Iterator<Item = &SpaceTimeId>`
-
-集合内の要素を反復処理するイテレータを返します。
-
-```rust
-for id in set.iter() {
-    println!("{}", id);
-}
-```
-
-#### `is_empty() -> bool`
-
-集合が空かどうかを確認します。
-
-```rust
-if set.is_empty() {
-    println!("集合は空です");
-}
-```
-
-#### `from(id: SpaceTimeId) -> SpaceTimeIdSet`
-
-単一の SpaceTimeId から集合を作成します。
-
-```rust
-let set = SpaceTimeIdSet::from(stid);
-```
-
-### 🔀 対応演算子
-
-- `|`：和集合 - 2 つの集合を結合
-- `&`：積集合 - 共通部分を抽出
-- `^`：排他的論理和（XOR）- どちらか一方の集合にのみ含まれる領域を返す
-- `!`：補集合 - 含まれていない領域を返す
-- `==`：等価比較 - 実体が同じ空間領域を示していれば true
-
-```rust
-let union = set_a | set_b;
-let intersection = set_a & set_b;
-let xor = set_a ^ set_b;
-let complement = !set_a;
-assert_eq!(set_a, set_b); // 物理的に等価であれば true
-```
-
-## 🧪 使用例
-
-```rust
-let a = SpaceTimeId::new(...).unwrap();
-let b = SpaceTimeId::new(...).unwrap();
-
-let mut set = SpaceTimeIdSet::new();
-set.insert(a);
-
-let set2 = SpaceTimeIdSet::from(b);
-let union = set | set2;
-let common = set & set2;
-let outside = !set;
-```
-
-## 📋 API リファレンス
-
-### `SpaceTimeId` コンストラクタ
-
-- `new(z: u16, x: DimensionRange<u64>, y: DimensionRange<u64>, f: DimensionRange<i64>, i: u32, t: DimensionRange<u32>) -> Result<SpaceTimeId, String>`
-
-### `SpaceTimeId` インスタンスメソッド
-
-- `coordinates() -> Coordinates` - 地理座標を取得
-- `center() -> Point` - 空間領域の中心点を取得
-- `vertex() -> [Point; 8]` - 8 つの角の頂点を取得
-- `change_scale(z: Option<u16>, i: Option<u32>) -> Result<SpaceTimeId, String>` - 解像度を変更
-- `containment_relation(&other: &SpaceTimeId) -> Containment` - 包含関係を確認
-- `complement() -> SpaceTimeIdSet` - 補集合を取得
-- `x() -> DimensionRange<u64>` - X 次元の値を取得
-- `y() -> DimensionRange<u64>` - Y 次元の値を取得
-- `f() -> DimensionRange<i64>` - F 次元の値を取得
-- `t() -> DimensionRange<u32>` - T 次元の値を取得
-- `z() -> u16` - ズームレベルを取得
-- `i() -> u32` - 時間間隔を取得
-
-### `SpaceTimeIdSet` メソッド
-
-- `new() -> SpaceTimeIdSet` - 新しい空の集合を作成
-- `from(id: SpaceTimeId) -> SpaceTimeIdSet` - 単一 ID から集合を作成
-- `insert(&mut self, other: SpaceTimeId)` - ID を集合に追加
-- `iter() -> impl Iterator<Item = &SpaceTimeId>` - イテレータを取得
-- `is_empty() -> bool` - 集合が空かを確認
-
-### `SpaceTimeIdSet` 演算子
-
-- `set1 | set2` - 和集合演算
-- `set1 & set2` - 積集合演算
-- `set1 ^ set2` - XOR（排他的論理和）演算
-- `!set` - 補集合演算
-- `set1 == set2` - 等価比較
+## 📊 コマンドリファレンス
+
+### スペース管理
+- `ADD_SPACE <name>` - 新しいデータスペースを作成
+- `DELETE_SPACE <name>` - データスペースを削除
+
+### キー管理  
+- `ADD_KEYS <key1> <key2> ...` - 現在のスペースにキーを追加
+- `DELETE_KEYS <key1> <key2> ...` - 現在のスペースからキーを削除
+
+### 値操作
+- `PUT_VALUE <space> <key> <value>` - 値を挿入または更新
+- `SET_VALUE <space> <key> <value>` - 値を設定（存在しない場合は作成）
+- `DELETE_VALUE <space> <key>` - 値を削除
+
+### トランザクション
+- `TRANSACTION { <commands> }` - トランザクション内でコマンドを実行
 
 ## 🤝 コントリビューションについて
 
-バグ報告・機能提案・ドキュメント修正・テスト追加など、あらゆる貢献を歓迎します。
+Kasane Coreデータベースの改善への貢献を歓迎します：
+
+- バグ報告と機能リクエスト
+- パフォーマンス最適化
+- ドキュメント改善
+- テストカバレッジの拡張
 
 ## 🧪 テストに関する考え方
 
-このライブラリは正確性を第一として作成します。よって、テストは最大限充実する方針で整備します：
+コアデータベースはデータ整合性とパフォーマンスを優先します：
 
-- コードを改善したときに以前のテストと異なる挙動になった場合にバグの発生なのか修正なのかを議論します
-- とにかくたくさんのテストを充実させることで挙動が変わった場合に検知できるようになります
-- `cargo test`で実行できます
+- 全てのコンポーネントに対する包括的なユニットテスト
+- 複雑な操作に対する統合テスト
+- 重要パスのパフォーマンスベンチマーク
+- データ整合性のためのプロパティベースドテスト
 
-## ⚡ パフォーマンステストに関する考え方
+テストの実行：
+```bash
+cargo test --package kasane
+```
 
-関数のパフォーマンスが高くなるように改良を行います：
+## ⚡ パフォーマンス
 
-- `cargo bench`で実行できます
-- criterionを用いてテストを行います
-- まだ全ての関数を網羅できていません
+パフォーマンスベンチマークにより最適な動作を保証：
+
+- ストレージと検索のベンチマーク
+- トランザクションパフォーマンステスト
+- 並行アクセスベンチマーク
+- メモリ使用量プロファイリング
+
+ベンチマークの実行：
+```bash
+cargo bench --package kasane
+```
 
 ## 📜 ライセンス
 
-本ライブラリは MIT ライセンスの下で公開されています。
-詳細は [LICENSE](./LICENSE) ファイルをご覧ください。
+このコアデータベース実装は MIT ライセンスの下で公開されています。
+詳細は [LICENSE](../LICENSE) ファイルをご覧ください。
