@@ -1,7 +1,7 @@
 use crate::{
     interface::input::json_file::json_file,
     parser::parser::Command,
-    parser::parser::{parser, Packet},
+    parser::parser::{Packet, parser},
 };
 
 pub mod command;
@@ -48,6 +48,7 @@ fn main() {
 
     //Interface-Output層
     //全ての実行結果を含めてJSONに変換する
+    //OK
 }
 
 //Json Schemaを出力する
