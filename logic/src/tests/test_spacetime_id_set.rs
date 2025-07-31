@@ -120,7 +120,7 @@ mod tests {
     fn test_spacetime_idset_display_single_element() {
         let id = create_test_id_with_any_t(2, 1, 1, 0);
         let set = SpaceTimeIdSet::from(id);
-        assert_eq!(set.to_string(), "2/1/1/0_0/-");
+        assert_eq!(set.to_string(), "2/0/1/1_0/-");
     }
 
     #[test]
@@ -133,8 +133,8 @@ mod tests {
         set.insert(id2);
 
         let display_str = set.to_string();
-        assert!(display_str.contains("2/1/1/0_0/-"));
-        assert!(display_str.contains("2/2/2/1_0/-"));
+        assert!(display_str.contains("2/0/1/1_0/-"));
+        assert!(display_str.contains("2/1/2/2_0/-"));
         assert!(display_str.contains(", "));
     }
 

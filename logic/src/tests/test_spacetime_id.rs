@@ -84,9 +84,9 @@ mod tests {
     fn test_spacetime_id_new_x_out_of_bounds() {
         let result = SpaceTimeId::new(
             2,
-            DimensionRange::Single(4), // max is 3 for z=2
-            DimensionRange::Single(0),
-            DimensionRange::Single(0),
+            DimensionRange::Single(0), // f
+            DimensionRange::Single(4), // x - max is 3 for z=2
+            DimensionRange::Single(0), // y
             0,
             DimensionRange::Any,
         );
@@ -98,9 +98,9 @@ mod tests {
     fn test_spacetime_id_new_y_out_of_bounds() {
         let result = SpaceTimeId::new(
             2,
-            DimensionRange::Single(0),
-            DimensionRange::Single(5), // max is 3 for z=2
-            DimensionRange::Single(0),
+            DimensionRange::Single(0), // f
+            DimensionRange::Single(0), // x
+            DimensionRange::Single(5), // y - max is 3 for z=2
             0,
             DimensionRange::Any,
         );
@@ -112,9 +112,9 @@ mod tests {
     fn test_spacetime_id_new_f_out_of_bounds_positive() {
         let result = SpaceTimeId::new(
             2,
-            DimensionRange::Single(0),
-            DimensionRange::Single(0),
-            DimensionRange::Single(4), // max is 3 for z=2
+            DimensionRange::Single(4), // f - max is 3 for z=2
+            DimensionRange::Single(0), // x
+            DimensionRange::Single(0), // y
             0,
             DimensionRange::Any,
         );
