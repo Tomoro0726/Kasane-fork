@@ -257,9 +257,9 @@ mod tests {
         let result = range1.containment_relation(&range2);
         match result {
             Containment::Partial(intersection) => {
-                assert_eq!(intersection.x(), DimensionRange::LimitRange(2, 4));
-                assert_eq!(intersection.y(), DimensionRange::Single(1));
-                assert_eq!(intersection.f(), DimensionRange::Single(0));
+                assert_eq!(intersection.f(), DimensionRange::LimitRange(2, 4));
+                assert_eq!(intersection.x(), DimensionRange::Single(1));
+                assert_eq!(intersection.y(), DimensionRange::Single(0));
             }
             _ => panic!("Expected Partial containment"),
         }
