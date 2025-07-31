@@ -97,7 +97,7 @@ impl SpaceTimeId {
             None => self.i,
         };
 
-        Ok(Self::new(z, x, y, f, i, t)?)
+        Ok(Self::new(z, f, x, y, i, t)?)
     }
 
     fn change_scale_logic<T, Y>(

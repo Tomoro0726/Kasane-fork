@@ -75,7 +75,7 @@ impl SpaceTimeId {
         {
             return Containment::Full;
         } else {
-            return Containment::Partial(SpaceTimeId::new(target_z, x, y, f, target_i, t).unwrap());
+            return Containment::Partial(SpaceTimeId::new(target_z, f, x, y, target_i, t).unwrap());
         }
     }
 

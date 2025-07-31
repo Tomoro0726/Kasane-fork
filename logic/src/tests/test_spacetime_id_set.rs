@@ -14,7 +14,8 @@ mod tests {
             DimensionRange::Single(f),
             i,
             DimensionRange::Single(t),
-        ).unwrap()
+        )
+        .unwrap()
     }
 
     fn create_test_id_with_any_t(z: u16, x: u64, y: u64, f: i64) -> SpaceTimeId {
@@ -25,7 +26,8 @@ mod tests {
             DimensionRange::Single(f),
             0,
             DimensionRange::Any,
-        ).unwrap()
+        )
+        .unwrap()
     }
 
     // Tests for SpaceTimeIdSet::new()
@@ -66,7 +68,7 @@ mod tests {
     fn test_spacetime_idset_from_spacetime_id() {
         let id = create_test_id_with_any_t(2, 1, 1, 0);
         let set = SpaceTimeIdSet::from(id);
-        
+
         assert!(!set.is_empty());
         assert_eq!(set.iter().count(), 1);
         assert_eq!(*set.iter().next().unwrap(), id);
@@ -77,7 +79,7 @@ mod tests {
     fn test_spacetime_idset_insert_empty_set() {
         let mut set = SpaceTimeIdSet::new();
         let id = create_test_id_with_any_t(2, 1, 1, 0);
-        
+
         set.insert(id);
         assert!(!set.is_empty());
         assert_eq!(set.iter().count(), 1);
@@ -89,10 +91,10 @@ mod tests {
         let mut set = SpaceTimeIdSet::new();
         let id1 = create_test_id_with_any_t(2, 1, 1, 0);
         let id2 = create_test_id_with_any_t(2, 2, 2, 0);
-        
+
         set.insert(id1);
         set.insert(id2);
-        
+
         assert_eq!(set.iter().count(), 2);
     }
 
@@ -100,10 +102,10 @@ mod tests {
     fn test_spacetime_idset_insert_duplicate() {
         let mut set = SpaceTimeIdSet::new();
         let id = create_test_id_with_any_t(2, 1, 1, 0);
-        
+
         set.insert(id);
         set.insert(id); // Insert same ID again
-        
+
         assert_eq!(set.iter().count(), 1); // Should still have only one
     }
 
@@ -126,10 +128,10 @@ mod tests {
         let mut set = SpaceTimeIdSet::new();
         let id1 = create_test_id_with_any_t(2, 1, 1, 0);
         let id2 = create_test_id_with_any_t(2, 2, 2, 1);
-        
+
         set.insert(id1);
         set.insert(id2);
-        
+
         let display_str = set.to_string();
         assert!(display_str.contains("2/1/1/0_0/-"));
         assert!(display_str.contains("2/2/2/1_0/-"));
@@ -149,7 +151,7 @@ mod tests {
         let id = create_test_id_with_any_t(2, 1, 1, 0);
         let set = SpaceTimeIdSet::from(id);
         let debug_str = format!("{:?}", set);
-        
+
         // Debug should show individual coordinate combinations
         assert!(debug_str.contains("2/1/1/0"));
     }
@@ -160,10 +162,10 @@ mod tests {
         let mut set = SpaceTimeIdSet::new();
         let id1 = create_test_id_with_any_t(2, 1, 1, 0);
         let id2 = create_test_id_with_any_t(2, 2, 2, 1);
-        
+
         set.insert(id1);
         set.insert(id2);
-        
+
         let mut count = 0;
         for _ in set {
             count += 1;
@@ -176,16 +178,16 @@ mod tests {
         let mut set = SpaceTimeIdSet::new();
         let id1 = create_test_id_with_any_t(2, 1, 1, 0);
         let id2 = create_test_id_with_any_t(2, 2, 2, 1);
-        
+
         set.insert(id1);
         set.insert(id2);
-        
+
         let mut count = 0;
         for _ in &set {
             count += 1;
         }
         assert_eq!(count, 2);
-        
+
         // Set should still be usable after borrowing
         assert_eq!(set.iter().count(), 2);
     }
@@ -196,7 +198,7 @@ mod tests {
         let id1 = create_test_id_with_any_t(2, 1, 1, 0);
         let id2 = create_test_id_with_any_t(2, 2, 2, 1);
         let ids = vec![id1, id2];
-        
+
         let set: SpaceTimeIdSet = ids.into_iter().collect();
         assert_eq!(set.iter().count(), 2);
     }
@@ -212,7 +214,7 @@ mod tests {
     fn test_spacetime_idset_from_iterator_with_duplicates() {
         let id = create_test_id_with_any_t(2, 1, 1, 0);
         let ids = vec![id, id, id]; // Same ID multiple times
-        
+
         let set: SpaceTimeIdSet = ids.into_iter().collect();
         assert_eq!(set.iter().count(), 1); // Should deduplicate
     }
@@ -223,10 +225,10 @@ mod tests {
         let mut set = SpaceTimeIdSet::new();
         let id1 = create_test_id_with_any_t(2, 1, 1, 0);
         let id2 = create_test_id_with_any_t(2, 2, 2, 1);
-        
+
         set.insert(id1);
         set.insert(id2);
-        
+
         let cloned = set.clone();
         assert_eq!(set.iter().count(), cloned.iter().count());
         assert_eq!(set.to_string(), cloned.to_string());
@@ -242,8 +244,9 @@ mod tests {
             DimensionRange::AfterUnLimitRange(-1),
             60,
             DimensionRange::BeforeUnLimitRange(10),
-        ).unwrap();
-        
+        )
+        .unwrap();
+
         let set = SpaceTimeIdSet::from(id);
         assert!(!set.is_empty());
         assert_eq!(set.iter().count(), 1);
@@ -281,7 +284,7 @@ mod tests {
     #[test]
     fn test_spacetime_idset_insert_overlapping_ranges() {
         let mut set = SpaceTimeIdSet::new();
-        
+
         // Insert a range
         let id1 = SpaceTimeId::new(
             2,
@@ -290,8 +293,9 @@ mod tests {
             DimensionRange::Single(0),
             0,
             DimensionRange::Any,
-        ).unwrap();
-        
+        )
+        .unwrap();
+
         // Insert an overlapping range
         let id2 = SpaceTimeId::new(
             2,
@@ -300,11 +304,12 @@ mod tests {
             DimensionRange::Single(0),
             0,
             DimensionRange::Any,
-        ).unwrap();
-        
+        )
+        .unwrap();
+
         set.insert(id1);
         set.insert(id2);
-        
+
         // Should handle overlaps appropriately (exact behavior depends on implementation)
         assert!(!set.is_empty());
     }
@@ -312,7 +317,7 @@ mod tests {
     #[test]
     fn test_spacetime_idset_insert_contained_range() {
         let mut set = SpaceTimeIdSet::new();
-        
+
         // Insert a larger range
         let id1 = SpaceTimeId::new(
             3,
@@ -321,8 +326,9 @@ mod tests {
             DimensionRange::Single(0),
             0,
             DimensionRange::Any,
-        ).unwrap();
-        
+        )
+        .unwrap();
+
         // Insert a smaller contained range
         let id2 = SpaceTimeId::new(
             3,
@@ -331,11 +337,12 @@ mod tests {
             DimensionRange::Single(0),
             0,
             DimensionRange::Any,
-        ).unwrap();
-        
+        )
+        .unwrap();
+
         set.insert(id1);
         set.insert(id2);
-        
+
         // The smaller range should not be added as it's contained in the larger one
         assert_eq!(set.iter().count(), 1);
     }
@@ -343,7 +350,7 @@ mod tests {
     #[test]
     fn test_spacetime_idset_insert_any_dimension() {
         let mut set = SpaceTimeIdSet::new();
-        
+
         let id = SpaceTimeId::new(
             2,
             DimensionRange::Any,
@@ -351,15 +358,16 @@ mod tests {
             DimensionRange::Any,
             0,
             DimensionRange::Any,
-        ).unwrap();
-        
+        )
+        .unwrap();
+
         set.insert(id);
         assert_eq!(set.iter().count(), 1);
-        
+
         // Try to insert a specific point - should be contained in Any
         let specific_id = create_test_id_with_any_t(2, 1, 1, 0);
         set.insert(specific_id);
-        
+
         // Should still have only one element as specific is contained in Any
         assert_eq!(set.iter().count(), 1);
     }

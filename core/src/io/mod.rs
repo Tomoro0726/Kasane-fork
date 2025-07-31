@@ -1,8 +1,10 @@
+use logic::set::SpaceTimeIdSet;
+
 pub struct Storage {
     space: Vec<Space>,
 }
 
-struct Space {
+pub struct Space {
     name: String,
     key: Vec<Key>,
 }
@@ -14,7 +16,7 @@ struct Key {
 
 struct Value {
     value: ValueEntry,
-    //set: SpaceTimeIdSet,
+    set: SpaceTimeIdSet,
 }
 
 enum ValueEntry {

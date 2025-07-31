@@ -101,7 +101,7 @@ impl SpaceTimeIdSet {
         let new_y = Self::scale_range_for_z_u64(other.y(), delta_z);
         let new_f = Self::scale_range_for_z_i64(other.f(), delta_z);
 
-        SpaceTimeId::new(max_z, new_x, new_y, new_f, other.i(), other.t()).unwrap()
+        SpaceTimeId::new(max_z, new_f, new_x, new_y, other.i(), other.t()).unwrap()
     }
 
     /// その次元範囲に対する最適ZoomLevelを計算する（z: u16, 戻り値: Option<u16>）
@@ -182,9 +182,9 @@ impl SpaceTimeIdSet {
         } else {
             return SpaceTimeId::new(
                 other.z(),
+                other.f(),
                 other.x(),
                 other.y(),
-                other.f(),
                 gcd,
                 DimensionRange::LimitRange(start / gcd, end / gcd),
             )
@@ -218,28 +218,28 @@ impl SpaceTimeIdSet {
                     .ok()
                     .flatten()
                     .map(|merged_x| {
-                        SpaceTimeId::new(stid.z(), merged_x, stid.y(), stid.f(), stid.i(), stid.t())
+                        SpaceTimeId::new(stid.z(), stid.f(), merged_x, stid.y(), stid.i(), stid.t())
                     })
             } else if !matches[1] {
                 Self::to_continuous_xy(stid.y(), other.y())
                     .ok()
                     .flatten()
                     .map(|merged_y| {
-                        SpaceTimeId::new(stid.z(), stid.x(), merged_y, stid.f(), stid.i(), stid.t())
+                        SpaceTimeId::new(stid.z(), stid.f(), stid.x(), merged_y, stid.i(), stid.t())
                     })
             } else if !matches[2] {
                 Self::to_continuous_f(stid.f(), other.f())
                     .ok()
                     .flatten()
                     .map(|merged_f| {
-                        SpaceTimeId::new(stid.z(), stid.x(), stid.y(), merged_f, stid.i(), stid.t())
+                        SpaceTimeId::new(stid.z(), merged_f, stid.x(), stid.y(), stid.i(), stid.t())
                     })
             } else if !matches[3] {
                 Self::to_continuous_t(stid.t(), other.t())
                     .ok()
                     .flatten()
                     .map(|merged_t| {
-                        SpaceTimeId::new(stid.z(), stid.x(), stid.y(), stid.f(), stid.i(), merged_t)
+                        SpaceTimeId::new(stid.z(), stid.f(), stid.x(), stid.y(), stid.i(), merged_t)
                     })
             } else {
                 None

@@ -53,9 +53,9 @@ impl SpaceTimeId {
                         } else {
                             let stid = SpaceTimeId::new(
                                 self.z,
+                                fi.clone(),
                                 xi.clone(),
                                 yi.clone(),
-                                fi.clone(),
                                 self.i,
                                 ti.clone(),
                             )

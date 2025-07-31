@@ -43,9 +43,9 @@ where
 }
 #[derive(PartialEq, Debug, Clone, Copy)]
 /// * z: The zoom level, a u16 value. It defines the coordinate space boundaries.
-/// * x: The value for the X dimension as a DimensionRange<u64>.
 /// * y: The value for the Y dimension as a DimensionRange<u64>.
 /// * f: The value for the F (vertical) dimension as a DimensionRange<i64>.
+/// * x: The value for the X dimension as a DimensionRange<u64>.
 /// * i: The time interval in seconds, a u32 value.
 /// * t: The time index value as a DimensionRange<u32>.
 ///
@@ -83,9 +83,9 @@ where
 #[derive(Serialize, Deserialize, JsonSchema)]
 pub struct SpaceTimeId {
     z: u16,
+    f: DimensionRange<i64>,
     x: DimensionRange<u64>,
     y: DimensionRange<u64>,
-    f: DimensionRange<i64>,
     i: u32,
     t: DimensionRange<u32>,
 }
@@ -95,7 +95,7 @@ impl fmt::Display for SpaceTimeId {
         write!(
             f,
             "{}/{}/{}/{}_{}/{}",
-            self.z, self.x, self.y, self.f, self.i, self.t
+            self.z, self.f, self.x, self.y, self.i, self.t
         )
     }
 }
@@ -130,9 +130,9 @@ impl SpaceTimeId {
     /// - The time interval i is 0, but the time index t is not DimensionRange::Any.
     pub fn new(
         z: u16,
+        f: DimensionRange<i64>,
         x: DimensionRange<u64>,
         y: DimensionRange<u64>,
-        f: DimensionRange<i64>,
         i: u32,
         t: DimensionRange<u32>,
     ) -> Result<Self, String> {
@@ -337,9 +337,9 @@ impl SpaceTimeId {
 
         Ok(Self {
             z,
+            f: validate_f_dim(&f, z).map_err(|e| format!("Invalid f dimension: {}", e))?,
             x: validate_xy_dim(&x, z).map_err(|e| format!("Invalid x dimension: {}", e))?,
             y: validate_xy_dim(&y, z).map_err(|e| format!("Invalid y dimension: {}", e))?,
-            f: validate_f_dim(&f, z).map_err(|e| format!("Invalid f dimension: {}", e))?,
             i,
             t: validate_t_dim(&t, i).map_err(|e| format!("Invalid t dimension: {}", e))?,
         })
