@@ -13,7 +13,7 @@ fn bench_spacetimeid_valid_full_range(c: &mut Criterion) {
             let i = 60;
             let t = DimensionRange::LimitRange(0, 10);
 
-            let result = SpaceTimeId::new(z, x, y, f, i, t);
+            let result = SpaceTimeId::new(z, f, x, y, i, t);
             assert!(result.is_ok());
         });
     });
@@ -29,7 +29,7 @@ fn bench_spacetimeid_valid_any(c: &mut Criterion) {
             let i = 60;
             let t = DimensionRange::Any;
 
-            let result = SpaceTimeId::new(z, x, y, f, i, t);
+            let result = SpaceTimeId::new(z, f, x, y, i, t);
             assert!(result.is_ok());
         });
     });
@@ -45,7 +45,7 @@ fn bench_spacetimeid_valid_single(c: &mut Criterion) {
             let i = 60;
             let t = DimensionRange::Single(100);
 
-            let result = SpaceTimeId::new(z, x, y, f, i, t);
+            let result = SpaceTimeId::new(z, f, x, y, i, t);
             assert!(result.is_ok());
         });
     });
@@ -61,7 +61,7 @@ fn bench_spacetimeid_invalid_z_overflow(c: &mut Criterion) {
             let i = 60;
             let t = DimensionRange::Single(0);
 
-            let result = SpaceTimeId::new(z, x, y, f, i, t);
+            let result = SpaceTimeId::new(z, f, x, y, i, t);
             assert!(result.is_err());
         });
     });
@@ -77,7 +77,7 @@ fn bench_spacetimeid_invalid_xy_range(c: &mut Criterion) {
             let i = 60;
             let t = DimensionRange::Single(0);
 
-            let result = SpaceTimeId::new(z, x, y, f, i, t);
+            let result = SpaceTimeId::new(z, f, x, y, i, t);
             assert!(result.is_err());
         });
     });
@@ -93,7 +93,7 @@ fn bench_spacetimeid_invalid_f_range(c: &mut Criterion) {
             let i = 60;
             let t = DimensionRange::Single(0);
 
-            let result = SpaceTimeId::new(z, x, y, f, i, t);
+            let result = SpaceTimeId::new(z, f, x, y, i, t);
             assert!(result.is_err());
         });
     });
@@ -109,7 +109,7 @@ fn bench_spacetimeid_invalid_t_when_i_zero(c: &mut Criterion) {
             let i = 0;
             let t = DimensionRange::Single(10); // must be Any when i == 0
 
-            let result = SpaceTimeId::new(z, x, y, f, i, t);
+            let result = SpaceTimeId::new(z, f, x, y, i, t);
             assert!(result.is_err());
         });
     });

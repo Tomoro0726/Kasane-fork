@@ -21,9 +21,9 @@
 ```rust
 let stid = SpaceTimeId::new(
     4,                                      // Zoom level
+    DimensionRange::AfterUnLimitRange(10),  // Height (f): 10 and above
     DimensionRange::Single(5),              // x coordinate
     DimensionRange::Single(3),              // y coordinate
-    DimensionRange::AfterUnLimitRange(10),  // Height (f): 10 and above
     60,                                     // Time interval (seconds)
     DimensionRange::LimitRange(100, 200),   // Time index (t)
 ).unwrap();
@@ -36,9 +36,9 @@ Spatial ID represents objects that are valid for all time.
 ```rust
 let stid = SpaceTimeId::new(
     4,                                      // Zoom level
+    DimensionRange::AfterUnLimitRange(10),  // Height (f): 10 and above
     DimensionRange::Single(5),              // x coordinate
     DimensionRange::Single(3),              // y coordinate
-    DimensionRange::AfterUnLimitRange(10),  // Height (f): 10 and above
     0,                                      // i=0 specifies spatial ID
     DimensionRange::Any,                    // Time index shows Any for all values
 ).unwrap();
@@ -55,13 +55,13 @@ When there are no constraints on a specific dimension (all values are targeted),
 Example: When F dimension is undefined
 
 ```
-2/1/3/-
+2/-/1/3
 ```
 
 This is equivalent to the following set:
 
 ```
-2/1/3/-4, 2/1/3/-3, ..., 2/1/3/3
+2/-4/1/3, 2/-3/1/3, ..., 2/3/1/3
 ```
 
 ### Range Specification
@@ -182,9 +182,9 @@ println!("Complement: {}", complement_set);
 
 Getter methods for accessing values and attributes of each dimension:
 
+- `f() -> DimensionRange<i64>`: F dimension (altitude) value
 - `x() -> DimensionRange<u64>`: X dimension value
 - `y() -> DimensionRange<u64>`: Y dimension value
-- `f() -> DimensionRange<i64>`: F dimension (altitude) value
 - `t() -> DimensionRange<u32>`: T dimension (time index) value
 - `z() -> u16`: Zoom level
 - `i() -> u32`: Time interval (seconds)
@@ -333,9 +333,9 @@ let outside = !set;
 - `change_scale(z: Option<u16>, i: Option<u32>) -> Result<SpaceTimeId, String>` - Change resolution
 - `containment_relation(&other: &SpaceTimeId) -> Containment` - Check containment relationship
 - `complement() -> SpaceTimeIdSet` - Get complement set
+- `f() -> DimensionRange<i64>` - Get F dimension value
 - `x() -> DimensionRange<u64>` - Get X dimension value
 - `y() -> DimensionRange<u64>` - Get Y dimension value
-- `f() -> DimensionRange<i64>` - Get F dimension value
 - `t() -> DimensionRange<u32>` - Get T dimension value
 - `z() -> u16` - Get zoom level
 - `i() -> u32` - Get time interval

@@ -6,7 +6,7 @@
 
 ## 🌱 特長
 
-- `SpaceTimeId` による 4 次元（X, Y, F, T）空間の表現
+- `SpaceTimeId` による 4 次元（F, X, Y, T）空間の表現
 - `DimensionRange` による範囲指定、無限範囲の柔軟な記述
 - `SpaceTimeIdSet` による集合管理と重複排除
 - 和集合（OR）、積集合（AND）、補集合（NOT）などの演算子サポート
@@ -14,16 +14,16 @@
 
 ## 📦 `SpaceTimeId` 型
 
-`SpaceTimeId` は 4 次元空間（X, Y, F, T）に加え、ズームレベルと時間間隔を持つ領域を表します。
+`SpaceTimeId` は 4 次元空間（F, X, Y, T）に加え、ズームレベルと時間間隔を持つ領域を表します。
 
 ### 時空間 ID
 
 ```rust
 let stid = SpaceTimeId::new(
     4,                                      // ズームレベル
+    DimensionRange::AfterUnLimitRange(10),  // 高さ（f）: 10以上
     DimensionRange::Single(5),              // x座標
     DimensionRange::Single(3),              // y座標
-    DimensionRange::AfterUnLimitRange(10),  // 高さ（f）: 10以上
     60,                                     // 時間間隔（秒）
     DimensionRange::LimitRange(100, 200),   // 時間インデックス（t）
 ).unwrap();
@@ -36,9 +36,9 @@ let stid = SpaceTimeId::new(
 ```rust
 let stid = SpaceTimeId::new(
     4,                                      // ズームレベル
+    DimensionRange::AfterUnLimitRange(10),  // 高さ（f）: 10以上
     DimensionRange::Single(5),              // x座標
     DimensionRange::Single(3),              // y座標
-    DimensionRange::AfterUnLimitRange(10),  // 高さ（f）: 10以上
     0,                                      // i=0で空間IDを指定
     DimensionRange::Any,                    // 時間インデックスは全ての値を示すAny
 ).unwrap();
@@ -55,13 +55,13 @@ let stid = SpaceTimeId::new(
 例：F 次元が未定義の場合
 
 ```
-2/1/3/-
+2/-/1/3
 ```
 
 これは次の集合と等価です：
 
 ```
-2/1/3/-4, 2/1/3/-3, ..., 2/1/3/3
+2/-4/1/3, 2/-3/1/3, ..., 2/3/1/3
 ```
 
 ### 範囲の指定
@@ -96,7 +96,7 @@ let stid = SpaceTimeId::new(
 
 ## 📐 `DimensionRange<T>` 型
 
-各次元（X, Y, F, T）の値を表す汎用範囲型：
+各次元（F, X, Y, T）の値を表す汎用範囲型：
 
 - `Single(v)`：単一の値
 - `LimitRange(start, end)`：開始～終了の閉区間
@@ -184,9 +184,9 @@ println!("補集合: {}", complement_set);
 
 各次元の値や属性にアクセスするためのゲッターメソッド：
 
+- `f() -> DimensionRange<i64>`：F 次元（高度）の値
 - `x() -> DimensionRange<u64>`：X 次元の値
 - `y() -> DimensionRange<u64>`：Y 次元の値
-- `f() -> DimensionRange<i64>`：F 次元（高度）の値
 - `t() -> DimensionRange<u32>`：T 次元（時間インデックス）の値
 - `z() -> u16`：ズームレベル
 - `i() -> u32`：時間間隔（秒）
@@ -335,9 +335,9 @@ let outside = !set;
 - `change_scale(z: Option<u16>, i: Option<u32>) -> Result<SpaceTimeId, String>` - 解像度を変更
 - `containment_relation(&other: &SpaceTimeId) -> Containment` - 包含関係を確認
 - `complement() -> SpaceTimeIdSet` - 補集合を取得
+- `f() -> DimensionRange<i64>` - F 次元の値を取得
 - `x() -> DimensionRange<u64>` - X 次元の値を取得
 - `y() -> DimensionRange<u64>` - Y 次元の値を取得
-- `f() -> DimensionRange<i64>` - F 次元の値を取得
 - `t() -> DimensionRange<u32>` - T 次元の値を取得
 - `z() -> u16` - ズームレベルを取得
 - `i() -> u32` - 時間間隔を取得
