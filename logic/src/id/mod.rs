@@ -5,7 +5,7 @@ pub mod coordinates;
 pub mod points;
 pub mod value;
 
-/// Represents a value for a single dimension (X, Y, F, or T) in a SpaceTimeId.
+/// Represents a value for a single dimension (F, X, Y, or T) in a SpaceTimeId.
 ///
 /// This enum can represent a single value, a range, or an Any value,
 /// corresponding to the extended notation of the spatial ID.
@@ -43,9 +43,9 @@ where
 }
 #[derive(PartialEq, Debug, Clone, Copy)]
 /// * z: The zoom level, a u16 value. It defines the coordinate space boundaries.
-/// * y: The value for the Y dimension as a DimensionRange<u64>.
 /// * f: The value for the F (vertical) dimension as a DimensionRange<i64>.
 /// * x: The value for the X dimension as a DimensionRange<u64>.
+/// * y: The value for the Y dimension as a DimensionRange<u64>.
 /// * i: The time interval in seconds, a u32 value.
 /// * t: The time index value as a DimensionRange<u32>.
 ///
@@ -109,9 +109,9 @@ impl SpaceTimeId {
     /// # Arguments
     ///
     /// * z: The zoom level, a u16 value. It defines the coordinate space boundaries.
+    /// * f: The value for the F (vertical) dimension as a DimensionRange<i64>.
     /// * x: The value for the X dimension as a DimensionRange<u64>.
     /// * y: The value for the Y dimension as a DimensionRange<u64>.
-    /// * f: The value for the F (vertical) dimension as a DimensionRange<i64>.
     /// * i: The time interval in seconds, a u32 value.
     /// * t: The time index value as a DimensionRange<u32>.
     ///

@@ -1,6 +1,4 @@
 //! Intersection (`&`) logic for `SpaceTimeIdSet`.
-//!
-//! Returns the overlapping regions between two space-time sets.
 
 use std::ops::BitAnd;
 
@@ -13,10 +11,10 @@ use crate::{id::contain::Containment, set::SpaceTimeIdSet};
 /// # Example
 /// ```
 /// use logic::{id::{DimensionRange, SpaceTimeId}, set::SpaceTimeIdSet};
-/// 
-/// let stid_a = SpaceTimeId::new(4, DimensionRange::Single(5), DimensionRange::Single(3), 
+///
+/// let stid_a = SpaceTimeId::new(4, DimensionRange::Single(5), DimensionRange::Single(3),
 ///                               DimensionRange::Single(10), 60, DimensionRange::Single(100)).unwrap();
-/// let stid_b = SpaceTimeId::new(4, DimensionRange::Single(5), DimensionRange::Single(3), 
+/// let stid_b = SpaceTimeId::new(4, DimensionRange::Single(5), DimensionRange::Single(3),
 ///                               DimensionRange::Single(10), 60, DimensionRange::Single(100)).unwrap();
 /// let set_a = SpaceTimeIdSet::from(stid_a);
 /// let set_b = SpaceTimeIdSet::from(stid_b);
