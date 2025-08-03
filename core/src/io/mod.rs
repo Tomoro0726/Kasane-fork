@@ -9,7 +9,7 @@ pub struct Space {
     key: Vec<Key>,
 }
 
-struct Key {
+pub struct Key {
     name: String,
     value: Vec<Value>,
 }

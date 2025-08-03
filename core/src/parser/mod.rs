@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use logic::set::SpaceTimeIdSet;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -122,6 +124,24 @@ enum TransactionAction {
     Commit,
     Rollback,
 }
+
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+struct Showkeys {
+    spacename: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+struct AddUser {
+    username: String,
+    password: String,
+    //permisson: HashSet<Command>,
+}
+
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+struct DeleteUser {
+    username: String,
+}
+
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub enum Command {
     AddSpace(AddSpace),
@@ -132,7 +152,9 @@ pub enum Command {
     SetValue(SetValue),
     DeleteValue(DeleteValue),
     Transaction(Transaction),
-    Showkeys,
+    Showkeys(Showkeys),
+    AddUser(AddUser),
+    DeleteUser(DeleteUser),
     ShowSpaces,
 }
 

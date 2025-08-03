@@ -1,3 +1,4 @@
+use crate::io::Storage;
 use crate::{
     interface::input::json_file::json_file,
     parser::Command,
@@ -13,8 +14,6 @@ pub mod role;
 #[cfg(not(feature = "BuildJsonSchema"))]
 
 fn main() {
-    use crate::io::Storage;
-
     let s = Storage::new();
 
     //パケットを入力している

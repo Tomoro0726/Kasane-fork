@@ -1,24 +1,21 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::io::Space;
+use crate::{
+    io::{Key, Space},
+    parser::Command,
+};
 
-struct User {
+struct User<'a> {
     name: String,
     auth: HashSet<Auth>,
-    permission: HashMap<Space, HashSet<Permission>>,
+    permission: HashMap<Command, Option<CommandTarget<'a>>>,
 }
 
 enum Auth {
     Password(String),
 }
 
-enum Permission {
-    //get
-    Read,
-
-    //showkeys,put,set,delete
-    Write,
-
-    //showskeys,addkey,deletekey
-    Admin,
+enum CommandTarget<'a> {
+    Key(HashSet<&'a Key>),
+    Space(HashSet<&'a Space>),
 }
