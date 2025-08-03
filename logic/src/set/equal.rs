@@ -1,3 +1,5 @@
+//! Equality (`==`) logic for `SpaceTimeIdSet`.
+
 use crate::set::SpaceTimeIdSet;
 
 impl PartialEq for SpaceTimeIdSet {

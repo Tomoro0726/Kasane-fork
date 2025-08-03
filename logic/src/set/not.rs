@@ -1,3 +1,5 @@
+//! Negation (`!`) logic for `SpaceTimeIdSet`.
+
 use crate::set::SpaceTimeIdSet;
 use std::ops::Not;
 

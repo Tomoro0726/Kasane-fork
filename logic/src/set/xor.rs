@@ -1,3 +1,5 @@
+//! Exclusive OR (`^`) logic for `SpaceTimeIdSet`.
+
 use std::ops::BitXor;
 
 use crate::set::SpaceTimeIdSet;
