@@ -1,15 +1,10 @@
 use crate::io::Storage;
-use crate::{
-    interface::input::json_file::json_file,
-    parser::Command,
-    parser::{Packet, parser},
-};
+use crate::{interface::input::json_file::json_file, parser::parser};
 
 pub mod command;
 pub mod interface;
 pub mod io;
 pub mod parser;
-pub mod role;
 
 #[cfg(not(feature = "BuildJsonSchema"))]
 
@@ -56,6 +51,7 @@ fn main() {
 //Json Schemaを出力する
 #[cfg(feature = "BuildJsonSchema")]
 fn main() {
+    use schemars::schema_for;
     //JSON Schemaを出力している
     let schema = schema_for!(Packet);
 
