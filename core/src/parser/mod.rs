@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use logic::set::SpaceTimeIdSet;
 use schemars::JsonSchema;
@@ -158,13 +158,13 @@ pub enum Command {
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
 pub struct Packet {
     pub user: String,
     pub commands: Vec<Command>,
-    // #[serde(flatten)]
-    // extra: HashMap<String, serde_json::Value>,
+    #[serde(rename = "$schema")]
+    pub schema: String,
 }
-
 pub fn parser(packet_raw: &str) -> Result<Packet, serde_json::Error> {
     serde_json::from_str(packet_raw)
 }
