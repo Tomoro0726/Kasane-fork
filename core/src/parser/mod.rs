@@ -6,26 +6,26 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 
-struct AddSpace {
-    spacename: String,
+pub struct AddSpace {
+    pub spacename: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 
-struct DeleteSpace {
-    spacename: String,
+pub struct DeleteSpace {
+    pub spacename: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 
-struct AddKeys {
-    spacename: String,
-    keys: Vec<AddKeyInfo>,
+pub struct AddKeys {
+    pub spacename: String,
+    pub keys: Vec<AddKeyInfo>,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 
-struct AddKeyInfo {
+pub struct AddKeyInfo {
     name: String,
     r#type: KeyType,
 }
@@ -40,46 +40,46 @@ enum KeyType {
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 
-struct DeleteKeys {
+pub struct DeleteKeys {
     spacename: String,
     keys: Vec<DeleteKeyInfo>,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 
-struct DeleteKeyInfo {
+pub struct DeleteKeyInfo {
     name: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 
-struct PutValue {
+pub struct PutValue {
     select: Select,
     keys: Vec<SelectKeyInfo>,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 
-struct SetValue {
+pub struct SetValue {
     select: Select,
     keys: Vec<SelectKeyInfo>,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 
-struct DeleteValue {
+pub struct DeleteValue {
     select: Select,
     keys: Vec<SelectKeyInfo>,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 
-struct SelectKeyInfo {
+pub struct SelectKeyInfo {
     name: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
-enum Select {
+pub enum Select {
     Function(Function),
     Prefix(Prefix),
     SpaceTimeIdSet(SpaceTimeIdSet),
@@ -99,13 +99,13 @@ struct Line {
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 
-enum Function {
+pub enum Function {
     Line(Line),
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 
-enum Prefix {
+pub enum Prefix {
     AND(Vec<Select>),
     OR(Vec<Select>),
     NOT(Box<Select>),

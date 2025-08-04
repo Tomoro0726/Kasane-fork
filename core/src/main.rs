@@ -2,6 +2,7 @@ use crate::io::Storage;
 use crate::{interface::input::json_file::json_file, parser::parser};
 
 pub mod command;
+pub mod error;
 pub mod interface;
 pub mod io;
 pub mod parser;

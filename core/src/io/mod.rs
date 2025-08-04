@@ -1,4 +1,7 @@
 use logic::set::SpaceTimeIdSet;
+pub mod error;
+pub mod space;
+pub mod storage;
 
 pub struct Storage {
     space: Vec<Space>,
