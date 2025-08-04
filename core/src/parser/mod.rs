@@ -79,7 +79,6 @@ struct SelectKeyInfo {
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
-
 enum Select {
     Function(Function),
     Prefix(Prefix),

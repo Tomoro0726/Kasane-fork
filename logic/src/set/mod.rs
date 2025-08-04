@@ -1,6 +1,3 @@
-use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
-
 use crate::id::{DimensionRange, SpaceTimeId};
 pub mod and;
 pub mod equal;
@@ -20,7 +17,10 @@ pub mod xor;
 /// to be represented by *only one* `SpaceTimeId` within the set.
 /// This ensures unambiguous mapping between a spatial-temporal region and its identifier.
 
-#[derive(Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(
+    feature = "serde_support",
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+)]
 pub struct SpaceTimeIdSet {
     inner: Vec<SpaceTimeId>,
 }

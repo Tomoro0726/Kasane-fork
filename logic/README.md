@@ -9,8 +9,16 @@
 - Representation of 4-dimensional (X, Y, F, T) space through `SpaceTimeId`
 - Flexible description of range specifications and infinite ranges with `DimensionRange`
 - Set management and duplicate elimination with `SpaceTimeIdSet`
-- Support for union (OR), intersection (AND), complement (NOT) operators
+- Support for union (OR), intersection (AND), complement (NOT), and symmetric difference (XOR) operators
 - Lightweight configuration independent of execution environment
+
+## Installation Option
+
+```toml
+logic = { path = "../logic", features = ["serde_support"] }
+```
+
+Enable the `serde_support` feature to output types compatible with [`serde`](https://crates.io/crates/serde) and [`jsonschema`](https://crates.io/crates/jsonschema).
 
 ## 📦 `SpaceTimeId` Type
 

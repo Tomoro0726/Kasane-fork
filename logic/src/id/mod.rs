@@ -9,7 +9,11 @@ pub mod value;
 ///
 /// This enum can represent a single value, a range, or an Any value,
 /// corresponding to the extended notation of the spatial ID.
-#[derive(Debug, Clone, PartialEq, Copy, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(
+    feature = "serde_support",
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+)]
+#[derive(Debug, Clone, PartialEq, Copy)]
 pub enum DimensionRange<T> {
     /// A closed range with a start and end value (e.g., 5:10).
     LimitRange(T, T),
@@ -23,9 +27,6 @@ pub enum DimensionRange<T> {
     Any,
 }
 use std::fmt;
-
-use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
 
 impl<T> fmt::Display for DimensionRange<T>
 where
@@ -80,7 +81,10 @@ where
 /// ## Special case for time dimension `t`
 /// - If `i == 0`, then `t` **must** be `Any`. Otherwise, an error is returned.
 
-#[derive(Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(
+    feature = "serde_support",
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+)]
 pub struct SpaceTimeId {
     z: u16,
     f: DimensionRange<i64>,

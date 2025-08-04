@@ -7,7 +7,8 @@ edition = "2024"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.141"
 schemars = "1.0.4"
-logic={path="../logic"}
+logic={path="../logic", features = ["serde_support"]}
+ascii = "1.1.0"
 
 [lib]
 crate-type = ["cdylib"]

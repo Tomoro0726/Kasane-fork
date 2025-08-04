@@ -1,6 +1,10 @@
 use crate::id::{DimensionRange, SpaceTimeId};
 use std::f64::consts::PI;
 
+#[cfg_attr(
+    feature = "serde_support",
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+)]
 #[derive(Debug)]
 pub struct Coordinates {
     pub latitude: (f64, f64),
