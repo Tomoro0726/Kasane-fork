@@ -12,6 +12,7 @@ pub mod tools;
 pub fn process(packet: Packet, s: &mut Storage) {
     for cmd in packet.commands {
         match match cmd {
+            //未定義の関数については追加が必要
             crate::parser::Command::AddSpace(v) => addspace(v, s),
             crate::parser::Command::DeleteSpace(v) => deletespace(v, s),
             crate::parser::Command::AddKeys(v) => todo!(),

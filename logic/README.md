@@ -24,6 +24,9 @@ Enable the `serde_support` feature to output types compatible with [`serde`](htt
 
 `SpaceTimeId` represents a region with 4-dimensional space (X, Y, F, T) plus zoom level and time interval.
 
+> [!NOTE]
+> A spacetime ID indicates a value where `i` is not 0, while a space ID is defined as having `i = 0` and `t = Any`.
+
 ### Space-Time ID
 
 ```rust

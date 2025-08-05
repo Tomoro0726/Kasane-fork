@@ -1,7 +1,7 @@
 use logic::set::SpaceTimeIdSet;
 
 use crate::parser::Function::Line;
-use crate::parser::Prefix::{AND, NOT, OR};
+use crate::parser::Prefix::{AND, NOT, OR, XOR};
 use crate::parser::Select;
 
 pub fn select(v: Select) -> SpaceTimeIdSet {
@@ -11,6 +11,7 @@ pub fn select(v: Select) -> SpaceTimeIdSet {
                 todo!()
             }
         },
+
         Select::Prefix(prefix) => match prefix {
             AND(and) => {
                 let mut is_first = true;
@@ -33,6 +34,19 @@ pub fn select(v: Select) -> SpaceTimeIdSet {
                 result
             }
             NOT(not) => !select(*not),
+            XOR(xor) => {
+                let mut is_first = true;
+                let mut result = SpaceTimeIdSet::new();
+                for ele in xor {
+                    if is_first {
+                        result = result ^ (select(ele));
+                        is_first = false
+                    } else {
+                        result = result & select(ele)
+                    }
+                }
+                result
+            }
         },
         Select::SpaceTimeIdSet(set) => {
             return set;

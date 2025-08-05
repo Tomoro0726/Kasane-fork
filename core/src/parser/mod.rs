@@ -18,21 +18,15 @@ pub struct DeleteSpace {
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 
-pub struct AddKeys {
+pub struct AddKey {
     pub spacename: String,
-    pub keys: Vec<AddKeyInfo>,
+    pub name: String,
+    pub r#type: KeyType,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 
-pub struct AddKeyInfo {
-    name: String,
-    r#type: KeyType,
-}
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
-
-enum KeyType {
+pub enum KeyType {
     Int,
     Boolean,
     Text,
@@ -106,8 +100,10 @@ pub enum Function {
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 
 pub enum Prefix {
+    //XORの追加
     AND(Vec<Select>),
     OR(Vec<Select>),
+    XOR(Vec<Select>),
     NOT(Box<Select>),
 }
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]

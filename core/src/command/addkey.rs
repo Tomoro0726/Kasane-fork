@@ -1,3 +1,3 @@
-use crate::{error::Error, io::Storage, parser::AddKeys};
+use crate::{error::Error, io::Storage, parser::AddKey};
 
-//pub fn addkey(v: AddKeys, s: &mut Storage) -> Result<(), Error> {}
+pub fn addkey(v: AddKey, s: &mut Storage) -> Result<(), Error> {}

@@ -26,6 +26,9 @@ logic = { path = "../logic", features = ["serde_support"] }
 
 `SpaceTimeId` は 4 次元空間（F, X, Y, T）に加え、ズームレベルと時間間隔を持つ領域を表します。
 
+> [!NOTE]
+> 時空間 ID は `i` が 0 ではない値を示し、空間 ID は `i` が 0 かつ `t` が `Any` です。
+
 ### 時空間 ID
 
 ```rust
