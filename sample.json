@@ -1,76 +1,49 @@
 {
-  "$schema": "./schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "user": "default",
   "commands": [
     {
       "AddSpace": {
-        "spacename": "space1"
+        "spacename": "example_space"
       }
     },
     {
-      "AddKeys": {
-        "spacename": "space1",
-        "key": [
-          {
-            "name": "temperature",
-            "type": "Int"
-          },
-          {
-            "name": "active",
-            "type": "Boolean"
-          }
-        ]
+      "AddKey": {
+        "spacename": "example_space",
+        "name": "temperature",
+        "type": "INT"
       }
     },
     {
       "PutValue": {
+        "spacename": "example_space",
+        "keyname": "temperature",
         "select": {
-          "SpaceTimeIdSet": {
-            "inner": [
-              {
-                "z": 8,
-                "f": {
-                  "Any": {}
-                },
-                "x": {
-                  "Single": 128
-                },
-                "y": {
-                  "Single": 256
-                },
-                "i": 0,
-                "t": "Any"
+          "SpaceTimeIdSet": [
+            {
+              "z": 20,
+              "f": {
+                "Single": 10
               },
-              {
-                "z": 8,
-                "f": {
-                  "AfterUnLimitRange": 0
-                },
-                "x": {
-                  "BeforeUnLimitRange": 255
-                },
-                "y": {
-                  "LimitRange": [
-                    0,
-                    511
-                  ]
-                },
-                "i": 30,
-                "t": {
-                  "Single": 4
-                }
-              }
-            ]
-          }
+              "x": {
+                "Single": 100
+              },
+              "y": {
+                "Single": 200
+              },
+              "i": 0,
+              "t": "Any"
+            }
+          ]
         },
-        "keys": [
-          {
-            "name": "temperature"
-          },
-          {
-            "name": "active"
-          }
-        ]
+        "value": {
+          "INT": 25
+        }
+      }
+    },
+    {
+      "Showkeys": {
+        "spacename": "example_space"
       }
     }
   ]

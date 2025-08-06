@@ -222,9 +222,11 @@ version = "0.1.0"
 dependencies = [
  "ascii",
  "logic",
+ "once_cell",
  "schemars",
  "serde",
  "serde_json",
+ "wasm-bindgen",
 ]
 
 [[package]]

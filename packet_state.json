@@ -1,0 +1,20 @@
+{
+  "Ok": [
+    {
+      "IoResult": "Success"
+    },
+    {
+      "IoResult": "Success"
+    },
+    {
+      "IoResult": "Success"
+    },
+    {
+      "IoResult": {
+        "KeyNames": [
+          "temperature"
+        ]
+      }
+    }
+  ]
+}
