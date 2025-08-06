@@ -5,6 +5,7 @@ pub mod command;
 pub mod error;
 pub mod interface;
 pub mod io;
+pub mod output;
 pub mod parser;
 
 #[cfg(not(feature = "BuildJsonSchema"))]

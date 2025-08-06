@@ -27,22 +27,16 @@ pub struct AddKey {
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 
 pub enum KeyType {
-    Int,
-    Boolean,
-    Text,
+    INT,
+    BOOLEAN,
+    TEXT,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 
-pub struct DeleteKeys {
-    spacename: String,
-    keys: Vec<DeleteKeyInfo>,
-}
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
-
-pub struct DeleteKeyInfo {
-    name: String,
+pub struct DeleteKey {
+    pub spacename: String,
+    pub name: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
@@ -80,7 +74,6 @@ pub enum Select {
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
-
 struct Line {
     start_x: u32,
     start_y: u32,
@@ -92,64 +85,34 @@ struct Line {
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
-
 pub enum Function {
-    Line(Line),
+    //Line(Line),
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 
 pub enum Prefix {
-    //XORの追加
     AND(Vec<Select>),
     OR(Vec<Select>),
     XOR(Vec<Select>),
     NOT(Box<Select>),
 }
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
-
-struct Transaction {
-    action: TransactionAction,
-}
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
-
-enum TransactionAction {
-    Start,
-    Commit,
-    Rollback,
-}
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
-struct Showkeys {
-    spacename: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
-struct AddUser {
-    username: String,
-    password: String,
-    //permisson: HashSet<Command>,
-}
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
-struct DeleteUser {
-    username: String,
+pub struct Showkeys {
+    pub spacename: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub enum Command {
     AddSpace(AddSpace),
     DeleteSpace(DeleteSpace),
-    AddKeys(AddKeys),
-    DeleteKeys(DeleteKeys),
+    AddKey(AddKey),
+    DeleteKey(DeleteKey),
     PutValue(PutValue),
     SetValue(SetValue),
     DeleteValue(DeleteValue),
-    Transaction(Transaction),
     Showkeys(Showkeys),
-    AddUser(AddUser),
-    DeleteUser(DeleteUser),
     ShowSpaces,
 }
 

@@ -3,15 +3,16 @@ use crate::{
     error::Error,
     io::Storage,
     output::Output,
-    parser::AddSpace,
+    parser::{AddKey, DeleteKey},
 };
 
-pub fn addspace(v: AddSpace, s: &mut Storage) -> Result<Output, Error> {
+pub fn deletekey(v: DeleteKey, s: &mut Storage) -> Result<Output, Error> {
     if !valid_name(&v.spacename) {
-        Err(Error::CommandError(CommandError::SpaceNameValidationError(
+        Err(Error::CommandError(CommandError::KeyNameValidationError(
             "Invalid name: only a-z, A-Z, 0-9, - _ . @ + = allowed, max 256 characters",
         )))
     } else {
-        s.add_space(&v.spacename)
+        let space = s.get_space(&v.spacename)?;
+        space.delete_key(&v.name)
     }
 }

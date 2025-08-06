@@ -1,5 +1,9 @@
 use logic::set::SpaceTimeIdSet;
+
+use crate::parser::KeyType;
 pub mod error;
+pub mod key;
+pub mod output;
 pub mod space;
 pub mod storage;
 
@@ -14,15 +18,17 @@ pub struct Space {
 
 pub struct Key {
     name: String,
+    r#type: KeyType,
     value: Vec<Value>,
 }
 
-struct Value {
+pub struct Value {
     value: ValueEntry,
     set: SpaceTimeIdSet,
 }
 
-enum ValueEntry {
+#[derive(Clone, PartialEq, Eq)]
+pub enum ValueEntry {
     INT(i64),
     TEXT(String),
     BOOLEAN(bool),
