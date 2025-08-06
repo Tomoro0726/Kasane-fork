@@ -1,8 +1,8 @@
-use std::collections::{HashMap, HashSet};
-
-use logic::set::SpaceTimeIdSet;
+use logic::id::DimensionRange;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+
+use crate::io::ValueEntry;
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 
@@ -42,47 +42,56 @@ pub struct DeleteKey {
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 
 pub struct PutValue {
-    select: Select,
-    keys: Vec<SelectKeyInfo>,
+    pub spacename: String,
+    pub keyname: String,
+    pub select: Select,
+    pub value: ValueEntry,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 
 pub struct SetValue {
-    select: Select,
-    keys: Vec<SelectKeyInfo>,
+    pub spacename: String,
+    pub keyname: String,
+    pub select: Select,
+    pub value: ValueEntry,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 
 pub struct DeleteValue {
-    select: Select,
-    keys: Vec<SelectKeyInfo>,
-}
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
-
-pub struct SelectKeyInfo {
-    name: String,
+    pub spacename: String,
+    pub keyname: String,
+    pub select: Select,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub enum Select {
     Function(Function),
     Prefix(Prefix),
-    SpaceTimeIdSet(SpaceTimeIdSet),
+    SpaceTimeIdSet(Vec<SpaceTimeIdInput>),
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
-struct Line {
-    start_x: u32,
-    start_y: u32,
-    start_z: u32,
-    end_x: u32,
-    end_y: u32,
-    end_z: u32,
-    zoom: u32,
+pub struct SpaceTimeIdInput {
+    pub z: u16,
+    pub f: DimensionRange<i64>,
+    pub x: DimensionRange<u64>,
+    pub y: DimensionRange<u64>,
+    pub i: u32,
+    pub t: DimensionRange<u32>,
 }
+
+// #[derive(Debug, Serialize, Deserialize, JsonSchema)]
+// struct Line {
+//     start_x: u32,
+//     start_y: u32,
+//     start_z: u32,
+//     end_x: u32,
+//     end_y: u32,
+//     end_z: u32,
+//     zoom: u32,
+// }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub enum Function {

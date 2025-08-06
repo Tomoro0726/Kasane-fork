@@ -23,10 +23,13 @@
     "$schema"
   ],
   "$defs": {
-    "AddKeyInfo": {
+    "AddKey": {
       "type": "object",
       "properties": {
         "name": {
+          "type": "string"
+        },
+        "spacename": {
           "type": "string"
         },
         "type": {
@@ -34,26 +37,9 @@
         }
       },
       "required": [
+        "spacename",
         "name",
         "type"
-      ]
-    },
-    "AddKeys": {
-      "type": "object",
-      "properties": {
-        "keys": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/AddKeyInfo"
-          }
-        },
-        "spacename": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "spacename",
-        "keys"
       ]
     },
     "AddSpace": {
@@ -65,21 +51,6 @@
       },
       "required": [
         "spacename"
-      ]
-    },
-    "AddUser": {
-      "type": "object",
-      "properties": {
-        "password": {
-          "type": "string"
-        },
-        "username": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "username",
-        "password"
       ]
     },
     "Command": {
@@ -117,25 +88,25 @@
         {
           "type": "object",
           "properties": {
-            "AddKeys": {
-              "$ref": "#/$defs/AddKeys"
+            "AddKey": {
+              "$ref": "#/$defs/AddKey"
             }
           },
           "additionalProperties": false,
           "required": [
-            "AddKeys"
+            "AddKey"
           ]
         },
         {
           "type": "object",
           "properties": {
-            "DeleteKeys": {
-              "$ref": "#/$defs/DeleteKeys"
+            "DeleteKey": {
+              "$ref": "#/$defs/DeleteKey"
             }
           },
           "additionalProperties": false,
           "required": [
-            "DeleteKeys"
+            "DeleteKey"
           ]
         },
         {
@@ -177,18 +148,6 @@
         {
           "type": "object",
           "properties": {
-            "Transaction": {
-              "$ref": "#/$defs/Transaction"
-            }
-          },
-          "additionalProperties": false,
-          "required": [
-            "Transaction"
-          ]
-        },
-        {
-          "type": "object",
-          "properties": {
             "Showkeys": {
               "$ref": "#/$defs/Showkeys"
             }
@@ -197,52 +156,14 @@
           "required": [
             "Showkeys"
           ]
-        },
-        {
-          "type": "object",
-          "properties": {
-            "AddUser": {
-              "$ref": "#/$defs/AddUser"
-            }
-          },
-          "additionalProperties": false,
-          "required": [
-            "AddUser"
-          ]
-        },
-        {
-          "type": "object",
-          "properties": {
-            "DeleteUser": {
-              "$ref": "#/$defs/DeleteUser"
-            }
-          },
-          "additionalProperties": false,
-          "required": [
-            "DeleteUser"
-          ]
         }
       ]
     },
-    "DeleteKeyInfo": {
+    "DeleteKey": {
       "type": "object",
       "properties": {
         "name": {
           "type": "string"
-        }
-      },
-      "required": [
-        "name"
-      ]
-    },
-    "DeleteKeys": {
-      "type": "object",
-      "properties": {
-        "keys": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/DeleteKeyInfo"
-          }
         },
         "spacename": {
           "type": "string"
@@ -250,7 +171,7 @@
       },
       "required": [
         "spacename",
-        "keys"
+        "name"
       ]
     },
     "DeleteSpace": {
@@ -264,33 +185,23 @@
         "spacename"
       ]
     },
-    "DeleteUser": {
+    "DeleteValue": {
       "type": "object",
       "properties": {
-        "username": {
+        "keyname": {
+          "type": "string"
+        },
+        "select": {
+          "$ref": "#/$defs/Select"
+        },
+        "spacename": {
           "type": "string"
         }
       },
       "required": [
-        "username"
-      ]
-    },
-    "DeleteValue": {
-      "type": "object",
-      "properties": {
-        "keys": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/SelectKeyInfo"
-          }
-        },
-        "select": {
-          "$ref": "#/$defs/Select"
-        }
-      },
-      "required": [
-        "select",
-        "keys"
+        "spacename",
+        "keyname",
+        "select"
       ]
     },
     "DimensionRange": {
@@ -534,77 +445,13 @@
         }
       ]
     },
-    "Function": {
-      "oneOf": [
-        {
-          "type": "object",
-          "properties": {
-            "Line": {
-              "$ref": "#/$defs/Line"
-            }
-          },
-          "additionalProperties": false,
-          "required": [
-            "Line"
-          ]
-        }
-      ]
-    },
+    "Function": false,
     "KeyType": {
       "type": "string",
       "enum": [
-        "Int",
-        "Boolean",
-        "Text"
-      ]
-    },
-    "Line": {
-      "type": "object",
-      "properties": {
-        "end_x": {
-          "type": "integer",
-          "format": "uint32",
-          "minimum": 0
-        },
-        "end_y": {
-          "type": "integer",
-          "format": "uint32",
-          "minimum": 0
-        },
-        "end_z": {
-          "type": "integer",
-          "format": "uint32",
-          "minimum": 0
-        },
-        "start_x": {
-          "type": "integer",
-          "format": "uint32",
-          "minimum": 0
-        },
-        "start_y": {
-          "type": "integer",
-          "format": "uint32",
-          "minimum": 0
-        },
-        "start_z": {
-          "type": "integer",
-          "format": "uint32",
-          "minimum": 0
-        },
-        "zoom": {
-          "type": "integer",
-          "format": "uint32",
-          "minimum": 0
-        }
-      },
-      "required": [
-        "start_x",
-        "start_y",
-        "start_z",
-        "end_x",
-        "end_y",
-        "end_z",
-        "zoom"
+        "INT",
+        "BOOLEAN",
+        "TEXT"
       ]
     },
     "Prefix": {
@@ -642,6 +489,21 @@
         {
           "type": "object",
           "properties": {
+            "XOR": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Select"
+              }
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "XOR"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
             "NOT": {
               "$ref": "#/$defs/Select"
             }
@@ -656,19 +518,24 @@
     "PutValue": {
       "type": "object",
       "properties": {
-        "keys": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/SelectKeyInfo"
-          }
+        "keyname": {
+          "type": "string"
         },
         "select": {
           "$ref": "#/$defs/Select"
+        },
+        "spacename": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/ValueEntry"
         }
       },
       "required": [
+        "spacename",
+        "keyname",
         "select",
-        "keys"
+        "value"
       ]
     },
     "Select": {
@@ -701,7 +568,10 @@
           "type": "object",
           "properties": {
             "SpaceTimeIdSet": {
-              "$ref": "#/$defs/SpaceTimeIdSet"
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/SpaceTimeIdInput"
+              }
             }
           },
           "additionalProperties": false,
@@ -711,33 +581,27 @@
         }
       ]
     },
-    "SelectKeyInfo": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "name"
-      ]
-    },
     "SetValue": {
       "type": "object",
       "properties": {
-        "keys": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/SelectKeyInfo"
-          }
+        "keyname": {
+          "type": "string"
         },
         "select": {
           "$ref": "#/$defs/Select"
+        },
+        "spacename": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/ValueEntry"
         }
       },
       "required": [
+        "spacename",
+        "keyname",
         "select",
-        "keys"
+        "value"
       ]
     },
     "Showkeys": {
@@ -751,8 +615,7 @@
         "spacename"
       ]
     },
-    "SpaceTimeId": {
-      "description": "* z: The zoom level, a u16 value. It defines the coordinate space boundaries.\n* f: The value for the F (vertical) dimension as a DimensionRange<i64>.\n* x: The value for the X dimension as a DimensionRange<u64>.\n* y: The value for the Y dimension as a DimensionRange<u64>.\n* i: The time interval in seconds, a u32 value.\n* t: The time index value as a DimensionRange<u32>.\n\n# Normalization Rules\n\nThe input `DimensionRange` values are normalized during validation inside `SpaceTimeId::new`\naccording to the following rules:\n\n## `DimensionRange::Single`\n- No normalization applied (used as-is).\n\n## `DimensionRange::LimitRange(start, end)`\n- If `start == end`: converted to `Single(start)`.\n- If the range spans the entire valid domain:\n  - For x/y: `0..=2^z - 1`\n  - For f: `-2^z..=2^z - 1`\n  → converted to `Any`.\n- If `start == 0`: converted to `BeforeUnLimitRange(end)`.\n- If `end == max`: converted to `AfterUnLimitRange(start)`.\n\n## `DimensionRange::AfterUnLimitRange(start)`\n- If `start == 0` (for x/y) or `start == min_f` (for f): converted to `Any`.\n- If `start == max` (for x/y only): converted to `Single(max)`.\n\n## `DimensionRange::BeforeUnLimitRange(end)`\n- If `end == max` (for x/y) or `end == max_f` (for f): converted to `Any`.\n- If `end == 0` (for x/y) or `end == min_f` (for f): converted to `Single(end)`.\n\n## `DimensionRange::Any`\n- No normalization applied (used as-is).\n\n## Special case for time dimension `t`\n- If `i == 0`, then `t` **must** be `Any`. Otherwise, an error is returned.",
+    "SpaceTimeIdInput": {
       "type": "object",
       "properties": {
         "f": {
@@ -788,38 +651,45 @@
         "t"
       ]
     },
-    "SpaceTimeIdSet": {
-      "description": "This type represents a set of `SpaceTimeId` elements.\n\nWhen a new `SpaceTimeId` is added, any overlapping ranges with existing elements\nwill be subtracted from the new one to ensure that the ranges represented by IDs\nin the set remain disjoint (i.e., no overlap between any two entries).\n\nAs a result, each distinct region in the physical space-time domain is guaranteed\nto be represented by *only one* `SpaceTimeId` within the set.\nThis ensures unambiguous mapping between a spatial-temporal region and its identifier.",
-      "type": "object",
-      "properties": {
-        "inner": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/SpaceTimeId"
-          }
+    "ValueEntry": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "INT": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "INT"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "TEXT": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "TEXT"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "BOOLEAN": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "BOOLEAN"
+          ]
         }
-      },
-      "required": [
-        "inner"
-      ]
-    },
-    "Transaction": {
-      "type": "object",
-      "properties": {
-        "action": {
-          "$ref": "#/$defs/TransactionAction"
-        }
-      },
-      "required": [
-        "action"
-      ]
-    },
-    "TransactionAction": {
-      "type": "string",
-      "enum": [
-        "Start",
-        "Commit",
-        "Rollback"
       ]
     }
   }

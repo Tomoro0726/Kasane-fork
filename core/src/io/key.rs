@@ -1,61 +1,12 @@
-use std::collections::HashMap;
-
-use crate::parser::Prefix::{AND, NOT, OR, XOR};
 use logic::set::SpaceTimeIdSet;
 
 use crate::{
     error::Error,
-    io::{Key, ValueEntry, error::IoError},
-    parser::Select,
+    io::{Key, ValueEntry, error::IoError, output::IoOutput},
+    output::Output,
 };
 
 impl Key {
-    pub fn select(v: Select) -> SpaceTimeIdSet {
-        match v {
-            Select::Function(function) => match function {},
-
-            Select::Prefix(prefix) => match prefix {
-                AND(and) => {
-                    let mut is_first = true;
-                    let mut result = SpaceTimeIdSet::new();
-                    for ele in and {
-                        if is_first {
-                            result = result | (Self::select(ele));
-                            is_first = false
-                        } else {
-                            result = result & Self::select(ele)
-                        }
-                    }
-                    result
-                }
-                OR(or) => {
-                    let mut result = SpaceTimeIdSet::new();
-                    for ele in or {
-                        result = result | Self::select(ele)
-                    }
-                    result
-                }
-                NOT(not) => !Self::select(*not),
-                XOR(xor) => {
-                    let mut is_first = true;
-                    let mut result = SpaceTimeIdSet::new();
-                    for ele in xor {
-                        if is_first {
-                            result = result ^ (Self::select(ele));
-                            is_first = false
-                        } else {
-                            result = result & Self::select(ele)
-                        }
-                    }
-                    result
-                }
-            },
-            Select::SpaceTimeIdSet(set) => {
-                return set;
-            }
-        }
-    }
-
     //データを取得して返す{set:value}の形が帰る
     pub fn get_value(&self, set: SpaceTimeIdSet) -> Vec<(SpaceTimeIdSet, ValueEntry)> {
         let mut result = Vec::new();
@@ -68,7 +19,7 @@ impl Key {
         }
         return result;
     }
-    pub fn set_value(&mut self, set: SpaceTimeIdSet, value: ValueEntry) {
+    pub fn set_value(&mut self, set: SpaceTimeIdSet, value: ValueEntry) -> Result<Output, Error> {
         let mut is_push = false;
 
         //valueが一致した場合はそこに出力
@@ -83,8 +34,9 @@ impl Key {
         if !is_push {
             self.value.push(super::Value { value, set });
         }
+        Ok(Output::IoResult(IoOutput::Success))
     }
-    pub fn put_value(&mut self, set: SpaceTimeIdSet, value: ValueEntry) -> Result<(), Error> {
+    pub fn put_value(&mut self, set: SpaceTimeIdSet, value: ValueEntry) -> Result<Output, Error> {
         let mut is_push = false;
 
         //valueが一致してかつ、既存範囲と競合がなければ加える
@@ -103,12 +55,13 @@ impl Key {
         if !is_push {
             self.value.push(super::Value { value, set });
         }
-        Ok(())
+        Ok(Output::IoResult(IoOutput::Success))
     }
-    pub fn delete_value(&mut self, set: SpaceTimeIdSet) {
+    pub fn delete_value(&mut self, set: SpaceTimeIdSet) -> Result<Output, Error> {
         self.value.retain_mut(|v| {
             v.set = v.set.clone() | !set.clone();
             !v.set.is_empty()
         });
+        Ok(Output::IoResult(IoOutput::Success))
     }
 }

@@ -1,4 +1,6 @@
 use logic::set::SpaceTimeIdSet;
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
 use crate::parser::KeyType;
 pub mod error;
@@ -27,7 +29,7 @@ pub struct Value {
     set: SpaceTimeIdSet,
 }
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Debug)]
 pub enum ValueEntry {
     INT(i64),
     TEXT(String),

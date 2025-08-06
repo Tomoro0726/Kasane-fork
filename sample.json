@@ -8,14 +8,9 @@
       }
     },
     {
-      "Transaction": {
-        "action": "Start"
-      }
-    },
-    {
       "AddKeys": {
         "spacename": "space1",
-        "keys": [
+        "key": [
           {
             "name": "temperature",
             "type": "Int"
@@ -30,16 +25,42 @@
     {
       "PutValue": {
         "select": {
-          "Function": {
-            "Line": {
-              "start_x": 1,
-              "start_y": 2,
-              "start_z": 3,
-              "end_x": 4,
-              "end_y": 5,
-              "end_z": 6,
-              "zoom": 1
-            }
+          "SpaceTimeIdSet": {
+            "inner": [
+              {
+                "z": 8,
+                "f": {
+                  "Any": {}
+                },
+                "x": {
+                  "Single": 128
+                },
+                "y": {
+                  "Single": 256
+                },
+                "i": 0,
+                "t": "Any"
+              },
+              {
+                "z": 8,
+                "f": {
+                  "AfterUnLimitRange": 0
+                },
+                "x": {
+                  "BeforeUnLimitRange": 255
+                },
+                "y": {
+                  "LimitRange": [
+                    0,
+                    511
+                  ]
+                },
+                "i": 30,
+                "t": {
+                  "Single": 4
+                }
+              }
+            ]
           }
         },
         "keys": [

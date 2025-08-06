@@ -3,7 +3,7 @@ use crate::{
     error::Error,
     io::Storage,
     output::Output,
-    parser::{AddKey, DeleteKey},
+    parser::DeleteKey,
 };
 
 pub fn deletekey(v: DeleteKey, s: &mut Storage) -> Result<Output, Error> {

@@ -7,11 +7,12 @@ pub mod interface;
 pub mod io;
 pub mod output;
 pub mod parser;
+use crate::command::process;
 
 #[cfg(not(feature = "BuildJsonSchema"))]
 
 fn main() {
-    let s = Storage::new();
+    let mut s = Storage::new().unwrap();
 
     //パケットを入力している
     let packet_raw = match json_file("sample.json") {
@@ -38,21 +39,19 @@ fn main() {
         println!("ユーザーが違うな...")
     }
 
-    //コマンド実行層
-
-    //ストレージ層
-    //ストレージはメモリの上に載せておく。
-    //ファイルへの書き込みは後で用意する
-    //とりあえずメモリ上にきれいな構造を用意する
-
-    //Interface-Output層
-    //全ての実行結果を含めてJSONに変換する
-    //OK
+    for cmd in packet.commands {
+        match process(cmd, &mut s) {
+            Ok(o) => {}
+            Err(v) => {}
+        }
+    }
 }
 
 //Json Schemaを出力する
 #[cfg(feature = "BuildJsonSchema")]
 fn main() {
+    use crate::parser::Packet;
+
     use schemars::schema_for;
     //JSON Schemaを出力している
     let schema = schema_for!(Packet);
