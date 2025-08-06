@@ -7,8 +7,7 @@ use crate::{
 };
 
 impl Key {
-    //データを取得して返す{set:value}の形が帰る
-    pub fn get_value(&self, set: SpaceTimeIdSet) -> Vec<(SpaceTimeIdSet, ValueEntry)> {
+    pub fn get_value(&self, set: SpaceTimeIdSet) -> Result<Output, Error> {
         let mut result = Vec::new();
         for v in &self.value {
             let and = v.set.clone() & set.clone();
@@ -17,7 +16,9 @@ impl Key {
                 result.push((and, v.value.clone()));
             }
         }
-        return result;
+        println!("{:?}", &result);
+
+        return Ok(Output::IoResult(IoOutput::GetValue(result)));
     }
     pub fn set_value(&mut self, set: SpaceTimeIdSet, value: ValueEntry) -> Result<Output, Error> {
         let mut is_push = false;

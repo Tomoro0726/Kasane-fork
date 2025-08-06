@@ -1,13 +1,13 @@
 use crate::{
     command::{
         addkey::addkey, addspace::addspace, deletekey::deletekey, deletespace::deletespace,
-        deletevalue::deletevalue, putvalue::putvalue, setvalue::setvalue, showkeys::showkeys,
-        showspaces::showspaces,
+        deletevalue::deletevalue, getvalue::getvalue, putvalue::putvalue, setvalue::setvalue,
+        showkeys::showkeys, showspaces::showspaces,
     },
     error::Error,
     io::Storage,
     output::Output,
-    parser::Command,
+    parser::{Command, GetValue},
 };
 pub mod addkey;
 pub mod addspace;
@@ -15,11 +15,13 @@ pub mod deletekey;
 pub mod deletespace;
 pub mod deletevalue;
 pub mod error;
+pub mod getvalue;
 pub mod putvalue;
 pub mod setvalue;
 pub mod showkeys;
 pub mod showspaces;
 pub mod tools;
+
 pub fn process(cmd: Command, s: &mut Storage) -> Result<Output, Error> {
     match cmd {
         crate::parser::Command::AddSpace(v) => addspace(v, s),
@@ -31,5 +33,6 @@ pub fn process(cmd: Command, s: &mut Storage) -> Result<Output, Error> {
         crate::parser::Command::DeleteValue(v) => deletevalue(v, s),
         crate::parser::Command::Showkeys(v) => showkeys(v, s),
         crate::parser::Command::ShowSpaces => showspaces(s),
+        crate::parser::Command::GetValue(v) => getvalue(v, s),
     }
 }

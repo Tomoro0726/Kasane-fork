@@ -11,6 +11,35 @@
     },
     {
       "IoResult": {
+        "GetValue": [
+          [
+            {
+              "inner": [
+                {
+                  "z": 20,
+                  "f": {
+                    "Single": 10
+                  },
+                  "x": {
+                    "Single": 100
+                  },
+                  "y": {
+                    "Single": 200
+                  },
+                  "i": 0,
+                  "t": "Any"
+                }
+              ]
+            },
+            {
+              "INT": 25
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "IoResult": {
         "KeyNames": [
           "temperature"
         ]

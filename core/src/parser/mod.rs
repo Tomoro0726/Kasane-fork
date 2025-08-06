@@ -68,6 +68,13 @@ pub struct DeleteValue {
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
+pub struct GetValue {
+    pub spacename: String,
+    pub keyname: String,
+    pub select: Select,
+}
+
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub enum Select {
     Function(Function),
     Prefix(Prefix),
@@ -123,6 +130,7 @@ pub enum Command {
     PutValue(PutValue),
     SetValue(SetValue),
     DeleteValue(DeleteValue),
+    GetValue(GetValue),
     Showkeys(Showkeys),
     ShowSpaces,
 }
