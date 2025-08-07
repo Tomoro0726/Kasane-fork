@@ -1,82 +1,52 @@
-// use schemars::JsonSchema;
-// use serde::Serialize;
-// use wasm_bindgen::prelude::*;
+use crate::command::process;
+use crate::io::Storage;
+use crate::output::Output;
+use crate::parser::parser;
+use serde::Serialize;
+use wasm_bindgen::prelude::*;
 
-// use crate::command::process;
-// use crate::interface::output::json_str::json_from_str;
-// use crate::io::Storage;
-// use crate::output::Output;
+pub mod command;
+pub mod error;
+pub mod interface;
+pub mod io;
+pub mod output;
+pub mod parser;
 
-// pub mod command;
-// pub mod error;
-// pub mod interface;
-// pub mod io;
-// pub mod output;
-// use crate::parser::parser;
-// pub mod parser;
+#[derive(Serialize)]
+enum CommandResult {
+    Success(Output),
+    Error(String),
+}
 
-// use once_cell::sync::Lazy;
-// use std::sync::Mutex;
+#[wasm_bindgen]
+pub struct KasaneVM {
+    storage: Storage,
+}
 
-// #[cfg(not(feature = "BuildJsonSchema"))]
-// #[derive(Serialize, JsonSchema)]
-// enum PacketState {
-//     JsonError(String),
-//     UserError(String),
-//     CommandError(String),
-//     Ok(Vec<Output>),
-// }
+#[wasm_bindgen]
+impl KasaneVM {
+    /// Rust側の純粋な new（init後に呼ばれる）
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Result<KasaneVM, JsValue> {
+        Storage::new()
+            .map(|s| KasaneVM { storage: s })
+            .map_err(|e| JsValue::from_str(&format!("Storage init error: {}", e)))
+    }
 
-// static STORAGE: Lazy<Mutex<Option<Storage>>> = Lazy::new(|| Mutex::new(None));
+    /// 実行メソッド
+    #[wasm_bindgen]
+    pub fn execute(&mut self, command_json: &str) -> String {
+        match parser(command_json) {
+            Ok(cmd) => match process(cmd, &mut self.storage) {
+                Ok(output) => to_json(CommandResult::Success(output)),
+                Err(e) => to_json(CommandResult::Error(e.to_string())),
+            },
+            Err(e) => to_json(CommandResult::Error(format!("Parse error: {}", e))),
+        }
+    }
+}
 
-// #[wasm_bindgen]
-// pub fn run_packet(json_input: &str) -> String {
-//     let mut storage_guard = STORAGE.lock().unwrap();
-
-//     // ストレージが未初期化なら初期化
-//     if storage_guard.is_none() {
-//         match Storage::new() {
-//             Ok(s) => *storage_guard = Some(s),
-//             Err(_) => return "エラー".to_string(),
-//         }
-//     }
-
-//     // ストレージへの可変参照を取得
-//     let mut s = storage_guard.as_mut().unwrap();
-
-//     let packet_raw = match json_from_str(json_input) {
-//         Ok(v) => v,
-//         Err(e) => return to_json(PacketState::JsonError(format!("{:?}", e))),
-//     };
-
-//     let packet = match parser(&packet_raw.to_string()) {
-//         Ok(v) => v,
-//         Err(e) => {
-//             return to_json(PacketState::CommandError(format!("Parse error: {:?}", e)));
-//         }
-//     };
-
-//     if packet.user != "default" {
-//         return to_json(PacketState::UserError(format!(
-//             "Unknown user: {}",
-//             packet.user
-//         )));
-//     }
-
-//     let mut outputs = Vec::new();
-//     for cmd in packet.commands {
-//         match process(cmd, &mut s) {
-//             Ok(output) => outputs.push(output),
-//             Err(e) => {
-//                 return to_json(PacketState::CommandError(format!("{:?}", e)));
-//             }
-//         }
-//     }
-
-//     to_json(PacketState::Ok(outputs))
-// }
-
-// fn to_json(state: PacketState) -> String {
-//     serde_json::to_string_pretty(&state)
-//         .unwrap_or_else(|e| format!(r#"{{"status":"SerializeError","data":"{}"}}"#, e))
-// }
+fn to_json(result: CommandResult) -> String {
+    serde_json::to_string_pretty(&result)
+        .unwrap_or_else(|e| format!("{{\"error\": \"Serialize error: {}\"}}", e))
+}

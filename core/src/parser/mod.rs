@@ -1,5 +1,3 @@
-//データの入出力を管理する
-
 use logic::id::DimensionRange;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};

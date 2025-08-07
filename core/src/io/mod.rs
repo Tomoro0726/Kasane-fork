@@ -7,21 +7,25 @@ pub mod key;
 pub mod space;
 pub mod storage;
 
+#[derive(Debug)]
 pub struct Storage {
     space: Vec<Space>,
 }
 
+#[derive(Debug)]
 pub struct Space {
     name: String,
     key: Vec<Key>,
 }
 
+#[derive(Debug)]
 pub struct Key {
     name: String,
     r#type: KeyType,
     value: Vec<Value>,
 }
 
+#[derive(Debug)]
 pub struct Value {
     value: ValueEntry,
     set: SpaceTimeIdSet,

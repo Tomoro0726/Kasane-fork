@@ -17,14 +17,6 @@ use crate::output::Output;
 
 use crate::command::process;
 
-#[cfg(not(feature = "BuildJsonSchema"))]
-#[derive(Serialize, JsonSchema)]
-enum PacketState {
-    JsonError(String),
-    CommandError(String),
-    Ok(Vec<Output>),
-}
-
 fn main() {
     let mut s = match Storage::new() {
         Ok(store) => store,
@@ -81,16 +73,13 @@ fn return_packet(result: CommandResult) {
     file.write_all(json.as_bytes())
         .expect("Failed to write to file");
 }
-
 //Json Schemaを出力する
 #[cfg(feature = "BuildJsonSchema")]
-fn main() {
-    use super::PacketState;
-    use crate::parser::Command;
 
+fn main() {
     use schemars::schema_for;
     //JSON Schemaを出力している
-    let schema = schema_for!(Packet);
+    let schema = schema_for!(Command);
 
     // ファイルにも保存（任意）
     std::fs::write(
