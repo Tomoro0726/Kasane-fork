@@ -134,15 +134,6 @@ pub enum Command {
     Showkeys(Showkeys),
     ShowSpaces,
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
-#[serde(deny_unknown_fields)]
-pub struct Packet {
-    pub user: String,
-    pub commands: Vec<Command>,
-    #[serde(rename = "$schema")]
-    pub schema: String,
-}
-pub fn parser(packet_raw: &str) -> Result<Packet, serde_json::Error> {
+pub fn parser(packet_raw: &str) -> Result<Command, serde_json::Error> {
     serde_json::from_str(packet_raw)
 }

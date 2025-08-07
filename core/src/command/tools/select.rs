@@ -1,7 +1,6 @@
 use logic::id::SpaceTimeId;
 use logic::set::SpaceTimeIdSet;
 
-use crate::command::error::CommandError;
 use crate::error::Error;
 use crate::parser::Prefix::{AND, NOT, OR, XOR};
 use crate::parser::Select;
@@ -58,7 +57,7 @@ pub fn select(v: Select) -> Result<SpaceTimeIdSet, Error> {
             let mut set = SpaceTimeIdSet::new();
             for id in ids {
                 let new_id = SpaceTimeId::new(id.z, id.f, id.x, id.y, id.i, id.t)
-                    .map_err(|e| Error::CommandError(CommandError::ParseError(e)))?;
+                    .map_err(|e| Error::ParseError(e))?;
                 set.insert(new_id);
             }
             Ok(set)

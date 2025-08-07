@@ -1,10 +1,11 @@
+use std::fs::File;
+use std::io::Write;
+
 use schemars::JsonSchema;
 use serde::Serialize;
 
 use crate::io::Storage;
 use crate::{interface::input::json_file::json_file, parser::parser};
-
-use std::fs::write;
 
 pub mod command;
 pub mod error;
@@ -20,7 +21,6 @@ use crate::command::process;
 #[derive(Serialize, JsonSchema)]
 enum PacketState {
     JsonError(String),
-    UserError(String),
     CommandError(String),
     Ok(Vec<Output>),
 }
@@ -29,11 +29,7 @@ fn main() {
     let mut s = match Storage::new() {
         Ok(store) => store,
         Err(e) => {
-            write_packet_state(PacketState::CommandError(format!(
-                "Storage init error: {:?}",
-                e
-            )));
-            return;
+            panic!("{}", e)
         }
     };
 
@@ -41,62 +37,56 @@ fn main() {
     let packet_raw = match json_file("sample.json") {
         Ok(v) => v,
         Err(e) => {
-            write_packet_state(PacketState::JsonError(format!("{:?}", e)));
+            return_packet(CommandResult::Error(e.to_string()));
             return;
         }
     };
 
     // JSONパース
-    let packet = match parser(&packet_raw) {
+    let cmd = match parser(&packet_raw) {
         Ok(v) => v,
         Err(e) => {
-            write_packet_state(PacketState::CommandError(format!("Parse error: {:?}", e)));
+            return_packet(CommandResult::Error(e.to_string()));
             return;
         }
     };
 
-    // ユーザー確認
-    if packet.user != "default" {
-        write_packet_state(PacketState::UserError(format!(
-            "Unknown user: {}",
-            packet.user
-        )));
-        return;
-    }
-
-    let mut outputs = Vec::new();
-    for cmd in packet.commands {
-        match process(cmd, &mut s) {
-            Ok(output) => outputs.push(output),
-            Err(e) => {
-                write_packet_state(PacketState::CommandError(format!("{:?}", e)));
-                return;
-            }
+    match process(cmd, &mut s) {
+        Ok(v) => {
+            return_packet(CommandResult::Success(v));
+            return;
+        }
+        Err(e) => {
+            return_packet(CommandResult::Error(e.to_string()));
+            return;
         }
     }
 
     // 成功したら出力
-    write_packet_state(PacketState::Ok(outputs));
 }
 
-/// PacketState を JSON にしてファイルに保存
-fn write_packet_state(state: PacketState) {
-    match serde_json::to_string_pretty(&state) {
-        Ok(json) => {
-            if let Err(e) = write("packet_state.json", json) {
-                eprintln!("Failed to write packet_state.json: {:?}", e);
-            }
-        }
-        Err(e) => {
-            eprintln!("Failed to serialize PacketState: {:?}", e);
-        }
-    }
+#[derive(Serialize, JsonSchema)]
+enum CommandResult {
+    Success(Output),
+    Error(String),
 }
+
+fn return_packet(result: CommandResult) {
+    // JSON に変換
+    let json = serde_json::to_string_pretty(&result).expect("Failed to serialize CommandResult");
+
+    // ファイルに書き出す（ファイル名は固定だが変更可能）
+    let mut file = File::create("result.json").expect("Failed to create file");
+
+    file.write_all(json.as_bytes())
+        .expect("Failed to write to file");
+}
+
 //Json Schemaを出力する
 #[cfg(feature = "BuildJsonSchema")]
 fn main() {
     use super::PacketState;
-    use crate::parser::Packet;
+    use crate::parser::Command;
 
     use schemars::schema_for;
     //JSON Schemaを出力している

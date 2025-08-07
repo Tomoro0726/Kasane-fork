@@ -14,7 +14,6 @@ pub mod addspace;
 pub mod deletekey;
 pub mod deletespace;
 pub mod deletevalue;
-pub mod error;
 pub mod getvalue;
 pub mod putvalue;
 pub mod setvalue;

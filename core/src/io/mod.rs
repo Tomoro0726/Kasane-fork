@@ -3,9 +3,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::parser::KeyType;
-pub mod error;
 pub mod key;
-pub mod output;
 pub mod space;
 pub mod storage;
 

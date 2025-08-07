@@ -2,7 +2,7 @@ use logic::set::SpaceTimeIdSet;
 
 use crate::{
     error::Error,
-    io::{Key, ValueEntry, error::IoError, output::IoOutput},
+    io::{Key, ValueEntry},
     output::Output,
 };
 
@@ -16,9 +16,8 @@ impl Key {
                 result.push((and, v.value.clone()));
             }
         }
-        println!("{:?}", &result);
 
-        return Ok(Output::IoResult(IoOutput::GetValue(result)));
+        return Ok(Output::GetValue(result));
     }
     pub fn set_value(&mut self, set: SpaceTimeIdSet, value: ValueEntry) -> Result<Output, Error> {
         let mut is_push = false;
@@ -35,7 +34,7 @@ impl Key {
         if !is_push {
             self.value.push(super::Value { value, set });
         }
-        Ok(Output::IoResult(IoOutput::Success))
+        Ok(Output::Success)
     }
     pub fn put_value(&mut self, set: SpaceTimeIdSet, value: ValueEntry) -> Result<Output, Error> {
         let mut is_push = false;
@@ -45,9 +44,7 @@ impl Key {
         for v in self.value.iter_mut() {
             if v.value == value {
                 if !(v.set.clone() & set.clone()).is_empty() {
-                    return Err(Error::IoError(IoError::SpaceTimeIdAlreadyHasValue(
-                        "値を上書きするな",
-                    )));
+                    return Err(Error::SpaceTimeIdAlreadyHasValue("値を上書きするな"));
                 }
                 v.set = v.set.clone() | set.clone();
                 is_push = true
@@ -56,13 +53,13 @@ impl Key {
         if !is_push {
             self.value.push(super::Value { value, set });
         }
-        Ok(Output::IoResult(IoOutput::Success))
+        Ok(Output::Success)
     }
     pub fn delete_value(&mut self, set: SpaceTimeIdSet) -> Result<Output, Error> {
         self.value.retain_mut(|v| {
             v.set = v.set.clone() | !set.clone();
             !v.set.is_empty()
         });
-        Ok(Output::IoResult(IoOutput::Success))
+        Ok(Output::Success)
     }
 }

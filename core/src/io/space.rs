@@ -3,24 +3,20 @@ use serde_json::Value;
 use crate::error::Error;
 
 use crate::io::Key;
-use crate::io::output::IoOutput;
 use crate::output::Output;
-use crate::{
-    io::{Space, error::IoError},
-    parser::KeyType,
-};
+use crate::{io::Space, parser::KeyType};
 
 impl Space {
     pub fn add_key(&mut self, name: &str, r#type: KeyType) -> Result<Output, Error> {
         match self.get_key(name) {
-            Ok(_) => Err(Error::IoError(IoError::KeyNameAlreadyExists("もうあるよ"))),
+            Ok(_) => Err(Error::KeyNameAlreadyExists("もうあるよ")),
             Err(_) => {
                 self.key.push(Key {
                     name: name.to_string(),
                     r#type,
                     value: Vec::new(),
                 });
-                Ok(Output::IoResult(IoOutput::Success))
+                Ok(Output::Success)
             }
         }
     }
@@ -29,7 +25,7 @@ impl Space {
         match self.get_key(name) {
             Ok(_) => {
                 self.key.retain(|v| v.name != name);
-                Ok(Output::IoResult(IoOutput::Success))
+                Ok(Output::Success)
             }
             Err(e) => Err(e),
         }
@@ -39,7 +35,7 @@ impl Space {
         self.key
             .iter_mut()
             .find(|v| v.name == name)
-            .ok_or(Error::IoError(IoError::KeyNameNotFound("Keyがないです。")))
+            .ok_or(Error::KeyNameNotFound("Keyがないです。"))
     }
 
     pub fn show_keys(&self) -> Output {
@@ -47,6 +43,6 @@ impl Space {
         for v in &self.key {
             result.push(v.name.clone());
         }
-        Output::IoResult(IoOutput::KeyNames(result))
+        Output::KeyNames(result)
     }
 }

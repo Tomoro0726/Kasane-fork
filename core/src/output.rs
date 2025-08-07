@@ -2,9 +2,12 @@ use logic::set::SpaceTimeIdSet;
 use schemars::JsonSchema;
 use serde::Serialize;
 
-use crate::io::output::IoOutput;
+use crate::io::ValueEntry;
 #[derive(Serialize, JsonSchema)]
 pub enum Output {
-    IoResult(IoOutput),
+    SpaceNames(Vec<String>),
+    KeyNames(Vec<String>),
+    GetValue(Vec<(SpaceTimeIdSet, ValueEntry)>),
     SpaceTimeIdSet(SpaceTimeIdSet),
+    Success,
 }
