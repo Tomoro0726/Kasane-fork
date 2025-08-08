@@ -20,9 +20,9 @@ pub struct Space {
 
 #[derive(Debug)]
 pub struct Key {
-    name: String,
-    r#type: KeyType,
-    value: Vec<Value>,
+    pub name: String,
+    pub r#type: KeyType,
+    pub value: Vec<Value>,
 }
 
 #[derive(Debug)]

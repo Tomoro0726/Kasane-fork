@@ -8,6 +8,7 @@ pub enum Error {
     KeyNameNotFound(&'static str),
     KeyNameAlreadyExists(&'static str),
     SpaceTimeIdAlreadyHasValue(&'static str),
+    FilterTypeMismatch(String),
 }
 
 use std::fmt;
@@ -24,6 +25,9 @@ impl fmt::Display for Error {
             Error::KeyNameAlreadyExists(name) => write!(f, "Key name already exists: {}", name),
             Error::SpaceTimeIdAlreadyHasValue(id) => {
                 write!(f, "SpaceTimeId already has value: {}", id)
+            }
+            Error::FilterTypeMismatch(name) => {
+                write!(f, "Filter type mismatch for: {}", name)
             }
         }
     }

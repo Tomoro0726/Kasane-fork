@@ -1,32 +1,133 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Packet",
-  "type": "object",
-  "properties": {
-    "$schema": {
-      "type": "string"
+  "title": "Command",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "AddSpace": {
+          "$ref": "#/$defs/AddSpace"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "AddSpace"
+      ]
     },
-    "commands": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/Command"
-      }
+    {
+      "type": "object",
+      "properties": {
+        "DeleteSpace": {
+          "$ref": "#/$defs/DeleteSpace"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "DeleteSpace"
+      ]
     },
-    "user": {
-      "type": "string"
+    {
+      "type": "object",
+      "properties": {
+        "AddKey": {
+          "$ref": "#/$defs/AddKey"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "AddKey"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "DeleteKey": {
+          "$ref": "#/$defs/DeleteKey"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "DeleteKey"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "PutValue": {
+          "$ref": "#/$defs/PutValue"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "PutValue"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "SetValue": {
+          "$ref": "#/$defs/SetValue"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "SetValue"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "DeleteValue": {
+          "$ref": "#/$defs/DeleteValue"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "DeleteValue"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "GetValue": {
+          "$ref": "#/$defs/GetValue"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "GetValue"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "Keys": {
+          "$ref": "#/$defs/keys"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Keys"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "Spaces": {
+          "$ref": "#/$defs/spaces"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Spaces"
+      ]
     }
-  },
-  "additionalProperties": false,
-  "required": [
-    "user",
-    "commands",
-    "$schema"
   ],
   "$defs": {
     "AddKey": {
       "type": "object",
       "properties": {
-        "name": {
+        "keyname": {
           "type": "string"
         },
         "spacename": {
@@ -38,7 +139,7 @@
       },
       "required": [
         "spacename",
-        "name",
+        "keyname",
         "type"
       ]
     },
@@ -51,112 +152,6 @@
       },
       "required": [
         "spacename"
-      ]
-    },
-    "Command": {
-      "oneOf": [
-        {
-          "type": "string",
-          "enum": [
-            "ShowSpaces"
-          ]
-        },
-        {
-          "type": "object",
-          "properties": {
-            "AddSpace": {
-              "$ref": "#/$defs/AddSpace"
-            }
-          },
-          "additionalProperties": false,
-          "required": [
-            "AddSpace"
-          ]
-        },
-        {
-          "type": "object",
-          "properties": {
-            "DeleteSpace": {
-              "$ref": "#/$defs/DeleteSpace"
-            }
-          },
-          "additionalProperties": false,
-          "required": [
-            "DeleteSpace"
-          ]
-        },
-        {
-          "type": "object",
-          "properties": {
-            "AddKey": {
-              "$ref": "#/$defs/AddKey"
-            }
-          },
-          "additionalProperties": false,
-          "required": [
-            "AddKey"
-          ]
-        },
-        {
-          "type": "object",
-          "properties": {
-            "DeleteKey": {
-              "$ref": "#/$defs/DeleteKey"
-            }
-          },
-          "additionalProperties": false,
-          "required": [
-            "DeleteKey"
-          ]
-        },
-        {
-          "type": "object",
-          "properties": {
-            "PutValue": {
-              "$ref": "#/$defs/PutValue"
-            }
-          },
-          "additionalProperties": false,
-          "required": [
-            "PutValue"
-          ]
-        },
-        {
-          "type": "object",
-          "properties": {
-            "SetValue": {
-              "$ref": "#/$defs/SetValue"
-            }
-          },
-          "additionalProperties": false,
-          "required": [
-            "SetValue"
-          ]
-        },
-        {
-          "type": "object",
-          "properties": {
-            "DeleteValue": {
-              "$ref": "#/$defs/DeleteValue"
-            }
-          },
-          "additionalProperties": false,
-          "required": [
-            "DeleteValue"
-          ]
-        },
-        {
-          "type": "object",
-          "properties": {
-            "Showkeys": {
-              "$ref": "#/$defs/Showkeys"
-            }
-          },
-          "additionalProperties": false,
-          "required": [
-            "Showkeys"
-          ]
-        }
       ]
     },
     "DeleteKey": {
@@ -192,7 +187,7 @@
           "type": "string"
         },
         "select": {
-          "$ref": "#/$defs/Select"
+          "$ref": "#/$defs/Range"
         },
         "spacename": {
           "type": "string"
@@ -446,6 +441,25 @@
       ]
     },
     "Function": false,
+    "GetValue": {
+      "type": "object",
+      "properties": {
+        "keyname": {
+          "type": "string"
+        },
+        "select": {
+          "$ref": "#/$defs/Range"
+        },
+        "spacename": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "spacename",
+        "keyname",
+        "select"
+      ]
+    },
     "KeyType": {
       "type": "string",
       "enum": [
@@ -462,7 +476,7 @@
             "AND": {
               "type": "array",
               "items": {
-                "$ref": "#/$defs/Select"
+                "$ref": "#/$defs/Range"
               }
             }
           },
@@ -477,7 +491,7 @@
             "OR": {
               "type": "array",
               "items": {
-                "$ref": "#/$defs/Select"
+                "$ref": "#/$defs/Range"
               }
             }
           },
@@ -492,7 +506,7 @@
             "XOR": {
               "type": "array",
               "items": {
-                "$ref": "#/$defs/Select"
+                "$ref": "#/$defs/Range"
               }
             }
           },
@@ -505,7 +519,10 @@
           "type": "object",
           "properties": {
             "NOT": {
-              "$ref": "#/$defs/Select"
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Range"
+              }
             }
           },
           "additionalProperties": false,
@@ -522,7 +539,7 @@
           "type": "string"
         },
         "select": {
-          "$ref": "#/$defs/Select"
+          "$ref": "#/$defs/Range"
         },
         "spacename": {
           "type": "string"
@@ -538,7 +555,7 @@
         "value"
       ]
     },
-    "Select": {
+    "Range": {
       "oneOf": [
         {
           "type": "object",
@@ -588,7 +605,7 @@
           "type": "string"
         },
         "select": {
-          "$ref": "#/$defs/Select"
+          "$ref": "#/$defs/Range"
         },
         "spacename": {
           "type": "string"
@@ -602,17 +619,6 @@
         "keyname",
         "select",
         "value"
-      ]
-    },
-    "Showkeys": {
-      "type": "object",
-      "properties": {
-        "spacename": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "spacename"
       ]
     },
     "SpaceTimeIdInput": {
@@ -691,6 +697,20 @@
           ]
         }
       ]
+    },
+    "keys": {
+      "type": "object",
+      "properties": {
+        "spacename": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "spacename"
+      ]
+    },
+    "spaces": {
+      "type": "object"
     }
   }
 }

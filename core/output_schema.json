@@ -1,0 +1,445 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Output",
+  "oneOf": [
+    {
+      "type": "string",
+      "enum": [
+        "Success"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "SpaceNames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "SpaceNames"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "KeyNames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "KeyNames"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "GetValue": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "maxItems": 3,
+            "minItems": 3,
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/SpaceTimeId"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/Point"
+                },
+                "maxItems": 8,
+                "minItems": 8
+              },
+              {
+                "$ref": "#/$defs/ValueEntry"
+              }
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "GetValue"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "SpaceTimeIdSet": {
+          "$ref": "#/$defs/SpaceTimeIdSet"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "SpaceTimeIdSet"
+      ]
+    }
+  ],
+  "$defs": {
+    "DimensionRange": {
+      "description": "Represents a value for a single dimension (F, X, Y, or T) in a SpaceTimeId.\n\nThis enum can represent a single value, a range, or an Any value,\ncorresponding to the extended notation of the spatial ID.",
+      "oneOf": [
+        {
+          "description": "A closed range with a start and end value (e.g., 5:10).",
+          "type": "object",
+          "properties": {
+            "LimitRange": {
+              "type": "array",
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "LimitRange"
+          ]
+        },
+        {
+          "description": "An unlimited range up to an end value (e.g., -:10).",
+          "type": "object",
+          "properties": {
+            "BeforeUnLimitRange": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "BeforeUnLimitRange"
+          ]
+        },
+        {
+          "description": "An unlimited range from a start value onwards (e.g., 5:-).",
+          "type": "object",
+          "properties": {
+            "AfterUnLimitRange": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "AfterUnLimitRange"
+          ]
+        },
+        {
+          "description": "A single, discrete value.",
+          "type": "object",
+          "properties": {
+            "Single": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "Single"
+          ]
+        },
+        {
+          "description": "An Any value, indicating it applies to all possible values in this dimension (e.g., -).",
+          "type": "string",
+          "const": "Any"
+        }
+      ]
+    },
+    "DimensionRange2": {
+      "description": "Represents a value for a single dimension (F, X, Y, or T) in a SpaceTimeId.\n\nThis enum can represent a single value, a range, or an Any value,\ncorresponding to the extended notation of the spatial ID.",
+      "oneOf": [
+        {
+          "description": "A closed range with a start and end value (e.g., 5:10).",
+          "type": "object",
+          "properties": {
+            "LimitRange": {
+              "type": "array",
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0
+                },
+                {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "LimitRange"
+          ]
+        },
+        {
+          "description": "An unlimited range up to an end value (e.g., -:10).",
+          "type": "object",
+          "properties": {
+            "BeforeUnLimitRange": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "BeforeUnLimitRange"
+          ]
+        },
+        {
+          "description": "An unlimited range from a start value onwards (e.g., 5:-).",
+          "type": "object",
+          "properties": {
+            "AfterUnLimitRange": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "AfterUnLimitRange"
+          ]
+        },
+        {
+          "description": "A single, discrete value.",
+          "type": "object",
+          "properties": {
+            "Single": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "Single"
+          ]
+        },
+        {
+          "description": "An Any value, indicating it applies to all possible values in this dimension (e.g., -).",
+          "type": "string",
+          "const": "Any"
+        }
+      ]
+    },
+    "DimensionRange3": {
+      "description": "Represents a value for a single dimension (F, X, Y, or T) in a SpaceTimeId.\n\nThis enum can represent a single value, a range, or an Any value,\ncorresponding to the extended notation of the spatial ID.",
+      "oneOf": [
+        {
+          "description": "A closed range with a start and end value (e.g., 5:10).",
+          "type": "object",
+          "properties": {
+            "LimitRange": {
+              "type": "array",
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "format": "uint32",
+                  "minimum": 0
+                },
+                {
+                  "type": "integer",
+                  "format": "uint32",
+                  "minimum": 0
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "LimitRange"
+          ]
+        },
+        {
+          "description": "An unlimited range up to an end value (e.g., -:10).",
+          "type": "object",
+          "properties": {
+            "BeforeUnLimitRange": {
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "BeforeUnLimitRange"
+          ]
+        },
+        {
+          "description": "An unlimited range from a start value onwards (e.g., 5:-).",
+          "type": "object",
+          "properties": {
+            "AfterUnLimitRange": {
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "AfterUnLimitRange"
+          ]
+        },
+        {
+          "description": "A single, discrete value.",
+          "type": "object",
+          "properties": {
+            "Single": {
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "Single"
+          ]
+        },
+        {
+          "description": "An Any value, indicating it applies to all possible values in this dimension (e.g., -).",
+          "type": "string",
+          "const": "Any"
+        }
+      ]
+    },
+    "Point": {
+      "type": "object",
+      "properties": {
+        "altitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "latitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "longitude": {
+          "type": "number",
+          "format": "double"
+        }
+      },
+      "required": [
+        "latitude",
+        "longitude",
+        "altitude"
+      ]
+    },
+    "SpaceTimeId": {
+      "description": "* z: The zoom level, a u16 value. It defines the coordinate space boundaries.\n* f: The value for the F (vertical) dimension as a DimensionRange<i64>.\n* x: The value for the X dimension as a DimensionRange<u64>.\n* y: The value for the Y dimension as a DimensionRange<u64>.\n* i: The time interval in seconds, a u32 value.\n* t: The time index value as a DimensionRange<u32>.\n\n# Normalization Rules\n\nThe input `DimensionRange` values are normalized during validation inside `SpaceTimeId::new`\naccording to the following rules:\n\n## `DimensionRange::Single`\n- No normalization applied (used as-is).\n\n## `DimensionRange::LimitRange(start, end)`\n- If `start == end`: converted to `Single(start)`.\n- If the range spans the entire valid domain:\n  - For x/y: `0..=2^z - 1`\n  - For f: `-2^z..=2^z - 1`\n  → converted to `Any`.\n- If `start == 0`: converted to `BeforeUnLimitRange(end)`.\n- If `end == max`: converted to `AfterUnLimitRange(start)`.\n\n## `DimensionRange::AfterUnLimitRange(start)`\n- If `start == 0` (for x/y) or `start == min_f` (for f): converted to `Any`.\n- If `start == max` (for x/y only): converted to `Single(max)`.\n\n## `DimensionRange::BeforeUnLimitRange(end)`\n- If `end == max` (for x/y) or `end == max_f` (for f): converted to `Any`.\n- If `end == 0` (for x/y) or `end == min_f` (for f): converted to `Single(end)`.\n\n## `DimensionRange::Any`\n- No normalization applied (used as-is).\n\n## Special case for time dimension `t`\n- If `i == 0`, then `t` **must** be `Any`. Otherwise, an error is returned.",
+      "type": "object",
+      "properties": {
+        "f": {
+          "$ref": "#/$defs/DimensionRange"
+        },
+        "i": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "t": {
+          "$ref": "#/$defs/DimensionRange3"
+        },
+        "x": {
+          "$ref": "#/$defs/DimensionRange2"
+        },
+        "y": {
+          "$ref": "#/$defs/DimensionRange2"
+        },
+        "z": {
+          "type": "integer",
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0
+        }
+      },
+      "required": [
+        "z",
+        "f",
+        "x",
+        "y",
+        "i",
+        "t"
+      ]
+    },
+    "SpaceTimeIdSet": {
+      "description": "This type represents a set of `SpaceTimeId` elements.\n\nWhen a new `SpaceTimeId` is added, any overlapping ranges with existing elements\nwill be subtracted from the new one to ensure that the ranges represented by IDs\nin the set remain disjoint (i.e., no overlap between any two entries).\n\nAs a result, each distinct region in the physical space-time domain is guaranteed\nto be represented by *only one* `SpaceTimeId` within the set.\nThis ensures unambiguous mapping between a spatial-temporal region and its identifier.",
+      "type": "object",
+      "properties": {
+        "inner": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SpaceTimeId"
+          }
+        }
+      },
+      "required": [
+        "inner"
+      ]
+    },
+    "ValueEntry": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "INT": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "INT"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "TEXT": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "TEXT"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "BOOLEAN": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "BOOLEAN"
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -223,6 +223,7 @@ dependencies = [
  "ascii",
  "logic",
  "once_cell",
+ "regex",
  "schemars",
  "serde",
  "serde_json",

@@ -2,17 +2,19 @@ use logic::id::SpaceTimeId;
 use logic::set::SpaceTimeIdSet;
 
 use crate::error::Error;
+use crate::io::Storage;
+use crate::parser::Function::{FilterValue, HasValue};
 use crate::parser::Prefix::{AND, NOT, OR, XOR};
 use crate::parser::Range;
 
-pub fn select(v: Range) -> Result<SpaceTimeIdSet, Error> {
+pub fn select(s: &mut Storage, v: Range) -> Result<SpaceTimeIdSet, Error> {
     match v {
         Range::Prefix(prefix) => match prefix {
             AND(and) => {
                 let mut is_first = true;
                 let mut result = SpaceTimeIdSet::new();
                 for ele in and {
-                    let set = select(ele)?;
+                    let set = select(s, ele)?;
                     if is_first {
                         result = set;
                         is_first = false;
@@ -26,7 +28,7 @@ pub fn select(v: Range) -> Result<SpaceTimeIdSet, Error> {
             OR(or) => {
                 let mut result = SpaceTimeIdSet::new();
                 for ele in or {
-                    let set = select(ele)?;
+                    let set = select(s, ele)?;
                     result = result | set;
                 }
                 Ok(result)
@@ -35,7 +37,7 @@ pub fn select(v: Range) -> Result<SpaceTimeIdSet, Error> {
             NOT(not) => {
                 let mut result = SpaceTimeIdSet::new();
                 for ele in not {
-                    let set = select(ele)?;
+                    let set = select(s, ele)?;
                     result = result | set;
                 }
                 Ok(!result)
@@ -45,7 +47,7 @@ pub fn select(v: Range) -> Result<SpaceTimeIdSet, Error> {
                 let mut is_first = true;
                 let mut result = SpaceTimeIdSet::new();
                 for ele in xor {
-                    let set = select(ele)?;
+                    let set = select(s, ele)?;
                     if is_first {
                         result = set;
                         is_first = false;
@@ -56,7 +58,6 @@ pub fn select(v: Range) -> Result<SpaceTimeIdSet, Error> {
                 Ok(result)
             }
         },
-
         Range::SpaceTimeIdSet(ids) => {
             let mut set = SpaceTimeIdSet::new();
             for id in ids {
@@ -66,5 +67,17 @@ pub fn select(v: Range) -> Result<SpaceTimeIdSet, Error> {
             }
             Ok(set)
         }
+        Range::Function(function) => match function {
+            HasValue(v) => {
+                let space = s.get_space(&v.spacename)?;
+                let key = space.get_key(&v.keyname)?;
+                return Ok(key.has_value());
+            }
+            FilterValue(v) => {
+                let space = s.get_space(&v.spacename)?;
+                let key = space.get_key(&v.keyname)?;
+                key.filter_value(v.filter)
+            }
+        },
     }
 }

@@ -16,7 +16,9 @@ pub mod parser;
 use crate::output::Output;
 
 use crate::command::process;
+use crate::parser::Command;
 
+#[cfg(not(feature = "BuildJsonSchema"))]
 fn main() {
     let mut s = match Storage::new() {
         Ok(store) => store,
@@ -79,12 +81,20 @@ fn return_packet(result: CommandResult) {
 fn main() {
     use schemars::schema_for;
     //JSON Schemaを出力している
-    let schema = schema_for!(Command);
+    let input_schema = schema_for!(Command);
 
     // ファイルにも保存（任意）
     std::fs::write(
-        "schema.json",
-        serde_json::to_string_pretty(&schema).unwrap(),
+        "input_schema.json",
+        serde_json::to_string_pretty(&input_schema).unwrap(),
+    )
+    .expect("Failed to write schema.json");
+
+    let output_schema = schema_for!(Output);
+    // ファイルにも保存（任意）
+    std::fs::write(
+        "output_schema.json",
+        serde_json::to_string_pretty(&output_schema).unwrap(),
     )
     .expect("Failed to write schema.json");
 }

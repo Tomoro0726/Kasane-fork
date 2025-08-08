@@ -1,0 +1,716 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Command",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "AddSpace": {
+          "$ref": "#/$defs/AddSpace"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "AddSpace"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "DeleteSpace": {
+          "$ref": "#/$defs/DeleteSpace"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "DeleteSpace"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "AddKey": {
+          "$ref": "#/$defs/AddKey"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "AddKey"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "DeleteKey": {
+          "$ref": "#/$defs/DeleteKey"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "DeleteKey"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "PutValue": {
+          "$ref": "#/$defs/PutValue"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "PutValue"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "SetValue": {
+          "$ref": "#/$defs/SetValue"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "SetValue"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "DeleteValue": {
+          "$ref": "#/$defs/DeleteValue"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "DeleteValue"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "GetValue": {
+          "$ref": "#/$defs/GetValue"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "GetValue"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "Keys": {
+          "$ref": "#/$defs/keys"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Keys"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "Spaces": {
+          "$ref": "#/$defs/spaces"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Spaces"
+      ]
+    }
+  ],
+  "$defs": {
+    "AddKey": {
+      "type": "object",
+      "properties": {
+        "keyname": {
+          "type": "string"
+        },
+        "spacename": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/KeyType"
+        }
+      },
+      "required": [
+        "spacename",
+        "keyname",
+        "type"
+      ]
+    },
+    "AddSpace": {
+      "type": "object",
+      "properties": {
+        "spacename": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "spacename"
+      ]
+    },
+    "DeleteKey": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "spacename": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "spacename",
+        "name"
+      ]
+    },
+    "DeleteSpace": {
+      "type": "object",
+      "properties": {
+        "spacename": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "spacename"
+      ]
+    },
+    "DeleteValue": {
+      "type": "object",
+      "properties": {
+        "keyname": {
+          "type": "string"
+        },
+        "select": {
+          "$ref": "#/$defs/Range"
+        },
+        "spacename": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "spacename",
+        "keyname",
+        "select"
+      ]
+    },
+    "DimensionRange": {
+      "description": "Represents a value for a single dimension (F, X, Y, or T) in a SpaceTimeId.\n\nThis enum can represent a single value, a range, or an Any value,\ncorresponding to the extended notation of the spatial ID.",
+      "oneOf": [
+        {
+          "description": "A closed range with a start and end value (e.g., 5:10).",
+          "type": "object",
+          "properties": {
+            "LimitRange": {
+              "type": "array",
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "LimitRange"
+          ]
+        },
+        {
+          "description": "An unlimited range up to an end value (e.g., -:10).",
+          "type": "object",
+          "properties": {
+            "BeforeUnLimitRange": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "BeforeUnLimitRange"
+          ]
+        },
+        {
+          "description": "An unlimited range from a start value onwards (e.g., 5:-).",
+          "type": "object",
+          "properties": {
+            "AfterUnLimitRange": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "AfterUnLimitRange"
+          ]
+        },
+        {
+          "description": "A single, discrete value.",
+          "type": "object",
+          "properties": {
+            "Single": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "Single"
+          ]
+        },
+        {
+          "description": "An Any value, indicating it applies to all possible values in this dimension (e.g., -).",
+          "type": "string",
+          "const": "Any"
+        }
+      ]
+    },
+    "DimensionRange2": {
+      "description": "Represents a value for a single dimension (F, X, Y, or T) in a SpaceTimeId.\n\nThis enum can represent a single value, a range, or an Any value,\ncorresponding to the extended notation of the spatial ID.",
+      "oneOf": [
+        {
+          "description": "A closed range with a start and end value (e.g., 5:10).",
+          "type": "object",
+          "properties": {
+            "LimitRange": {
+              "type": "array",
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0
+                },
+                {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "LimitRange"
+          ]
+        },
+        {
+          "description": "An unlimited range up to an end value (e.g., -:10).",
+          "type": "object",
+          "properties": {
+            "BeforeUnLimitRange": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "BeforeUnLimitRange"
+          ]
+        },
+        {
+          "description": "An unlimited range from a start value onwards (e.g., 5:-).",
+          "type": "object",
+          "properties": {
+            "AfterUnLimitRange": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "AfterUnLimitRange"
+          ]
+        },
+        {
+          "description": "A single, discrete value.",
+          "type": "object",
+          "properties": {
+            "Single": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "Single"
+          ]
+        },
+        {
+          "description": "An Any value, indicating it applies to all possible values in this dimension (e.g., -).",
+          "type": "string",
+          "const": "Any"
+        }
+      ]
+    },
+    "DimensionRange3": {
+      "description": "Represents a value for a single dimension (F, X, Y, or T) in a SpaceTimeId.\n\nThis enum can represent a single value, a range, or an Any value,\ncorresponding to the extended notation of the spatial ID.",
+      "oneOf": [
+        {
+          "description": "A closed range with a start and end value (e.g., 5:10).",
+          "type": "object",
+          "properties": {
+            "LimitRange": {
+              "type": "array",
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "format": "uint32",
+                  "minimum": 0
+                },
+                {
+                  "type": "integer",
+                  "format": "uint32",
+                  "minimum": 0
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "LimitRange"
+          ]
+        },
+        {
+          "description": "An unlimited range up to an end value (e.g., -:10).",
+          "type": "object",
+          "properties": {
+            "BeforeUnLimitRange": {
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "BeforeUnLimitRange"
+          ]
+        },
+        {
+          "description": "An unlimited range from a start value onwards (e.g., 5:-).",
+          "type": "object",
+          "properties": {
+            "AfterUnLimitRange": {
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "AfterUnLimitRange"
+          ]
+        },
+        {
+          "description": "A single, discrete value.",
+          "type": "object",
+          "properties": {
+            "Single": {
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "Single"
+          ]
+        },
+        {
+          "description": "An Any value, indicating it applies to all possible values in this dimension (e.g., -).",
+          "type": "string",
+          "const": "Any"
+        }
+      ]
+    },
+    "Function": false,
+    "GetValue": {
+      "type": "object",
+      "properties": {
+        "keyname": {
+          "type": "string"
+        },
+        "select": {
+          "$ref": "#/$defs/Range"
+        },
+        "spacename": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "spacename",
+        "keyname",
+        "select"
+      ]
+    },
+    "KeyType": {
+      "type": "string",
+      "enum": [
+        "INT",
+        "BOOLEAN",
+        "TEXT"
+      ]
+    },
+    "Prefix": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "AND": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Range"
+              }
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "AND"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "OR": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Range"
+              }
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "OR"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "XOR": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Range"
+              }
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "XOR"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "NOT": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Range"
+              }
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "NOT"
+          ]
+        }
+      ]
+    },
+    "PutValue": {
+      "type": "object",
+      "properties": {
+        "keyname": {
+          "type": "string"
+        },
+        "select": {
+          "$ref": "#/$defs/Range"
+        },
+        "spacename": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/ValueEntry"
+        }
+      },
+      "required": [
+        "spacename",
+        "keyname",
+        "select",
+        "value"
+      ]
+    },
+    "Range": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "Function": {
+              "$ref": "#/$defs/Function"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "Function"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "Prefix": {
+              "$ref": "#/$defs/Prefix"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "Prefix"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "SpaceTimeIdSet": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/SpaceTimeIdInput"
+              }
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "SpaceTimeIdSet"
+          ]
+        }
+      ]
+    },
+    "SetValue": {
+      "type": "object",
+      "properties": {
+        "keyname": {
+          "type": "string"
+        },
+        "select": {
+          "$ref": "#/$defs/Range"
+        },
+        "spacename": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/ValueEntry"
+        }
+      },
+      "required": [
+        "spacename",
+        "keyname",
+        "select",
+        "value"
+      ]
+    },
+    "SpaceTimeIdInput": {
+      "type": "object",
+      "properties": {
+        "f": {
+          "$ref": "#/$defs/DimensionRange"
+        },
+        "i": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "t": {
+          "$ref": "#/$defs/DimensionRange3"
+        },
+        "x": {
+          "$ref": "#/$defs/DimensionRange2"
+        },
+        "y": {
+          "$ref": "#/$defs/DimensionRange2"
+        },
+        "z": {
+          "type": "integer",
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0
+        }
+      },
+      "required": [
+        "z",
+        "f",
+        "x",
+        "y",
+        "i",
+        "t"
+      ]
+    },
+    "ValueEntry": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "INT": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "INT"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "TEXT": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "TEXT"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "BOOLEAN": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "BOOLEAN"
+          ]
+        }
+      ]
+    },
+    "keys": {
+      "type": "object",
+      "properties": {
+        "spacename": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "spacename"
+      ]
+    },
+    "spaces": {
+      "type": "object"
+    }
+  }
+}
