@@ -193,12 +193,12 @@ impl Key {
                 }
             }
             ValueEntry::TEXT(_) => {
-                if self.r#type != KeyType::INT {
+                if self.r#type != KeyType::TEXT {
                     return Err(Error::ValueTypeMismatch("TEXTをよこせ".to_string()));
                 }
             }
             ValueEntry::BOOLEAN(_) => {
-                if self.r#type != KeyType::INT {
+                if self.r#type != KeyType::TEXT {
                     return Err(Error::ValueTypeMismatch("BOOLEANをよこせ".to_string()));
                 }
             }
@@ -228,12 +228,12 @@ impl Key {
                 }
             }
             ValueEntry::TEXT(_) => {
-                if self.r#type != KeyType::INT {
+                if self.r#type != KeyType::TEXT {
                     return Err(Error::ValueTypeMismatch("TEXTをよこせ".to_string()));
                 }
             }
             ValueEntry::BOOLEAN(_) => {
-                if self.r#type != KeyType::INT {
+                if self.r#type != KeyType::TEXT {
                     return Err(Error::ValueTypeMismatch("BOOLEANをよこせ".to_string()));
                 }
             }
