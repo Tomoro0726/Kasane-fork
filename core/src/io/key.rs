@@ -198,7 +198,7 @@ impl Key {
                 }
             }
             ValueEntry::BOOLEAN(_) => {
-                if self.r#type != KeyType::TEXT {
+                if self.r#type != KeyType::BOOLEAN {
                     return Err(Error::ValueTypeMismatch("BOOLEANをよこせ".to_string()));
                 }
             }
@@ -233,7 +233,7 @@ impl Key {
                 }
             }
             ValueEntry::BOOLEAN(_) => {
-                if self.r#type != KeyType::TEXT {
+                if self.r#type != KeyType::BOOLEAN {
                     return Err(Error::ValueTypeMismatch("BOOLEANをよこせ".to_string()));
                 }
             }
