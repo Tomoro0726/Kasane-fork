@@ -3,11 +3,11 @@ use logic::set::SpaceTimeIdSet;
 
 use crate::error::Error;
 use crate::parser::Prefix::{AND, NOT, OR, XOR};
-use crate::parser::Select;
+use crate::parser::Range;
 
-pub fn select(v: Select) -> Result<SpaceTimeIdSet, Error> {
+pub fn select(v: Range) -> Result<SpaceTimeIdSet, Error> {
     match v {
-        Select::Prefix(prefix) => match prefix {
+        Range::Prefix(prefix) => match prefix {
             AND(and) => {
                 let mut is_first = true;
                 let mut result = SpaceTimeIdSet::new();
@@ -33,8 +33,12 @@ pub fn select(v: Select) -> Result<SpaceTimeIdSet, Error> {
             }
 
             NOT(not) => {
-                let set = select(*not)?;
-                Ok(!set)
+                let mut result = SpaceTimeIdSet::new();
+                for ele in not {
+                    let set = select(ele)?;
+                    result = result | set;
+                }
+                Ok(!result)
             }
 
             XOR(xor) => {
@@ -53,7 +57,7 @@ pub fn select(v: Select) -> Result<SpaceTimeIdSet, Error> {
             }
         },
 
-        Select::SpaceTimeIdSet(ids) => {
+        Range::SpaceTimeIdSet(ids) => {
             let mut set = SpaceTimeIdSet::new();
             for id in ids {
                 let new_id = SpaceTimeId::new(id.z, id.f, id.x, id.y, id.i, id.t)

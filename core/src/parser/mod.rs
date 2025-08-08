@@ -20,7 +20,7 @@ pub struct DeleteSpace {
 
 pub struct AddKey {
     pub spacename: String,
-    pub name: String,
+    pub keyname: String,
     pub r#type: KeyType,
 }
 
@@ -44,7 +44,7 @@ pub struct DeleteKey {
 pub struct PutValue {
     pub spacename: String,
     pub keyname: String,
-    pub select: Select,
+    pub select: Range,
     pub value: ValueEntry,
 }
 
@@ -53,7 +53,7 @@ pub struct PutValue {
 pub struct SetValue {
     pub spacename: String,
     pub keyname: String,
-    pub select: Select,
+    pub select: Range,
     pub value: ValueEntry,
 }
 
@@ -62,18 +62,18 @@ pub struct SetValue {
 pub struct DeleteValue {
     pub spacename: String,
     pub keyname: String,
-    pub select: Select,
+    pub select: Range,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct GetValue {
     pub spacename: String,
     pub keyname: String,
-    pub select: Select,
+    pub select: Range,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
-pub enum Select {
+pub enum Range {
     Function(Function),
     Prefix(Prefix),
     SpaceTimeIdSet(Vec<SpaceTimeIdInput>),
@@ -108,19 +108,19 @@ pub enum Function {
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 
 pub enum Prefix {
-    AND(Vec<Select>),
-    OR(Vec<Select>),
-    XOR(Vec<Select>),
-    NOT(Box<Select>),
+    AND(Vec<Range>),
+    OR(Vec<Range>),
+    XOR(Vec<Range>),
+    NOT(Vec<Range>),
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
-pub struct Showkeys {
+pub struct keys {
     pub spacename: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
-pub struct ShowSpaces {}
+pub struct spaces {}
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub enum Command {
@@ -132,8 +132,8 @@ pub enum Command {
     SetValue(SetValue),
     DeleteValue(DeleteValue),
     GetValue(GetValue),
-    Showkeys(Showkeys),
-    ShowSpaces(ShowSpaces),
+    Keys(keys),
+    Spaces(spaces),
 }
 
 pub fn parser(packet_raw: &str) -> Result<Command, serde_json::Error> {

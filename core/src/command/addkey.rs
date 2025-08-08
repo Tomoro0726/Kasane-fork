@@ -10,6 +10,6 @@ pub fn addkey(v: AddKey, s: &mut Storage) -> Result<Output, Error> {
         ))
     } else {
         let space = s.get_space(&v.spacename)?;
-        space.add_key(&v.name, v.r#type)
+        space.add_key(&v.keyname, v.r#type)
     }
 }
