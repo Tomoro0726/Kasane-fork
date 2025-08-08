@@ -67,11 +67,16 @@ impl SpaceTimeIdSet {
 
     fn scale_range_for_z_i64(range: DimensionRange<i64>, delta_z: u16) -> DimensionRange<i64> {
         let scale = 2_i64.pow(delta_z as u32);
+
         match range {
             DimensionRange::Single(_) => {
                 panic!("このパターンは上位で除外されているはず");
             }
-            DimensionRange::LimitRange(s, e) => DimensionRange::LimitRange(s / scale, e / scale),
+            DimensionRange::LimitRange(s, e) => {
+                println!("{}", DimensionRange::LimitRange(s / scale, e / scale));
+
+                DimensionRange::LimitRange(s / scale, e / scale)
+            }
             DimensionRange::AfterUnLimitRange(s) => DimensionRange::AfterUnLimitRange(s / scale),
             DimensionRange::BeforeUnLimitRange(e) => DimensionRange::BeforeUnLimitRange(e / scale),
             DimensionRange::Any => DimensionRange::Any,
@@ -94,7 +99,14 @@ impl SpaceTimeIdSet {
             None => return other,
         };
 
+        println!("X最適化：{}", x);
+        println!("Y最適化：{}", y);
+        println!("F最適化：{}", f);
+
         let max_z = x.max(y).max(f);
+
+        println!("合わせるZ：{}", max_z);
+
         let delta_z = other.z() - max_z;
 
         let new_x = Self::scale_range_for_z_u64(other.x(), delta_z);
@@ -138,7 +150,28 @@ impl SpaceTimeIdSet {
 
     /// F（i64）次元用
     fn optimal_f_max_z(range: DimensionRange<i64>, z: u16) -> Option<u16> {
-        Self::optimal_max_z_for_range(range, z, |x| x as u64)
+        //この関数の内部判定にはバグがある
+        match range {
+            DimensionRange::Single(_) => None,
+            DimensionRange::LimitRange(s, e) => {
+                if e == !0 {
+                    return None;
+                } else if e % 2 == 1 {
+                    let len = e.saturating_sub(s).unsigned_abs() as u64 + 1;
+                    Some(z.saturating_sub(Self::count_trailing_zeros(len))).filter(|&res| res != z)
+                } else {
+                    return None;
+                }
+            }
+            DimensionRange::BeforeUnLimitRange(e) => {
+                Self::optimal_f_max_z(DimensionRange::LimitRange(0, e), z)
+            }
+            DimensionRange::AfterUnLimitRange(s) => {
+                let max = 1i64 << z;
+                Self::optimal_f_max_z(DimensionRange::LimitRange(s, max), z)
+            }
+            DimensionRange::Any => Some(0),
+        }
     }
 
     /// その数が2で何回割れるかを返す（戻り値: u16）

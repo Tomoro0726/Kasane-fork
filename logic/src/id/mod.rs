@@ -247,13 +247,16 @@ impl SpaceTimeId {
                     if start > end {
                         return validate_f_dim(&DimensionRange::LimitRange(end, start), z);
                     }
-                    if start >= min_f && end <= max_f {
-                        if start == min_f && end == max_f {
+                    if end == start {
+                        return Ok(DimensionRange::Single(start));
+                    }
+                    if end <= max_f {
+                        if start == 0 && end == max_f {
                             Ok(DimensionRange::Any)
+                        } else if start == 0 {
+                            Ok(DimensionRange::BeforeUnLimitRange(end))
                         } else if end == max_f {
                             Ok(DimensionRange::AfterUnLimitRange(start))
-                        } else if start == min_f {
-                            Ok(DimensionRange::BeforeUnLimitRange(end))
                         } else {
                             Ok(DimensionRange::LimitRange(start, end))
                         }
