@@ -2,7 +2,6 @@ use logic::{
     id::{SpaceTimeId, points::Point},
     set::SpaceTimeIdSet,
 };
-use regex::Regex;
 
 use crate::{
     error::Error,
@@ -157,13 +156,6 @@ impl Key {
                             {
                                 result = result | k.set.clone();
                             }
-                            FilterTEXT::Regex(ref pattern) => {
-                                if let Ok(re) = Regex::new(pattern) {
-                                    if re.is_match(text_value) {
-                                        result = result | k.set.clone();
-                                    }
-                                }
-                            }
                             _ => {}
                         }
                     }
@@ -192,6 +184,26 @@ impl Key {
         return Ok(Output::GetValue(result));
     }
     pub fn set_value(&mut self, set: SpaceTimeIdSet, value: ValueEntry) -> Result<Output, Error> {
+        //入力された型のチェック
+
+        match value {
+            ValueEntry::INT(_) => {
+                if self.r#type != KeyType::INT {
+                    return Err(Error::ValueTypeMismatch("INTをよこせ".to_string()));
+                }
+            }
+            ValueEntry::TEXT(_) => {
+                if self.r#type != KeyType::INT {
+                    return Err(Error::ValueTypeMismatch("TEXTをよこせ".to_string()));
+                }
+            }
+            ValueEntry::BOOLEAN(_) => {
+                if self.r#type != KeyType::INT {
+                    return Err(Error::ValueTypeMismatch("BOOLEANをよこせ".to_string()));
+                }
+            }
+        }
+
         let mut is_push = false;
 
         //valueが一致した場合はそこに出力
@@ -209,6 +221,23 @@ impl Key {
         Ok(Output::Success)
     }
     pub fn put_value(&mut self, set: SpaceTimeIdSet, value: ValueEntry) -> Result<Output, Error> {
+        match value {
+            ValueEntry::INT(_) => {
+                if self.r#type != KeyType::INT {
+                    return Err(Error::ValueTypeMismatch("INTをよこせ".to_string()));
+                }
+            }
+            ValueEntry::TEXT(_) => {
+                if self.r#type != KeyType::INT {
+                    return Err(Error::ValueTypeMismatch("TEXTをよこせ".to_string()));
+                }
+            }
+            ValueEntry::BOOLEAN(_) => {
+                if self.r#type != KeyType::INT {
+                    return Err(Error::ValueTypeMismatch("BOOLEANをよこせ".to_string()));
+                }
+            }
+        }
         let mut is_push = false;
 
         //valueが一致してかつ、既存範囲と競合がなければ加える

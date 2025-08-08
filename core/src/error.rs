@@ -9,6 +9,7 @@ pub enum Error {
     KeyNameAlreadyExists(&'static str),
     SpaceTimeIdAlreadyHasValue(&'static str),
     FilterTypeMismatch(String),
+    ValueTypeMismatch(String),
 }
 
 use std::fmt;
@@ -28,6 +29,9 @@ impl fmt::Display for Error {
             }
             Error::FilterTypeMismatch(name) => {
                 write!(f, "Filter type mismatch for: {}", name)
+            }
+            Error::ValueTypeMismatch(name) => {
+                write!(f, "Value type mismatch for: {}", name)
             }
         }
     }
