@@ -1,5 +1,7 @@
 {
-  "AddSpace": {
-    "spacename": "example_space"
+  "AddKey": {
+    "spacename": "myspace",
+    "name": "mykey",
+    "type": "INT"
   }
 }

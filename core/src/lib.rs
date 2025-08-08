@@ -19,17 +19,17 @@ enum CommandResult {
 }
 
 #[wasm_bindgen]
-pub struct KasaneVM {
+pub struct Kasane {
     storage: Storage,
 }
 
 #[wasm_bindgen]
-impl KasaneVM {
+impl Kasane {
     /// Rust側の純粋な new（init後に呼ばれる）
     #[wasm_bindgen(constructor)]
-    pub fn new() -> Result<KasaneVM, JsValue> {
+    pub fn new() -> Result<Kasane, JsValue> {
         Storage::new()
-            .map(|s| KasaneVM { storage: s })
+            .map(|s| Kasane { storage: s })
             .map_err(|e| JsValue::from_str(&format!("Storage init error: {}", e)))
     }
 

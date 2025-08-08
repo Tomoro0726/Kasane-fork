@@ -166,10 +166,7 @@ impl SpaceTimeId {
                 }
                 DimensionRange::LimitRange(start, end) => {
                     if start > end {
-                        return Err(format!(
-                            "start value {} cannot be greater than end value {}.",
-                            start, end
-                        ));
+                        return validate_xy_dim(&DimensionRange::LimitRange(end, start), z);
                     }
                     if end == start {
                         return Ok(DimensionRange::Single(start));
@@ -248,10 +245,7 @@ impl SpaceTimeId {
                 }
                 DimensionRange::LimitRange(start, end) => {
                     if start > end {
-                        return Err(format!(
-                            "start value {} cannot be greater than end value {}.",
-                            start, end
-                        ));
+                        return validate_f_dim(&DimensionRange::LimitRange(end, start), z);
                     }
                     if start >= min_f && end <= max_f {
                         if start == min_f && end == max_f {

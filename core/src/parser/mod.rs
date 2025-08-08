@@ -120,6 +120,9 @@ pub struct Showkeys {
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
+pub struct ShowSpaces {}
+
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub enum Command {
     AddSpace(AddSpace),
     DeleteSpace(DeleteSpace),
@@ -130,8 +133,9 @@ pub enum Command {
     DeleteValue(DeleteValue),
     GetValue(GetValue),
     Showkeys(Showkeys),
-    ShowSpaces,
+    ShowSpaces(ShowSpaces),
 }
+
 pub fn parser(packet_raw: &str) -> Result<Command, serde_json::Error> {
     serde_json::from_str(packet_raw)
 }
