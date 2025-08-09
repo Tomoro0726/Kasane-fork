@@ -1,7 +1,7 @@
 {
   "AddKey": {
     "spacename": "myspace",
-    "name": "mykey",
+    "keyname": "mykey",
     "type": "INT"
   }
 }

@@ -29,7 +29,11 @@ impl Key {
         match filter {
             FilterType::FilterBOOLEAN(v) => {
                 if self.r#type != KeyType::BOOLEAN {
-                    return Err(Error::FilterTypeMismatch("BOOLEAN".to_string()));
+                    return Err(Error::TypeMismatchFilter {
+                        expected_type: "BOOLEAN".to_string(),
+                        operation: "filter".to_string(),
+                        location: "io::key::filter_value",
+                    });
                 }
 
                 for k in &self.value {
@@ -54,7 +58,11 @@ impl Key {
             }
             FilterType::FilterINT(v) => {
                 if self.r#type != KeyType::INT {
-                    return Err(Error::FilterTypeMismatch("INT".to_string()));
+                    return Err(Error::TypeMismatchFilter {
+                        expected_type: "INT".to_string(),
+                        operation: "filter".to_string(),
+                        location: "io::key::filter_value",
+                    });
                 };
 
                 let mut result = SpaceTimeIdSet::new();
@@ -125,7 +133,11 @@ impl Key {
 
             FilterType::FilterTEXT(v) => {
                 if self.r#type != KeyType::TEXT {
-                    return Err(Error::FilterTypeMismatch("TEXT".to_string()));
+                    return Err(Error::TypeMismatchFilter {
+                        expected_type: "TEXT".to_string(),
+                        operation: "filter".to_string(),
+                        location: "io::key::filter_value",
+                    });
                 }
 
                 let mut result = SpaceTimeIdSet::new();
@@ -189,17 +201,29 @@ impl Key {
         match value {
             ValueEntry::INT(_) => {
                 if self.r#type != KeyType::INT {
-                    return Err(Error::ValueTypeMismatch("INTをよこせ".to_string()));
+                    return Err(Error::TypeMismatchValue {
+                        expected_type: "INT".to_string(),
+                        received_type: format!("{:?}", value),
+                        location: "io::key::set_value",
+                    });
                 }
             }
             ValueEntry::TEXT(_) => {
                 if self.r#type != KeyType::TEXT {
-                    return Err(Error::ValueTypeMismatch("TEXTをよこせ".to_string()));
+                    return Err(Error::TypeMismatchValue {
+                        expected_type: "TEXT".to_string(),
+                        received_type: format!("{:?}", value),
+                        location: "io::key::set_value",
+                    });
                 }
             }
             ValueEntry::BOOLEAN(_) => {
                 if self.r#type != KeyType::BOOLEAN {
-                    return Err(Error::ValueTypeMismatch("BOOLEANをよこせ".to_string()));
+                    return Err(Error::TypeMismatchValue {
+                        expected_type: "BOOLEAN".to_string(),
+                        received_type: format!("{:?}", value),
+                        location: "io::key::set_value",
+                    });
                 }
             }
         }
@@ -224,17 +248,29 @@ impl Key {
         match value {
             ValueEntry::INT(_) => {
                 if self.r#type != KeyType::INT {
-                    return Err(Error::ValueTypeMismatch("INTをよこせ".to_string()));
+                    return Err(Error::TypeMismatchValue {
+                        expected_type: "INT".to_string(),
+                        received_type: format!("{:?}", value),
+                        location: "io::key::put_value",
+                    });
                 }
             }
             ValueEntry::TEXT(_) => {
                 if self.r#type != KeyType::TEXT {
-                    return Err(Error::ValueTypeMismatch("TEXTをよこせ".to_string()));
+                    return Err(Error::TypeMismatchValue {
+                        expected_type: "TEXT".to_string(),
+                        received_type: format!("{:?}", value),
+                        location: "io::key::put_value",
+                    });
                 }
             }
             ValueEntry::BOOLEAN(_) => {
                 if self.r#type != KeyType::BOOLEAN {
-                    return Err(Error::ValueTypeMismatch("BOOLEANをよこせ".to_string()));
+                    return Err(Error::TypeMismatchValue {
+                        expected_type: "BOOLEAN".to_string(),
+                        received_type: format!("{:?}", value),
+                        location: "io::key::put_value",
+                    });
                 }
             }
         }
@@ -245,7 +281,10 @@ impl Key {
         for v in self.value.iter_mut() {
             if v.value == value {
                 if !(v.set.clone() & set.clone()).is_empty() {
-                    return Err(Error::SpaceTimeIdAlreadyHasValue("値を上書きするな"));
+                    return Err(Error::ValueAlreadyExists {
+                        space_time_id: format!("{:?}", v.set.clone() & set.clone()),
+                        location: "io::key::put_value",
+                    });
                 }
                 v.set = v.set.clone() | set.clone();
                 is_push = true

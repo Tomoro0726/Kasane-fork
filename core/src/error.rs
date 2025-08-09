@@ -1,15 +1,58 @@
 #[derive(Debug)]
 pub enum Error {
-    SpaceNameValidationError(&'static str),
-    KeyNameValidationError(&'static str),
-    ParseError(String),
-    SpaceNameAlreadyExists(&'static str),
-    SpaceNameNotFound(&'static str),
-    KeyNameNotFound(&'static str),
-    KeyNameAlreadyExists(&'static str),
-    SpaceTimeIdAlreadyHasValue(&'static str),
-    FilterTypeMismatch(String),
-    ValueTypeMismatch(String),
+    // Name validation errors with context
+    SpaceNameValidationError { 
+        name: String, 
+        reason: &'static str, 
+        location: &'static str 
+    },
+    KeyNameValidationError { 
+        name: String, 
+        reason: &'static str, 
+        location: &'static str 
+    },
+    
+    // Parse errors with context
+    ParseError { 
+        message: String, 
+        location: &'static str 
+    },
+    
+    // Resource existence errors
+    SpaceAlreadyExists { 
+        space_name: String, 
+        location: &'static str 
+    },
+    SpaceNotFound { 
+        space_name: String, 
+        location: &'static str 
+    },
+    KeyNotFound { 
+        key_name: String, 
+        space_name: String, 
+        location: &'static str 
+    },
+    KeyAlreadyExists { 
+        key_name: String, 
+        space_name: String, 
+        location: &'static str 
+    },
+    
+    // Value operation errors
+    ValueAlreadyExists { 
+        space_time_id: String, 
+        location: &'static str 
+    },
+    TypeMismatchFilter { 
+        expected_type: String, 
+        operation: String, 
+        location: &'static str 
+    },
+    TypeMismatchValue { 
+        expected_type: String, 
+        received_type: String, 
+        location: &'static str 
+    },
 }
 
 use std::fmt;
@@ -17,21 +60,35 @@ use std::fmt;
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Error::SpaceNameValidationError(name) => write!(f, "Invalid space name: {}", name),
-            Error::KeyNameValidationError(name) => write!(f, "Invalid key name: {}", name),
-            Error::ParseError(err) => write!(f, "Parse error: {}", err),
-            Error::SpaceNameAlreadyExists(name) => write!(f, "Space name already exists: {}", name),
-            Error::SpaceNameNotFound(name) => write!(f, "Space name not found: {}", name),
-            Error::KeyNameNotFound(name) => write!(f, "Key name not found: {}", name),
-            Error::KeyNameAlreadyExists(name) => write!(f, "Key name already exists: {}", name),
-            Error::SpaceTimeIdAlreadyHasValue(id) => {
-                write!(f, "SpaceTimeId already has value: {}", id)
+            Error::SpaceNameValidationError { name, reason, location } => {
+                write!(f, "Invalid space name '{}': {} (at {})", name, reason, location)
             }
-            Error::FilterTypeMismatch(name) => {
-                write!(f, "Filter type mismatch for: {}", name)
+            Error::KeyNameValidationError { name, reason, location } => {
+                write!(f, "Invalid key name '{}': {} (at {})", name, reason, location)
             }
-            Error::ValueTypeMismatch(name) => {
-                write!(f, "Value type mismatch for: {}", name)
+            Error::ParseError { message, location } => {
+                write!(f, "Parse error: {} (at {})", message, location)
+            }
+            Error::SpaceAlreadyExists { space_name, location } => {
+                write!(f, "Space '{}' already exists (at {})", space_name, location)
+            }
+            Error::SpaceNotFound { space_name, location } => {
+                write!(f, "Space '{}' not found (at {})", space_name, location)
+            }
+            Error::KeyNotFound { key_name, space_name, location } => {
+                write!(f, "Key '{}' not found in space '{}' (at {})", key_name, space_name, location)
+            }
+            Error::KeyAlreadyExists { key_name, space_name, location } => {
+                write!(f, "Key '{}' already exists in space '{}' (at {})", key_name, space_name, location)
+            }
+            Error::ValueAlreadyExists { space_time_id, location } => {
+                write!(f, "Value already exists for SpaceTimeId '{}' (at {})", space_time_id, location)
+            }
+            Error::TypeMismatchFilter { expected_type, operation, location } => {
+                write!(f, "Type mismatch: expected '{}' type for {} operation (at {})", expected_type, operation, location)
+            }
+            Error::TypeMismatchValue { expected_type, received_type, location } => {
+                write!(f, "Type mismatch: expected '{}' but received '{}' (at {})", expected_type, received_type, location)
             }
         }
     }

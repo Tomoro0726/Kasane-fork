@@ -7,7 +7,11 @@ use crate::{io::Space, parser::KeyType};
 impl Space {
     pub fn add_key(&mut self, name: &str, r#type: KeyType) -> Result<Output, Error> {
         match self.get_key(name) {
-            Ok(_) => Err(Error::KeyNameAlreadyExists("もうあるよ")),
+            Ok(_) => Err(Error::KeyAlreadyExists {
+                key_name: name.to_string(),
+                space_name: self.name.clone(),
+                location: "io::space::add_key",
+            }),
             Err(_) => {
                 self.key.push(Key {
                     name: name.to_string(),
@@ -33,7 +37,11 @@ impl Space {
         self.key
             .iter_mut()
             .find(|v| v.name == name)
-            .ok_or(Error::KeyNameNotFound("Keyがないです。"))
+            .ok_or(Error::KeyNotFound {
+                key_name: name.to_string(),
+                space_name: self.name.clone(),
+                location: "io::space::get_key",
+            })
     }
 
     pub fn show_keys(&self) -> Output {
