@@ -1,4 +1,9 @@
 use crate::id::SpaceTimeId;
+
+#[cfg_attr(
+    feature = "serde_support",
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+)]
 #[derive(Debug)]
 pub struct Point {
     pub latitude: f64,

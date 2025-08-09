@@ -9,7 +9,11 @@ pub mod value;
 ///
 /// This enum can represent a single value, a range, or an Any value,
 /// corresponding to the extended notation of the spatial ID.
-#[derive(Debug, Clone, PartialEq, Copy, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(
+    feature = "serde_support",
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+)]
+#[derive(Debug, Clone, PartialEq, Copy)]
 pub enum DimensionRange<T> {
     /// A closed range with a start and end value (e.g., 5:10).
     LimitRange(T, T),
@@ -23,9 +27,6 @@ pub enum DimensionRange<T> {
     Any,
 }
 use std::fmt;
-
-use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
 
 impl<T> fmt::Display for DimensionRange<T>
 where
@@ -80,7 +81,10 @@ where
 /// ## Special case for time dimension `t`
 /// - If `i == 0`, then `t` **must** be `Any`. Otherwise, an error is returned.
 
-#[derive(Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(
+    feature = "serde_support",
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+)]
 pub struct SpaceTimeId {
     z: u16,
     f: DimensionRange<i64>,
@@ -162,10 +166,7 @@ impl SpaceTimeId {
                 }
                 DimensionRange::LimitRange(start, end) => {
                     if start > end {
-                        return Err(format!(
-                            "start value {} cannot be greater than end value {}.",
-                            start, end
-                        ));
+                        return validate_xy_dim(&DimensionRange::LimitRange(end, start), z);
                     }
                     if end == start {
                         return Ok(DimensionRange::Single(start));
@@ -244,18 +245,18 @@ impl SpaceTimeId {
                 }
                 DimensionRange::LimitRange(start, end) => {
                     if start > end {
-                        return Err(format!(
-                            "start value {} cannot be greater than end value {}.",
-                            start, end
-                        ));
+                        return validate_f_dim(&DimensionRange::LimitRange(end, start), z);
                     }
-                    if start >= min_f && end <= max_f {
-                        if start == min_f && end == max_f {
+                    if end == start {
+                        return Ok(DimensionRange::Single(start));
+                    }
+                    if end <= max_f {
+                        if start == 0 && end == max_f {
                             Ok(DimensionRange::Any)
+                        } else if start == 0 {
+                            Ok(DimensionRange::BeforeUnLimitRange(end))
                         } else if end == max_f {
                             Ok(DimensionRange::AfterUnLimitRange(start))
-                        } else if start == min_f {
-                            Ok(DimensionRange::BeforeUnLimitRange(end))
                         } else {
                             Ok(DimensionRange::LimitRange(start, end))
                         }

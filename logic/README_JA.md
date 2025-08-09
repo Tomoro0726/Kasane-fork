@@ -9,12 +9,25 @@
 - `SpaceTimeId` による 4 次元（F, X, Y, T）空間の表現
 - `DimensionRange` による範囲指定、無限範囲の柔軟な記述
 - `SpaceTimeIdSet` による集合管理と重複排除
-- 和集合（OR）、積集合（AND）、補集合（NOT）などの演算子サポート
+- 和集合（OR）、積集合（AND）、補集合（NOT）、排他的論理和（XOR）などの演算子サポート
 - 実行環境に依存しない軽量な構成
+
+もちろんです。以下が日本語・英語の併記フォーマットです：
+
+## インストールのオプション
+
+```toml
+logic = { path = "../logic", features = ["serde_support"] }
+```
+
+`serde_support`を指定して、[`serde`](https://crates.io/crates/serde)と[`jsonschema`](https://crates.io/crates/jsonschema)に対応した型を出力します
 
 ## 📦 `SpaceTimeId` 型
 
 `SpaceTimeId` は 4 次元空間（F, X, Y, T）に加え、ズームレベルと時間間隔を持つ領域を表します。
+
+> [!NOTE]
+> 時空間 ID は `i` が 0 ではない値を示し、空間 ID は `i` が 0 かつ `t` が `Any` です。
 
 ### 時空間 ID
 

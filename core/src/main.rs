@@ -1,69 +1,100 @@
-use crate::{
-    interface::input::json_file::json_file,
-    parser::Command,
-    parser::{Packet, parser},
-};
+use std::fs::File;
+use std::io::Write;
+
+use schemars::JsonSchema;
+use serde::Serialize;
+
+use crate::io::Storage;
+use crate::{interface::input::json_file::json_file, parser::parser};
 
 pub mod command;
+pub mod error;
 pub mod interface;
 pub mod io;
+pub mod output;
 pub mod parser;
-pub mod role;
+use crate::output::Output;
+
+use crate::command::process;
+use crate::parser::Command;
 
 #[cfg(not(feature = "BuildJsonSchema"))]
-
 fn main() {
-    use crate::io::Storage;
+    let mut s = match Storage::new() {
+        Ok(store) => store,
+        Err(e) => {
+            panic!("{}", e)
+        }
+    };
 
-    let s = Storage::new();
-
-    //パケットを入力している
+    // JSONファイル読み込み
     let packet_raw = match json_file("sample.json") {
         Ok(v) => v,
         Err(e) => {
-            println!("{:?}", e);
+            return_packet(CommandResult::Error(e.to_string()));
             return;
         }
     };
 
-    //PacketのJSONをパースしてみる
-    let packet = match parser(&packet_raw) {
+    // JSONパース
+    let cmd = match parser(&packet_raw) {
         Ok(v) => v,
         Err(e) => {
-            println!("{:?}", e);
+            return_packet(CommandResult::Error(e.to_string()));
             return;
         }
     };
 
-    //ユーザー情報確認レイヤー
-    //存在しないユーザーははじく
-    //Wasm用の段階ではdefault以外に受け付けない
-    if packet.user != "default" {
-        println!("ユーザーが違うな...")
+    match process(cmd, &mut s) {
+        Ok(v) => {
+            return_packet(CommandResult::Success(v));
+            return;
+        }
+        Err(e) => {
+            return_packet(CommandResult::Error(e.to_string()));
+            return;
+        }
     }
 
-    //コマンド実行層
-
-    //ストレージ層
-    //ストレージはメモリの上に載せておく。
-    //ファイルへの書き込みは後で用意する
-    //とりあえずメモリ上にきれいな構造を用意する
-
-    //Interface-Output層
-    //全ての実行結果を含めてJSONに変換する
-    //OK
+    // 成功したら出力
 }
 
+#[derive(Serialize, JsonSchema)]
+enum CommandResult {
+    Success(Output),
+    Error(String),
+}
+
+fn return_packet(result: CommandResult) {
+    // JSON に変換
+    let json = serde_json::to_string_pretty(&result).expect("Failed to serialize CommandResult");
+
+    // ファイルに書き出す（ファイル名は固定だが変更可能）
+    let mut file = File::create("result.json").expect("Failed to create file");
+
+    file.write_all(json.as_bytes())
+        .expect("Failed to write to file");
+}
 //Json Schemaを出力する
 #[cfg(feature = "BuildJsonSchema")]
+
 fn main() {
+    use schemars::schema_for;
     //JSON Schemaを出力している
-    let schema = schema_for!(Packet);
+    let input_schema = schema_for!(Command);
 
     // ファイルにも保存（任意）
     std::fs::write(
-        "schema.json",
-        serde_json::to_string_pretty(&schema).unwrap(),
+        "input_schema.json",
+        serde_json::to_string_pretty(&input_schema).unwrap(),
+    )
+    .expect("Failed to write schema.json");
+
+    let output_schema = schema_for!(Output);
+    // ファイルにも保存（任意）
+    std::fs::write(
+        "output_schema.json",
+        serde_json::to_string_pretty(&output_schema).unwrap(),
     )
     .expect("Failed to write schema.json");
 }

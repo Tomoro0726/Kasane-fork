@@ -1,8 +1,39 @@
-use crate::parser::Packet;
+use crate::{
+    command::{
+        addkey::addkey, addspace::addspace, deletekey::deletekey, deletespace::deletespace,
+        deletevalue::deletevalue, getvalue::getvalue, putvalue::putvalue, select::select,
+        setvalue::setvalue, showkeys::showkeys, showspaces::showspaces,
+    },
+    error::Error,
+    io::Storage,
+    output::Output,
+    parser::{Command, GetValue},
+};
+pub mod addkey;
+pub mod addspace;
+pub mod deletekey;
+pub mod deletespace;
+pub mod deletevalue;
+pub mod getvalue;
+pub mod putvalue;
+pub mod select;
+pub mod setvalue;
+pub mod showkeys;
+pub mod showspaces;
+pub mod tools;
 
-pub fn process(packet: Packet) {
-    //まず、ユーザーが存在するのかを確認する
-    //そのユーザーが持つ権限を参照する
-    //実行されようとしているコマンドの一覧と、ユーザーが持つ権限の対応を見る
-    //いけそうなら、コマンドを実行する
+pub fn process(cmd: Command, s: &mut Storage) -> Result<Output, Error> {
+    match cmd {
+        crate::parser::Command::AddSpace(v) => addspace(v, s),
+        crate::parser::Command::DeleteSpace(v) => deletespace(v, s),
+        crate::parser::Command::AddKey(v) => addkey(v, s),
+        crate::parser::Command::DeleteKey(v) => deletekey(v, s),
+        crate::parser::Command::PutValue(v) => putvalue(v, s),
+        crate::parser::Command::SetValue(v) => setvalue(v, s),
+        crate::parser::Command::DeleteValue(v) => deletevalue(v, s),
+        crate::parser::Command::Keys(v) => showkeys(v, s),
+        crate::parser::Command::Spaces(_) => showspaces(s),
+        crate::parser::Command::GetValue(v) => getvalue(v, s),
+        crate::parser::Command::Select(v) => select(v, s),
+    }
 }

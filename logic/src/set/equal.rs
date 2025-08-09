@@ -15,7 +15,8 @@ impl PartialEq for SpaceTimeIdSet {
     /// (i.e., the part not covered by `other`) is empty, then both sets are considered equal.
     ///
     fn eq(&self, other: &Self) -> bool {
-        let stid = (!other.clone()) & self.clone();
-        stid.is_empty()
+        let a_minus_b = (!other.clone()) & self.clone();
+        let b_minus_a = (!self.clone()) & other.clone();
+        a_minus_b.is_empty() && b_minus_a.is_empty()
     }
 }

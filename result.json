@@ -1,0 +1,3 @@
+{
+  "Error": "unknown variant `Addkey`, expected one of `AddSpace`, `DeleteSpace`, `AddKey`, `DeleteKey`, `PutValue`, `SetValue`, `DeleteValue`, `GetValue`, `Showkeys`, `ShowSpaces` at line 2 column 10"
+}
