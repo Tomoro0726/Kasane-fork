@@ -99,10 +99,6 @@ impl SpaceTimeIdSet {
             None => return other,
         };
 
-        println!("X最適化：{}", x);
-        println!("Y最適化：{}", y);
-        println!("F最適化：{}", f);
-
         let max_z = x.max(y).max(f);
 
         println!("合わせるZ：{}", max_z);
@@ -150,7 +146,6 @@ impl SpaceTimeIdSet {
 
     /// F（i64）次元用
     fn optimal_f_max_z(range: DimensionRange<i64>, z: u16) -> Option<u16> {
-        //この関数の内部判定にはバグがある
         match range {
             DimensionRange::Single(_) => None,
             DimensionRange::LimitRange(s, e) => {

@@ -3,7 +3,7 @@ use crate::{
 };
 
 pub fn putvalue(v: PutValue, s: &mut Storage) -> Result<Output, Error> {
-    let set = select(s, v.select)?;
+    let set = select(s, v.range)?;
 
     let space = s.get_space(&v.spacename)?;
     let key = space.get_key(&v.keyname)?;

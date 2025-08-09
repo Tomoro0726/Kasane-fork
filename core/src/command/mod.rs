@@ -1,8 +1,8 @@
 use crate::{
     command::{
         addkey::addkey, addspace::addspace, deletekey::deletekey, deletespace::deletespace,
-        deletevalue::deletevalue, getvalue::getvalue, putvalue::putvalue, setvalue::setvalue,
-        showkeys::showkeys, showspaces::showspaces,
+        deletevalue::deletevalue, getvalue::getvalue, putvalue::putvalue, select::select,
+        setvalue::setvalue, showkeys::showkeys, showspaces::showspaces,
     },
     error::Error,
     io::Storage,
@@ -16,6 +16,7 @@ pub mod deletespace;
 pub mod deletevalue;
 pub mod getvalue;
 pub mod putvalue;
+pub mod select;
 pub mod setvalue;
 pub mod showkeys;
 pub mod showspaces;
@@ -33,5 +34,6 @@ pub fn process(cmd: Command, s: &mut Storage) -> Result<Output, Error> {
         crate::parser::Command::Keys(v) => showkeys(v, s),
         crate::parser::Command::Spaces(_) => showspaces(s),
         crate::parser::Command::GetValue(v) => getvalue(v, s),
+        crate::parser::Command::Select(v) => select(v, s),
     }
 }

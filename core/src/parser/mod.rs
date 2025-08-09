@@ -43,7 +43,7 @@ pub struct DeleteKey {
 pub struct PutValue {
     pub spacename: String,
     pub keyname: String,
-    pub select: Range,
+    pub range: Range,
     pub value: ValueEntry,
 }
 
@@ -52,7 +52,7 @@ pub struct PutValue {
 pub struct SetValue {
     pub spacename: String,
     pub keyname: String,
-    pub select: Range,
+    pub range: Range,
     pub value: ValueEntry,
 }
 
@@ -61,14 +61,14 @@ pub struct SetValue {
 pub struct DeleteValue {
     pub spacename: String,
     pub keyname: String,
-    pub select: Range,
+    pub range: Range,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct GetValue {
     pub spacename: String,
     pub keyname: String,
-    pub select: Range,
+    pub range: Range,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
@@ -188,6 +188,7 @@ pub enum Command {
     GetValue(GetValue),
     Keys(keys),
     Spaces(spaces),
+    Select(Range),
 }
 
 pub fn parser(packet_raw: &str) -> Result<Command, serde_json::Error> {
