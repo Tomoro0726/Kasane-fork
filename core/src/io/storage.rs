@@ -8,7 +8,10 @@ impl Storage {
     pub fn add_space(&mut self, name: &str) -> Result<Output, Error> {
         match self.get_space(name) {
             Ok(_) => {
-                return Err(Error::SpaceNameAlreadyExists("Spaceがもう存在する"));
+                return Err(Error::SpaceAlreadyExists {
+                    space_name: name.to_string(),
+                    location: "io::storage::add_space",
+                });
             }
             Err(_) => {
                 self.space.push(Space {
@@ -32,7 +35,10 @@ impl Storage {
         self.space
             .iter_mut()
             .find(|v| v.name == name)
-            .ok_or(Error::SpaceNameNotFound("Spaceがない"))
+            .ok_or(Error::SpaceNotFound {
+                space_name: name.to_string(),
+                location: "io::storage::get_space",
+            })
     }
     pub fn show_spaces(&self) -> Output {
         let mut result = Vec::new();

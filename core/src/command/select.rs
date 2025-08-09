@@ -21,7 +21,10 @@ pub fn select(v: crate::parser::Range, s: &mut Storage) -> Result<Output, Error>
             Ok(Output::SelectValue(result))
         }
         Err(e) => {
-            return Err(Error::ParseError(e.to_string()));
+            return Err(Error::ParseError {
+                message: e.to_string(),
+                location: "command::select::select",
+            });
         }
     }
 }
