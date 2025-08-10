@@ -177,6 +177,9 @@ pub struct keys {
 pub struct spaces {}
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
+pub struct version {}
+
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub enum Command {
     AddSpace(AddSpace),
     DeleteSpace(DeleteSpace),
@@ -189,6 +192,7 @@ pub enum Command {
     Keys(keys),
     Spaces(spaces),
     Select(Range),
+    Version(version),
 }
 
 pub fn parser(packet_raw: &str) -> Result<Command, serde_json::Error> {

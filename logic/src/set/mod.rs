@@ -107,7 +107,7 @@ impl fmt::Debug for SpaceTimeIdSet {
                     for &f in &f_vals {
                         for &t in &t_vals {
                             if i == 0 {
-                                list.entry(&format_args!("{}/{}/{}/{}", z, x, y, f));
+                                list.entry(&format_args!("{}/{}/{}/{}", z, f, x, y));
                             } else {
                                 list.entry(&format_args!("{}/{}/{}/{}_{}/{}", z, x, y, f, i, t));
                             }

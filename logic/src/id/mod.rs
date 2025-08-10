@@ -3,6 +3,7 @@ pub mod complement;
 pub mod contain;
 pub mod coordinates;
 pub mod points;
+pub mod to_pure;
 pub mod value;
 
 /// Represents a value for a single dimension (F, X, Y, or T) in a SpaceTimeId.
@@ -251,9 +252,9 @@ impl SpaceTimeId {
                         return Ok(DimensionRange::Single(start));
                     }
                     if end <= max_f {
-                        if start == 0 && end == max_f {
+                        if start == min_f && end == max_f {
                             Ok(DimensionRange::Any)
-                        } else if start == 0 {
+                        } else if start == min_f {
                             Ok(DimensionRange::BeforeUnLimitRange(end))
                         } else if end == max_f {
                             Ok(DimensionRange::AfterUnLimitRange(start))

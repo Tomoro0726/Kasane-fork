@@ -22,7 +22,7 @@ pub struct SelectOutPut {
     pub vertex: [Point; 8],
 }
 
-use crate::io::{Space, ValueEntry};
+use crate::io::ValueEntry;
 #[derive(Serialize, JsonSchema)]
 pub enum Output {
     SpaceNames(Vec<String>),
@@ -30,5 +30,6 @@ pub enum Output {
     GetValue(Vec<GetValueOutput>),
     SelectValue(Vec<SelectOutPut>),
     SpaceTimeIdSet(SpaceTimeIdSet),
+    Version(String),
     Success,
 }

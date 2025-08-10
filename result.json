@@ -1,3 +1,5 @@
 {
-  "Error": "Invalid space name 'invalid space name with spaces and very long name that exceeds the 256 character limit for validation purposes and should trigger our new improved validation error message': only a-z, A-Z, 0-9, - _ . @ + = allowed, max 256 characters (at command::addspace::addspace)"
+  "Success": {
+    "Version": "0.0.1"
+  }
 }
