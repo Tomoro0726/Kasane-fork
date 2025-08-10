@@ -189,6 +189,35 @@ let complement_set = stid.complement();
 println!("Complement: {}", complement_set);
 ```
 
+### 🔍 Pure ID Expansion
+
+#### `to_pure(&self) -> Vec<SpaceTimeId>`
+
+Expands all range notations (Any, LimitRange, BeforeUnLimitRange, AfterUnLimitRange) in the spatial dimensions (F, X, Y) into individual SpaceTimeIds with only Single values. The time dimension (T) is preserved as-is.
+
+This function is useful for converting complex range-based SpaceTimeIds into concrete, enumerated SpaceTimeIds for precise processing.
+
+```rust
+// Create a SpaceTimeId with range dimensions
+let stid = SpaceTimeId::new(
+    2,                                    // Zoom level 2
+    DimensionRange::LimitRange(0, 1),     // F dimension: 0 to 1
+    DimensionRange::LimitRange(1, 2),     // X dimension: 1 to 2  
+    DimensionRange::Single(0),            // Y dimension: single value 0
+    60,                                   // Time interval
+    DimensionRange::Single(100),          // T dimension: single value 100
+).unwrap();
+
+// Expand to pure IDs
+let pure_ids = stid.to_pure();
+println!("Expanded to {} pure IDs", pure_ids.len()); // Will be 4 IDs (2 F values × 2 X values × 1 Y value)
+
+// Each pure ID will have only Single values for F, X, Y dimensions
+for pure_id in pure_ids {
+    println!("{}", pure_id); // e.g., "2/0/1/0_60/100", "2/0/2/0_60/100", etc.
+}
+```
+
 ### 📊 Value Getter Methods
 
 Getter methods for accessing values and attributes of each dimension:
@@ -344,6 +373,7 @@ let outside = !set;
 - `change_scale(z: Option<u16>, i: Option<u32>) -> Result<SpaceTimeId, String>` - Change resolution
 - `containment_relation(&other: &SpaceTimeId) -> Containment` - Check containment relationship
 - `complement() -> SpaceTimeIdSet` - Get complement set
+- `to_pure() -> Vec<SpaceTimeId>` - Expand range dimensions to individual SpaceTimeIds
 - `f() -> DimensionRange<i64>` - Get F dimension value
 - `x() -> DimensionRange<u64>` - Get X dimension value
 - `y() -> DimensionRange<u64>` - Get Y dimension value
