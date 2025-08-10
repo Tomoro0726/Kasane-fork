@@ -193,6 +193,35 @@ let complement_set = stid.complement();
 println!("補集合: {}", complement_set);
 ```
 
+### 🔍 純粋ID展開
+
+#### `to_pure(&self) -> Vec<SpaceTimeId>`
+
+空間次元（F、X、Y）の全ての範囲記法（Any、LimitRange、BeforeUnLimitRange、AfterUnLimitRange）を、Single値のみを持つ個別のSpaceTimeIdに展開します。時間次元（T）はそのまま保持されます。
+
+この関数は、複雑な範囲ベースのSpaceTimeIdを、精密な処理のための具体的で列挙されたSpaceTimeIdに変換する際に便利です。
+
+```rust
+// 範囲次元を持つSpaceTimeIdを作成
+let stid = SpaceTimeId::new(
+    2,                                    // ズームレベル2
+    DimensionRange::LimitRange(0, 1),     // F次元: 0から1まで
+    DimensionRange::LimitRange(1, 2),     // X次元: 1から2まで  
+    DimensionRange::Single(0),            // Y次元: 単一値0
+    60,                                   // 時間間隔
+    DimensionRange::Single(100),          // T次元: 単一値100
+).unwrap();
+
+// 純粋IDに展開
+let pure_ids = stid.to_pure();
+println!("{}個の純粋IDに展開されました", pure_ids.len()); // 4個のID（2個のF値 × 2個のX値 × 1個のY値）
+
+// 各純粋IDはF、X、Y次元にSingle値のみを持ちます
+for pure_id in pure_ids {
+    println!("{}", pure_id); // 例: "2/0/1/0_60/100", "2/0/2/0_60/100", など
+}
+```
+
 ### 📊 値取得メソッド
 
 各次元の値や属性にアクセスするためのゲッターメソッド：
@@ -348,6 +377,7 @@ let outside = !set;
 - `change_scale(z: Option<u16>, i: Option<u32>) -> Result<SpaceTimeId, String>` - 解像度を変更
 - `containment_relation(&other: &SpaceTimeId) -> Containment` - 包含関係を確認
 - `complement() -> SpaceTimeIdSet` - 補集合を取得
+- `to_pure() -> Vec<SpaceTimeId>` - 範囲次元を個別のSpaceTimeIdに展開
 - `f() -> DimensionRange<i64>` - F 次元の値を取得
 - `x() -> DimensionRange<u64>` - X 次元の値を取得
 - `y() -> DimensionRange<u64>` - Y 次元の値を取得
