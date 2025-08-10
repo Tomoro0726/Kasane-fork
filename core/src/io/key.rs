@@ -185,10 +185,11 @@ impl Key {
             if !and.is_empty() {
                 for stid in and.into_iter() {
                     result.push(GetValueOutput {
-                        id: stid.to_string(),
                         spacetimeid: stid,
-                        vertex: stid.vertex(),
+                        vertex: None,
                         value: v.value.clone(),
+                        id_string: None,
+                        center: None,
                     });
                 }
             }
