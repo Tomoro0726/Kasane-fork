@@ -72,11 +72,7 @@ impl SpaceTimeIdSet {
             DimensionRange::Single(_) => {
                 panic!("このパターンは上位で除外されているはず");
             }
-            DimensionRange::LimitRange(s, e) => {
-                println!("{}", DimensionRange::LimitRange(s / scale, e / scale));
-
-                DimensionRange::LimitRange(s / scale, e / scale)
-            }
+            DimensionRange::LimitRange(s, e) => DimensionRange::LimitRange(s / scale, e / scale),
             DimensionRange::AfterUnLimitRange(s) => DimensionRange::AfterUnLimitRange(s / scale),
             DimensionRange::BeforeUnLimitRange(e) => DimensionRange::BeforeUnLimitRange(e / scale),
             DimensionRange::Any => DimensionRange::Any,
@@ -100,8 +96,6 @@ impl SpaceTimeIdSet {
         };
 
         let max_z = x.max(y).max(f);
-
-        println!("合わせるZ：{}", max_z);
 
         let delta_z = other.z() - max_z;
 

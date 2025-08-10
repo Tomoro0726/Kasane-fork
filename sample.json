@@ -1,7 +1,3 @@
 {
-  "AddKey": {
-    "spacename": "myspace",
-    "keyname": "mykey",
-    "type": "INT"
-  }
+  "Version": {}
 }

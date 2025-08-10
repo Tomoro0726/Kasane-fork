@@ -4,7 +4,7 @@ use crate::id::SpaceTimeId;
     feature = "serde_support",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
 )]
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Point {
     pub latitude: f64,
     pub longitude: f64,

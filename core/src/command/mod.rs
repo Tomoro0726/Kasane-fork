@@ -2,12 +2,12 @@ use crate::{
     command::{
         addkey::addkey, addspace::addspace, deletekey::deletekey, deletespace::deletespace,
         deletevalue::deletevalue, getvalue::getvalue, putvalue::putvalue, select::select,
-        setvalue::setvalue, showkeys::showkeys, showspaces::showspaces,
+        setvalue::setvalue, showkeys::showkeys, showspaces::showspaces, version::version,
     },
     error::Error,
     io::Storage,
     output::Output,
-    parser::{Command, GetValue},
+    parser::Command,
 };
 pub mod addkey;
 pub mod addspace;
@@ -21,6 +21,7 @@ pub mod setvalue;
 pub mod showkeys;
 pub mod showspaces;
 pub mod tools;
+pub mod version;
 
 pub fn process(cmd: Command, s: &mut Storage) -> Result<Output, Error> {
     match cmd {
@@ -35,5 +36,6 @@ pub fn process(cmd: Command, s: &mut Storage) -> Result<Output, Error> {
         crate::parser::Command::Spaces(_) => showspaces(s),
         crate::parser::Command::GetValue(v) => getvalue(v, s),
         crate::parser::Command::Select(v) => select(v, s),
+        crate::parser::Command::Version(_) => version(),
     }
 }

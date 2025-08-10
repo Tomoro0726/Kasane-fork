@@ -9,20 +9,22 @@ use serde::Serialize;
 
 #[derive(Serialize, JsonSchema)]
 pub struct GetValueOutput {
-    pub id: String,
     pub spacetimeid: SpaceTimeId,
-    pub vertex: [Point; 8],
+    pub id_string: Option<String>,
+    pub vertex: Option<[Point; 8]>,
+    pub center: Option<Point>,
     pub value: ValueEntry,
 }
 
 #[derive(Serialize, JsonSchema)]
 pub struct SelectOutPut {
-    pub id: String,
     pub spacetimeid: SpaceTimeId,
-    pub vertex: [Point; 8],
+    pub id_string: Option<String>,
+    pub vertex: Option<[Point; 8]>,
+    pub center: Option<Point>,
 }
 
-use crate::io::{Space, ValueEntry};
+use crate::io::ValueEntry;
 #[derive(Serialize, JsonSchema)]
 pub enum Output {
     SpaceNames(Vec<String>),
@@ -30,5 +32,6 @@ pub enum Output {
     GetValue(Vec<GetValueOutput>),
     SelectValue(Vec<SelectOutPut>),
     SpaceTimeIdSet(SpaceTimeIdSet),
+    Version(String),
     Success,
 }

@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use logic::id::DimensionRange;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -69,6 +71,10 @@ pub struct GetValue {
     pub spacename: String,
     pub keyname: String,
     pub range: Range,
+    pub vertex: bool,
+    pub center: bool,
+    pub id_string: bool,
+    pub id_pure: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
@@ -177,6 +183,18 @@ pub struct keys {
 pub struct spaces {}
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
+pub struct version {}
+
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+pub struct Select {
+    pub range: Range,
+    pub vertex: bool,
+    pub center: bool,
+    pub id_string: bool,
+    pub id_pure: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub enum Command {
     AddSpace(AddSpace),
     DeleteSpace(DeleteSpace),
@@ -188,7 +206,8 @@ pub enum Command {
     GetValue(GetValue),
     Keys(keys),
     Spaces(spaces),
-    Select(Range),
+    Select(Select),
+    Version(version),
 }
 
 pub fn parser(packet_raw: &str) -> Result<Command, serde_json::Error> {
