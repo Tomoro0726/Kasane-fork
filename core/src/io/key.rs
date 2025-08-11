@@ -1,15 +1,12 @@
-use logic::{
-    id::{SpaceTimeId, points::Point},
-    set::SpaceTimeIdSet,
-};
+use logic::set::SpaceTimeIdSet;
 
 use crate::{
     error::Error,
-    io::{self, Key, ValueEntry, key},
+    io::{self, Key, ValueEntry},
     output::{GetValueOutput, Output},
     parser::{
-        FilterINT::{self, Equal, NotEqual},
-        FilterTEXT, FilterType, FilterValue, KeyType,
+        FilterINT::{self},
+        FilterTEXT, FilterType, KeyType,
     },
 };
 

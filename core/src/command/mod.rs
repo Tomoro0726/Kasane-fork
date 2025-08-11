@@ -33,9 +33,9 @@ pub fn process(cmd: Command, s: &mut Storage) -> Result<Output, Error> {
         crate::parser::Command::SetValue(v) => setvalue(v, s),
         crate::parser::Command::DeleteValue(v) => deletevalue(v, s),
         crate::parser::Command::Keys(v) => showkeys(v, s),
-        crate::parser::Command::Spaces(_) => showspaces(s),
+        crate::parser::Command::Spaces => showspaces(s),
         crate::parser::Command::GetValue(v) => getvalue(v, s),
         crate::parser::Command::Select(v) => select(v, s),
-        crate::parser::Command::Version(_) => version(),
+        crate::parser::Command::Version => version(),
     }
 }

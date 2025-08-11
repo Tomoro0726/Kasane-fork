@@ -1,7 +1,12 @@
 {
   "command": [
+    "Version",
+    "Spaces",
     {
-      "Version": {}
-    }
+      "AddSpace": {
+        "spacename": "tomoro"
+      }
+    },
+    "Spaces"
   ]
 }

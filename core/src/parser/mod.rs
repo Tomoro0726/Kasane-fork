@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 use logic::id::DimensionRange;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -175,15 +173,9 @@ pub enum Prefix {
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
-pub struct keys {
+pub struct Keys {
     pub spacename: String,
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
-pub struct spaces {}
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
-pub struct version {}
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct Select {
@@ -204,10 +196,10 @@ pub enum Command {
     SetValue(SetValue),
     DeleteValue(DeleteValue),
     GetValue(GetValue),
-    Keys(keys),
-    Spaces(spaces),
+    Keys(Keys),
+    Spaces,
     Select(Select),
-    Version(version),
+    Version,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]

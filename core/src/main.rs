@@ -16,7 +16,6 @@ pub mod parser;
 use crate::output::Output;
 
 use crate::command::process;
-use crate::parser::Command;
 
 #[cfg(not(feature = "BuildJsonSchema"))]
 fn main() {
@@ -78,6 +77,7 @@ fn return_packet(results: Vec<CommandResult>) {
 //Json Schemaを出力する
 #[cfg(feature = "BuildJsonSchema")]
 fn main() {
+    use crate::parser::Command;
     use schemars::schema_for;
     //JSON Schemaを出力している
     let input_schema = schema_for!(Command);

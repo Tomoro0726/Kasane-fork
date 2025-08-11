@@ -1,7 +1,22 @@
 [
   {
     "Success": {
-      "Version": "0.0.1"
+      "Version": "0.0.2"
+    }
+  },
+  {
+    "Success": {
+      "SpaceNames": []
+    }
+  },
+  {
+    "Success": "Success"
+  },
+  {
+    "Success": {
+      "SpaceNames": [
+        "tomoro"
+      ]
     }
   }
 ]
