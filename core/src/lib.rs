@@ -24,6 +24,14 @@ pub struct Kasane {
 }
 #[wasm_bindgen]
 impl Kasane {
+    /// Rust側の純粋な new（init後に呼ばれる）
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Result<Kasane, JsValue> {
+        Storage::new()
+            .map(|s| Kasane { storage: s })
+            .map_err(|e| JsValue::from_str(&format!("Storage init error: {}", e)))
+    }
+
     /// 実行メソッド（複数コマンド対応）
     #[wasm_bindgen]
     pub fn execute(&mut self, command_json: &str) -> String {
