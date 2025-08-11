@@ -1,15 +1,12 @@
-use logic::{
-    id::{SpaceTimeId, points::Point},
-    set::SpaceTimeIdSet,
-};
+use logic::set::SpaceTimeIdSet;
 
 use crate::{
     error::Error,
-    io::{self, Key, ValueEntry, key},
+    io::{self, Key, ValueEntry},
     output::{GetValueOutput, Output},
     parser::{
-        FilterINT::{self, Equal, NotEqual},
-        FilterTEXT, FilterType, FilterValue, KeyType,
+        FilterINT::{self},
+        FilterTEXT, FilterType, KeyType,
     },
 };
 
@@ -227,6 +224,15 @@ impl Key {
                     });
                 }
             }
+            ValueEntry::FLOAT(_) => {
+                if self.r#type != KeyType::FLOAT {
+                    return Err(Error::TypeMismatchValue {
+                        expected_type: "FLOAT".to_string(),
+                        received_type: format!("{:?}", value),
+                        location: "io::key::set_value",
+                    });
+                }
+            }
         }
 
         let mut is_push = false;
@@ -269,6 +275,15 @@ impl Key {
                 if self.r#type != KeyType::BOOLEAN {
                     return Err(Error::TypeMismatchValue {
                         expected_type: "BOOLEAN".to_string(),
+                        received_type: format!("{:?}", value),
+                        location: "io::key::put_value",
+                    });
+                }
+            }
+            ValueEntry::FLOAT(_) => {
+                if self.r#type != KeyType::FLOAT {
+                    return Err(Error::TypeMismatchValue {
+                        expected_type: "FLOAT".to_string(),
                         received_type: format!("{:?}", value),
                         location: "io::key::put_value",
                     });

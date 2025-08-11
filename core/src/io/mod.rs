@@ -31,11 +31,12 @@ pub struct Value {
     set: SpaceTimeIdSet,
 }
 
-#[derive(Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Debug)]
+#[derive(Clone, PartialEq, Serialize, Deserialize, JsonSchema, Debug)]
 pub enum ValueEntry {
-    INT(i64),
+    INT(i32),
     TEXT(String),
     BOOLEAN(bool),
+    FLOAT(f32),
 }
 
 impl Storage {
