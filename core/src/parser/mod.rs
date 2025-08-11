@@ -189,7 +189,6 @@ pub struct Select {
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct KeysInfo {
     pub spacename: String,
-    pub keyname: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
