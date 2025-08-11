@@ -1,7 +1,7 @@
 use crate::{
     error::Error,
     io::Storage,
-    output::{Output, SelectOutPut},
+    output::{Output, SelectOutput},
 };
 
 pub fn select(v: crate::parser::Select, s: &mut Storage) -> Result<Output, Error> {
@@ -19,7 +19,7 @@ pub fn select(v: crate::parser::Select, s: &mut Storage) -> Result<Output, Error
 
                 if v.id_pure {
                     for mini_id in stid.to_pure() {
-                        result.push(SelectOutPut {
+                        result.push(SelectOutput {
                             spacetimeid: mini_id,
                             id_string: id_string.clone(),
                             vertex: vertex,
@@ -27,7 +27,7 @@ pub fn select(v: crate::parser::Select, s: &mut Storage) -> Result<Output, Error
                         });
                     }
                 } else {
-                    result.push(SelectOutPut {
+                    result.push(SelectOutput {
                         spacetimeid: stid,
                         id_string,
                         vertex,

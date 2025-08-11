@@ -1,7 +1,8 @@
 use crate::error::Error;
 
 use crate::io::Key;
-use crate::output::Output;
+use crate::output::{KeyInfoOutput, Output};
+use crate::parser::KeysInfo;
 use crate::{io::Space, parser::KeyType};
 
 impl Space {
@@ -50,5 +51,16 @@ impl Space {
             result.push(v.name.clone());
         }
         Output::KeyNames(result)
+    }
+
+    pub fn info_keys(&self) -> Output {
+        let mut result = Vec::new();
+        for v in &self.key {
+            result.push(KeyInfoOutput {
+                keyname: v.name.clone(),
+                keytype: v.r#type.clone(),
+            });
+        }
+        Output::KeysInfo(result)
     }
 }
