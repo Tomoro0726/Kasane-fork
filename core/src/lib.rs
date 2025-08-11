@@ -22,31 +22,30 @@ enum CommandResult {
 pub struct Kasane {
     storage: Storage,
 }
-
 #[wasm_bindgen]
 impl Kasane {
-    /// Rust側の純粋な new（init後に呼ばれる）
-    #[wasm_bindgen(constructor)]
-    pub fn new() -> Result<Kasane, JsValue> {
-        Storage::new()
-            .map(|s| Kasane { storage: s })
-            .map_err(|e| JsValue::from_str(&format!("Storage init error: {}", e)))
-    }
-
-    /// 実行メソッド
+    /// 実行メソッド（複数コマンド対応）
     #[wasm_bindgen]
     pub fn execute(&mut self, command_json: &str) -> String {
         match parser(command_json) {
-            Ok(cmd) => match process(cmd, &mut self.storage) {
-                Ok(output) => to_json(CommandResult::Success(output)),
-                Err(e) => to_json(CommandResult::Error(e.to_string())),
-            },
-            Err(e) => to_json(CommandResult::Error(format!("Parse error: {}", e))),
+            Ok(packet) => {
+                let mut results = Vec::new();
+
+                for cmd in packet.command {
+                    match process(cmd, &mut self.storage) {
+                        Ok(output) => results.push(CommandResult::Success(output)),
+                        Err(e) => results.push(CommandResult::Error(e.to_string())),
+                    }
+                }
+
+                to_json(results)
+            }
+            Err(e) => to_json(vec![CommandResult::Error(format!("Parse error: {}", e))]),
         }
     }
 }
 
-fn to_json(result: CommandResult) -> String {
+fn to_json(result: Vec<CommandResult>) -> String {
     serde_json::to_string_pretty(&result)
         .unwrap_or_else(|e| format!("{{\"error\": \"Serialize error: {}\"}}", e))
 }

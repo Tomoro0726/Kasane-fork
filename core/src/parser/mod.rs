@@ -31,6 +31,7 @@ pub enum KeyType {
     INT,
     BOOLEAN,
     TEXT,
+    FLOAT,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
@@ -135,15 +136,15 @@ pub enum FilterBOOLEAN {
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub enum FilterINT {
-    Equal(i64),        // 等しい
-    NotEqual(i64),     // 等しくない
-    GreaterThan(i64),  // より大きい
-    GreaterEqual(i64), // 以上
-    LessThan(i64),     // より小さい
-    LessEqual(i64),    // 以下
-    Between(i64, i64), // 範囲内（inclusive）
-    In(Vec<i64>),      // 指定した複数の値のいずれか
-    NotIn(Vec<i64>),   // 指定した複数の値以外
+    Equal(i32),        // 等しい
+    NotEqual(i32),     // 等しくない
+    GreaterThan(i32),  // より大きい
+    GreaterEqual(i32), // 以上
+    LessThan(i32),     // より小さい
+    LessEqual(i32),    // 以下
+    Between(i32, i32), // 範囲内（inclusive）
+    In(Vec<i32>),      // 指定した複数の値のいずれか
+    NotIn(Vec<i32>),   // 指定した複数の値以外
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
@@ -155,7 +156,6 @@ pub enum FilterTEXT {
     StartsWith(String),           // 前方一致
     EndsWith(String),             // 後方一致
     CaseInsensitiveEqual(String), // 大文字小文字無視の完全一致
-    Regex(String),                // 正規表現マッチ
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
@@ -210,6 +210,11 @@ pub enum Command {
     Version(version),
 }
 
-pub fn parser(packet_raw: &str) -> Result<Command, serde_json::Error> {
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+pub struct Packet {
+    pub command: Vec<Command>,
+}
+
+pub fn parser(packet_raw: &str) -> Result<Packet, serde_json::Error> {
     serde_json::from_str(packet_raw)
 }

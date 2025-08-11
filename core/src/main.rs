@@ -31,32 +31,31 @@ fn main() {
     let packet_raw = match json_file("sample.json") {
         Ok(v) => v,
         Err(e) => {
-            return_packet(CommandResult::Error(e.to_string()));
+            return_packet(vec![CommandResult::Error(e.to_string())]);
             return;
         }
     };
 
     // JSONパース
-    let cmd = match parser(&packet_raw) {
+    let packet = match parser(&packet_raw) {
         Ok(v) => v,
         Err(e) => {
-            return_packet(CommandResult::Error(e.to_string()));
+            return_packet(vec![CommandResult::Error(e.to_string())]);
             return;
         }
     };
 
-    match process(cmd, &mut s) {
-        Ok(v) => {
-            return_packet(CommandResult::Success(v));
-            return;
-        }
-        Err(e) => {
-            return_packet(CommandResult::Error(e.to_string()));
-            return;
+    // 複数コマンド実行
+    let mut results = Vec::new();
+    for cmd in packet.command {
+        match process(cmd, &mut s) {
+            Ok(v) => results.push(CommandResult::Success(v)),
+            Err(e) => results.push(CommandResult::Error(e.to_string())),
         }
     }
 
-    // 成功したら出力
+    // 実行結果を出力
+    return_packet(results);
 }
 
 #[derive(Serialize, JsonSchema)]
@@ -65,9 +64,9 @@ enum CommandResult {
     Error(String),
 }
 
-fn return_packet(result: CommandResult) {
+fn return_packet(results: Vec<CommandResult>) {
     // JSON に変換
-    let json = serde_json::to_string_pretty(&result).expect("Failed to serialize CommandResult");
+    let json = serde_json::to_string_pretty(&results).expect("Failed to serialize CommandResult");
 
     // ファイルに書き出す（ファイル名は固定だが変更可能）
     let mut file = File::create("result.json").expect("Failed to create file");
@@ -75,9 +74,9 @@ fn return_packet(result: CommandResult) {
     file.write_all(json.as_bytes())
         .expect("Failed to write to file");
 }
+
 //Json Schemaを出力する
 #[cfg(feature = "BuildJsonSchema")]
-
 fn main() {
     use schemars::schema_for;
     //JSON Schemaを出力している
