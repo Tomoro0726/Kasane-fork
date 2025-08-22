@@ -18,7 +18,7 @@ pub fn select(v: crate::parser::Select, s: &mut Storage) -> Result<Output, Error
                 };
 
                 if v.id_pure {
-                    for mini_id in stid.to_pure() {
+                    for mini_id in stid.pure() {
                         result.push(SelectOutput {
                             spacetimeid: mini_id,
                             id_string: id_string.clone(),

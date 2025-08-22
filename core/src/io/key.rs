@@ -1,4 +1,4 @@
-use logic::set::SpaceTimeIdSet;
+use kasane_logic::set::SpaceTimeIdSet;
 
 use crate::{
     error::Error,

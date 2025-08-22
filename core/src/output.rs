@@ -1,5 +1,5 @@
-use logic::{
-    id::{SpaceTimeId, points::Point},
+use kasane_logic::{
+    id::{SpaceTimeId, coordinates::Point},
     set::SpaceTimeIdSet,
 };
 use schemars::JsonSchema;

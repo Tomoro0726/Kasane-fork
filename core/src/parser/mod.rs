@@ -1,4 +1,4 @@
-use logic::id::DimensionRange;
+use kasane_logic::id::DimensionRange;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 

@@ -1,4 +1,4 @@
-use logic::set::SpaceTimeIdSet;
+use kasane_logic::set::SpaceTimeIdSet;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 

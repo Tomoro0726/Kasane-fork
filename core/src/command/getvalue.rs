@@ -18,7 +18,7 @@ pub fn getvalue(v: GetValue, s: &mut Storage) -> Result<Output, Error> {
         for item in outputs {
             // id_pure==trueなら純粋IDに展開、それ以外は元のIDのみ
             let id_list = if v.id_pure {
-                item.spacetimeid.to_pure()
+                item.spacetimeid.pure()
             } else {
                 vec![item.spacetimeid.clone()]
             };

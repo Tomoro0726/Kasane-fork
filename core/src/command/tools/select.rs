@@ -1,5 +1,5 @@
-use logic::id::SpaceTimeId;
-use logic::set::SpaceTimeIdSet;
+use kasane_logic::id::SpaceTimeId;
+use kasane_logic::set::SpaceTimeIdSet;
 
 use crate::error::Error;
 use crate::io::Storage;
@@ -61,11 +61,12 @@ pub fn select(s: &mut Storage, v: Range) -> Result<SpaceTimeIdSet, Error> {
         Range::SpaceTimeIdSet(ids) => {
             let mut set = SpaceTimeIdSet::new();
             for id in ids {
-                let new_id = SpaceTimeId::new(id.z, id.f, id.x, id.y, id.i, id.t)
-                    .map_err(|e| Error::ParseError {
+                let new_id = SpaceTimeId::new(id.z, id.f, id.x, id.y, id.i, id.t).map_err(|e| {
+                    Error::ParseError {
                         message: e,
                         location: "command::tools::select::select",
-                    })?;
+                    }
+                })?;
                 set.insert(new_id);
             }
             Ok(set)
