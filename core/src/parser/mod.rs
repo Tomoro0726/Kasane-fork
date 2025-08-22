@@ -24,7 +24,7 @@ pub struct AddKey {
     pub r#type: KeyType,
 }
 
-#[derive(Debug, Serialize, Deserialize, JsonSchema, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, JsonSchema, PartialEq, Clone, Copy)]
 pub enum KeyType {
     INT,
     BOOLEAN,
@@ -187,6 +187,11 @@ pub struct Select {
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
+pub struct KeysInfo {
+    pub spacename: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub enum Command {
     AddSpace(AddSpace),
     DeleteSpace(DeleteSpace),
@@ -200,6 +205,7 @@ pub enum Command {
     Spaces,
     Select(Select),
     Version,
+    KeysInfo(KeysInfo),
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]

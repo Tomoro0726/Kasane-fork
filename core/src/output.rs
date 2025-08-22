@@ -15,21 +15,28 @@ pub struct GetValueOutput {
 }
 
 #[derive(Serialize, JsonSchema)]
-pub struct SelectOutPut {
+pub struct SelectOutput {
     pub spacetimeid: SpaceTimeId,
     pub id_string: Option<String>,
     pub vertex: Option<[Point; 8]>,
     pub center: Option<Point>,
 }
 
-use crate::io::ValueEntry;
+#[derive(Serialize, JsonSchema)]
+pub struct KeyInfoOutput {
+    pub keyname: String,
+    pub keytype: KeyType,
+}
+
+use crate::{io::ValueEntry, parser::KeyType};
 #[derive(Serialize, JsonSchema)]
 pub enum Output {
     SpaceNames(Vec<String>),
     KeyNames(Vec<String>),
     GetValue(Vec<GetValueOutput>),
-    SelectValue(Vec<SelectOutPut>),
+    SelectValue(Vec<SelectOutput>),
     SpaceTimeIdSet(SpaceTimeIdSet),
     Version(String),
+    KeysInfo(Vec<KeyInfoOutput>),
     Success,
 }
