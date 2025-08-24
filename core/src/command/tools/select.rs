@@ -3,7 +3,7 @@ use kasane_logic::set::SpaceTimeIdSet;
 
 use crate::error::Error;
 use crate::io::Storage;
-use crate::parser::Function::{FilterValue, HasValue};
+use crate::parser::Function::{self, FilterValue, HasValue};
 use crate::parser::Prefix::{AND, NOT, OR, XOR};
 use crate::parser::Range;
 
@@ -82,6 +82,7 @@ pub fn select(s: &mut Storage, v: Range) -> Result<SpaceTimeIdSet, Error> {
                 let key = space.get_key(&v.keyname)?;
                 key.filter_value(v.filter)
             }
+            Function::Line(line) => todo!(),
         },
     }
 }

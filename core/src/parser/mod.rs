@@ -1,4 +1,4 @@
-use kasane_logic::id::DimensionRange;
+use kasane_logic::id::{DimensionRange, coordinates::Point};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -94,14 +94,10 @@ pub struct SpaceTimeIdInput {
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
-struct Line {
-    start_x: u32,
-    start_y: u32,
-    start_z: u32,
-    end_x: u32,
-    end_y: u32,
-    end_z: u32,
-    zoom: u32,
+pub struct Line {
+    pub start: Point,
+    pub end: Point,
+    pub zoom: u16,
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
@@ -158,7 +154,7 @@ pub enum FilterTEXT {
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub enum Function {
-    //Line(Line),
+    Line(Line),
     FilterValue(FilterValue),
     HasValue(HasValue),
 }

@@ -47,9 +47,9 @@ dependencies = [
 
 [[package]]
 name = "kasane-logic"
-version = "0.0.1"
+version = "0.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a69b3385a4f54aeaf21cc5d1801a63eab7fe32bf6a1e71dd314d4951c6d3dd50"
+checksum = "9ce453c27575806cdc95c9ce8207c3953e1c5b7870a36fec691cb788178e0e3b"
 dependencies = [
  "schemars",
  "serde",
