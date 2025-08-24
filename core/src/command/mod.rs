@@ -24,6 +24,7 @@ pub mod setvalue;
 pub mod showkeys;
 pub mod showspaces;
 pub mod tools;
+pub mod triangle;
 pub mod version;
 
 pub fn process(cmd: Command, s: &mut Storage) -> Result<Output, Error> {

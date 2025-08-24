@@ -101,6 +101,14 @@ pub struct Line {
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
+pub struct Triangle {
+    pub point1: Point,
+    pub point2: Point,
+    pub point3: Point,
+    pub zoom: u16,
+}
+
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct HasValue {
     pub spacename: String,
     pub keyname: String,
@@ -155,6 +163,7 @@ pub enum FilterTEXT {
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub enum Function {
     Line(Line),
+    Triangle(Triangle),
     FilterValue(FilterValue),
     HasValue(HasValue),
 }
