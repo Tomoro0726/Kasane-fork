@@ -3,7 +3,7 @@ use kasane_logic::set::SpaceTimeIdSet;
 use crate::io::ValueEntry;
 use crate::io::memory::Storage;
 use crate::json::input::FilterBOOLEAN::{Equals, IsFalse, IsTrue, NotEquals};
-use crate::json::input::{FilterValue, GetValue, HasValue, PutValue, SetValue};
+use crate::json::input::{FilterValue, HasValue};
 use crate::{
     error::Error,
     json::{

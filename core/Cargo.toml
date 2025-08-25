@@ -4,9 +4,18 @@ version = "0.0.2"
 edition = "2024"
 
 [features]
-default = ["full"]   # デフォルトはフル機能
+# デフォルトはネイティブ向けフル機能
+default = ["full"]
+
+# ネイティブ向けフル機能
 full = ["sled", "actix-web", "tokio", "num_cpus"]
-wasm = ["once_cell", "wasm-bindgen"]
+
+# WASM向け機能
+wasm = [
+    "wasm-bindgen",
+    "once_cell",
+    "kasane-logic/serde_support",
+]
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
@@ -16,7 +25,7 @@ wasm-bindgen = { version = "0.2", optional = true }
 once_cell = { version = "1.21.3", optional = true }
 kasane-logic = { version = "0.0.2", features = ["serde_support"] }
 
-# ネイティブ機能のみ
+# ネイティブ専用
 sled = { version = "0.34.7", optional = true }
 tokio = { version = "1.47.1", optional = true }
 actix-web = { version = "4", optional = true }

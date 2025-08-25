@@ -4,7 +4,7 @@ use crate::{
     json::{input::DeleteValue, output::Output},
 };
 
-#[cfg(feature = "default")]
+#[cfg(feature = "full")]
 use crate::io::kv::Storage;
 #[cfg(feature = "wasm")]
 use crate::io::memory::Storage;

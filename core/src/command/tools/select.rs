@@ -7,7 +7,7 @@ use crate::error::Error;
 use crate::json::input::Prefix::{AND, NOT, OR, XOR};
 use crate::json::input::{Function, Range};
 
-#[cfg(feature = "default")]
+#[cfg(feature = "full")]
 use crate::io::kv::Storage;
 #[cfg(feature = "wasm")]
 use crate::io::memory::Storage;

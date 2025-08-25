@@ -2,7 +2,7 @@ use crate::json::input::AddKey;
 use crate::json::output::Output;
 use crate::{command::tools::valid_name::valid_name, error::Error};
 
-#[cfg(feature = "default")]
+#[cfg(feature = "full")]
 use crate::io::kv::Storage;
 #[cfg(feature = "wasm")]
 use crate::io::memory::Storage;

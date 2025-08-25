@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "wasm")]
 pub mod memory;
 
-#[cfg(feature = "default")]
+#[cfg(feature = "full")]
 pub mod kv;
 
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]

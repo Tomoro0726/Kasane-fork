@@ -25,7 +25,7 @@ pub mod tools;
 pub mod triangle;
 pub mod version;
 
-#[cfg(feature = "default")]
+#[cfg(feature = "full")]
 use crate::io::kv::Storage;
 #[cfg(feature = "wasm")]
 use crate::io::memory::Storage;
