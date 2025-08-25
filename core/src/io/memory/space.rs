@@ -75,15 +75,15 @@ impl Storage {
                 location: "io::space::delete_key",
             })?;
 
-        if !space.key.iter().any(|k| k.name == v.name) {
+        if !space.key.iter().any(|k| k.name == v.keyname) {
             return Err(Error::KeyNotFound {
-                key_name: v.name,
+                key_name: v.keyname,
                 space_name: v.spacename,
                 location: "io::space::delete_key",
             });
         }
 
-        space.key.retain(|k| k.name != v.name);
+        space.key.retain(|k| k.name != v.keyname);
         Ok(Output::Success)
     }
 

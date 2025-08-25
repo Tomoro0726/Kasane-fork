@@ -44,11 +44,11 @@ impl Storage {
         }
     }
 
-    pub fn show_spaces(&self) -> Output {
+    pub fn show_spaces(&self) -> Result<Output, Error> {
         let mut result = Vec::new();
         for v in &self.space {
             result.push(v.name.clone());
         }
-        Output::SpaceNames(result)
+        Ok(Output::SpaceNames(result))
     }
 }

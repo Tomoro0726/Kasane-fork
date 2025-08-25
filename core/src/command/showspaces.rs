@@ -6,5 +6,5 @@ use crate::io::kv::Storage;
 use crate::io::memory::Storage;
 
 pub fn showspaces(s: &mut Storage) -> Result<Output, Error> {
-    Ok(s.show_spaces())
+    s.show_spaces()
 }

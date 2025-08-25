@@ -40,7 +40,7 @@ pub enum KeyType {
 
 pub struct DeleteKey {
     pub spacename: String,
-    pub name: String,
+    pub keyname: String,
 }
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize)]

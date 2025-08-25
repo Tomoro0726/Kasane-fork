@@ -10,9 +10,9 @@ use crate::io::kv::Storage;
 use crate::io::memory::Storage;
 
 pub fn deletekey(v: DeleteKey, s: &mut Storage) -> Result<Output, Error> {
-    if !valid_name(&v.name) {
+    if !valid_name(&v.keyname) {
         Err(Error::KeyNameValidationError {
-            name: v.name.clone(),
+            name: v.keyname.clone(),
             reason: "only a-z, A-Z, 0-9, - _ . @ + = allowed, max 256 characters",
             location: "command::deletekey::deletekey",
         })
