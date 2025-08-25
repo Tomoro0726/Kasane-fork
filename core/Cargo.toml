@@ -4,23 +4,23 @@ version = "0.0.2"
 edition = "2024"
 
 [features]
-default=["sled","actix-web","tokio"]
-wasm=["once_cell","wasm-bindgen"]
-json_schema = ["schemars"]
+default = ["full"]   # デフォルトはフル機能
+full = ["sled", "actix-web", "tokio", "num_cpus"]
+wasm = ["once_cell", "wasm-bindgen"]
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.141"
-schemars = {version="1.0.4", optional = true}
-wasm-bindgen = {version="0.2", optional = true}
-once_cell = { version="1.21.3", optional = true}
-kasane-logic = { version="0.0.2" , features = ["serde_support"]}
-sled = {version="0.34.7", optional = true}
-tokio = {version="1.47.1", optional = true}
-actix-web = {version="4", optional = true}
+schemars = { version = "1.0.4", optional = true }
+wasm-bindgen = { version = "0.2", optional = true }
+once_cell = { version = "1.21.3", optional = true }
+kasane-logic = { version = "0.0.2", features = ["serde_support"] }
 
-
-
+# ネイティブ機能のみ
+sled = { version = "0.34.7", optional = true }
+tokio = { version = "1.47.1", optional = true }
+actix-web = { version = "4", optional = true }
+num_cpus = { version = "1.17.0", optional = true }
 
 [lib]
 crate-type = ["cdylib"]

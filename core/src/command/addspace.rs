@@ -1,9 +1,13 @@
 use crate::{
     command::tools::valid_name::valid_name,
     error::Error,
-    io::Storage,
     json::{input::AddSpace, output::Output},
 };
+
+#[cfg(feature = "default")]
+use crate::io::kv::Storage;
+#[cfg(feature = "wasm")]
+use crate::io::memory::Storage;
 
 pub fn addspace(v: AddSpace, s: &mut Storage) -> Result<Output, Error> {
     if !valid_name(&v.spacename) {
@@ -13,6 +17,6 @@ pub fn addspace(v: AddSpace, s: &mut Storage) -> Result<Output, Error> {
             location: "command::addspace::addspace",
         })
     } else {
-        s.add_space(&v.spacename)
+        s.add_space(v)
     }
 }

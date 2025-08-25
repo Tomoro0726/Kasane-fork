@@ -6,7 +6,6 @@ use crate::{
         version::version,
     },
     error::Error,
-    io::Storage,
     json::{input::Command, output::Output},
 };
 pub mod addkey;
@@ -25,6 +24,11 @@ pub mod showspaces;
 pub mod tools;
 pub mod triangle;
 pub mod version;
+
+#[cfg(feature = "default")]
+use crate::io::kv::Storage;
+#[cfg(feature = "wasm")]
+use crate::io::memory::Storage;
 
 pub fn process(cmd: Command, s: &mut Storage) -> Result<Output, Error> {
     match cmd {

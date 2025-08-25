@@ -1,18 +1,21 @@
 use crate::{
     command::tools::select::select,
     error::Error,
-    io::Storage,
     json::{
         input::GetValue,
         output::{GetValueOutput, Output},
     },
 };
+
+#[cfg(feature = "default")]
+use crate::io::kv::Storage;
+#[cfg(feature = "wasm")]
+use crate::io::memory::Storage;
+
 pub fn getvalue(v: GetValue, s: &mut Storage) -> Result<Output, Error> {
     let set = select(s, v.range)?;
 
-    let space = s.get_space(&v.spacename)?;
-    let key = space.get_key(&v.keyname)?;
-    let mut result = key.get_value(set)?;
+    let mut result = s.get_value(&v.spacename, &v.keyname, set)?;
 
     if let Output::GetValue(outputs) = result {
         let mut new_results = Vec::new();
@@ -34,15 +37,12 @@ pub fn getvalue(v: GetValue, s: &mut Storage) -> Result<Output, Error> {
                     center: None,
                 };
 
-                // vertexオプションがtrueならvertex情報を入れる処理（例）
                 if v.vertex {
                     new_item.vertex = Some(new_item.spacetimeid.vertex());
                 }
-                // centerオプションがtrueなら中心座標を計算してセット
                 if v.center {
                     new_item.center = Some(new_item.spacetimeid.center());
                 }
-                // id_stringオプションがtrueならID文字列化処理
                 if v.id_string {
                     new_item.id_string = Some(new_item.spacetimeid.to_string());
                 }

@@ -1,9 +1,13 @@
 use crate::{
     command::tools::valid_name::valid_name,
     error::Error,
-    io::Storage,
     json::{input::DeleteKey, output::Output},
 };
+
+#[cfg(feature = "default")]
+use crate::io::kv::Storage;
+#[cfg(feature = "wasm")]
+use crate::io::memory::Storage;
 
 pub fn deletekey(v: DeleteKey, s: &mut Storage) -> Result<Output, Error> {
     if !valid_name(&v.name) {
@@ -13,7 +17,6 @@ pub fn deletekey(v: DeleteKey, s: &mut Storage) -> Result<Output, Error> {
             location: "command::deletekey::deletekey",
         })
     } else {
-        let space = s.get_space(&v.spacename)?;
-        space.delete_key(&v.name)
+        s.delete_key(v)
     }
 }

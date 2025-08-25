@@ -1,29 +1,35 @@
 use kasane_logic::set::SpaceTimeIdSet;
 
+use crate::io::ValueEntry;
+use crate::io::memory::Storage;
 use crate::json::input::FilterBOOLEAN::{Equals, IsFalse, IsTrue, NotEquals};
+use crate::json::input::{FilterValue, GetValue, HasValue, PutValue, SetValue};
 use crate::{
     error::Error,
-    io::{self, Key, ValueEntry},
     json::{
         input::{FilterINT, FilterTEXT, FilterType, KeyType},
         output::{GetValueOutput, Output},
     },
 };
 
-impl Key {
-    pub fn has_value(&self) -> SpaceTimeIdSet {
+impl Storage {
+    pub fn has_value(&mut self, v: HasValue) -> Result<SpaceTimeIdSet, Error> {
+        let key = Self::get_key(self, &v.spacename, &v.keyname)?;
+
         let mut result = SpaceTimeIdSet::new();
-        for v in &self.value {
+        for v in &key.value {
             result = result | v.set.clone();
         }
-        return result;
+        return Ok(result);
     }
 
-    pub fn filter_value(&self, filter: FilterType) -> Result<SpaceTimeIdSet, Error> {
+    pub fn filter_value(&mut self, v: FilterValue) -> Result<SpaceTimeIdSet, Error> {
+        let key = self.get_key(&v.spacename, &v.keyname)?;
+
         let mut result = SpaceTimeIdSet::new();
-        match filter {
+        match v.filter {
             FilterType::FilterBOOLEAN(v) => {
-                if self.r#type != KeyType::BOOLEAN {
+                if key.r#type != KeyType::BOOLEAN {
                     return Err(Error::TypeMismatchFilter {
                         expected_type: "BOOLEAN".to_string(),
                         operation: "filter".to_string(),
@@ -31,18 +37,18 @@ impl Key {
                     });
                 }
 
-                for k in &self.value {
+                for k in key.value.iter() {
                     match v {
-                        IsTrue if k.value == io::ValueEntry::BOOLEAN(true) => {
+                        IsTrue if k.value == ValueEntry::BOOLEAN(true) => {
                             result = result | k.set.clone();
                         }
-                        IsFalse if k.value == io::ValueEntry::BOOLEAN(false) => {
+                        IsFalse if k.value == ValueEntry::BOOLEAN(false) => {
                             result = result | k.set.clone();
                         }
-                        Equals(val) if k.value == io::ValueEntry::BOOLEAN(val) => {
+                        Equals(val) if k.value == ValueEntry::BOOLEAN(val) => {
                             result = result | k.set.clone();
                         }
-                        NotEquals(val) if k.value != io::ValueEntry::BOOLEAN(val) => {
+                        NotEquals(val) if k.value != ValueEntry::BOOLEAN(val) => {
                             result = result | k.set.clone();
                         }
                         _ => {}
@@ -52,7 +58,7 @@ impl Key {
                 Ok(result)
             }
             FilterType::FilterINT(v) => {
-                if self.r#type != KeyType::INT {
+                if key.r#type != KeyType::INT {
                     return Err(Error::TypeMismatchFilter {
                         expected_type: "INT".to_string(),
                         operation: "filter".to_string(),
@@ -62,58 +68,58 @@ impl Key {
 
                 let mut result = SpaceTimeIdSet::new();
 
-                for k in &self.value {
+                for k in key.value.iter() {
                     match v {
-                        FilterINT::Equal(val) if k.value == io::ValueEntry::INT(val) => {
+                        FilterINT::Equal(val) if k.value == ValueEntry::INT(val) => {
                             result = result | k.set.clone();
                         }
-                        FilterINT::NotEqual(val) if k.value != io::ValueEntry::INT(val) => {
+                        FilterINT::NotEqual(val) if k.value != ValueEntry::INT(val) => {
                             result = result | k.set.clone();
                         }
                         FilterINT::GreaterThan(val) => {
-                            if let io::ValueEntry::INT(v) = k.value {
+                            if let ValueEntry::INT(v) = k.value {
                                 if v > val {
                                     result = result | k.set.clone();
                                 }
                             }
                         }
                         FilterINT::GreaterEqual(val) => {
-                            if let io::ValueEntry::INT(v) = k.value {
+                            if let ValueEntry::INT(v) = k.value {
                                 if v >= val {
                                     result = result | k.set.clone();
                                 }
                             }
                         }
                         FilterINT::LessThan(val) => {
-                            if let io::ValueEntry::INT(v) = k.value {
+                            if let ValueEntry::INT(v) = k.value {
                                 if v < val {
                                     result = result | k.set.clone();
                                 }
                             }
                         }
                         FilterINT::LessEqual(val) => {
-                            if let io::ValueEntry::INT(v) = k.value {
+                            if let ValueEntry::INT(v) = k.value {
                                 if v <= val {
                                     result = result | k.set.clone();
                                 }
                             }
                         }
                         FilterINT::Between(start, end) => {
-                            if let io::ValueEntry::INT(v) = k.value {
+                            if let ValueEntry::INT(v) = k.value {
                                 if v >= start && v <= end {
                                     result = result | k.set.clone();
                                 }
                             }
                         }
                         FilterINT::In(ref items) => {
-                            if let io::ValueEntry::INT(v) = k.value {
+                            if let ValueEntry::INT(v) = k.value {
                                 if items.contains(&v) {
                                     result = result | k.set.clone();
                                 }
                             }
                         }
                         FilterINT::NotIn(ref items) => {
-                            if let io::ValueEntry::INT(v) = k.value {
+                            if let ValueEntry::INT(v) = k.value {
                                 if !items.contains(&v) {
                                     result = result | k.set.clone();
                                 }
@@ -127,7 +133,7 @@ impl Key {
             }
 
             FilterType::FilterTEXT(v) => {
-                if self.r#type != KeyType::TEXT {
+                if key.r#type != KeyType::TEXT {
                     return Err(Error::TypeMismatchFilter {
                         expected_type: "TEXT".to_string(),
                         operation: "filter".to_string(),
@@ -137,8 +143,8 @@ impl Key {
 
                 let mut result = SpaceTimeIdSet::new();
 
-                for k in &self.value {
-                    if let io::ValueEntry::TEXT(ref text_value) = k.value {
+                for k in key.value.iter() {
+                    if let ValueEntry::TEXT(ref text_value) = k.value {
                         match v {
                             FilterTEXT::Equal(ref val) if text_value == val => {
                                 result = result | k.set.clone();
@@ -173,9 +179,15 @@ impl Key {
         }
     }
 
-    pub fn get_value(&self, set: SpaceTimeIdSet) -> Result<Output, Error> {
+    pub fn get_value(
+        &mut self,
+        spacename: &str,
+        keyname: &str,
+        set: SpaceTimeIdSet,
+    ) -> Result<Output, Error> {
+        let key = self.get_key(spacename, keyname)?;
         let mut result = Vec::new();
-        for v in &self.value {
+        for v in &key.value {
             let and = v.set.clone() & set.clone();
             if !and.is_empty() {
                 for stid in and.into_iter() {
@@ -191,108 +203,111 @@ impl Key {
         }
         return Ok(Output::GetValue(result));
     }
-    pub fn set_value(&mut self, set: SpaceTimeIdSet, value: ValueEntry) -> Result<Output, Error> {
-        //入力された型のチェック
+    pub fn set_value(
+        &mut self,
+        spacename: &str,
+        keyname: &str,
+        value: ValueEntry,
+        set: SpaceTimeIdSet,
+    ) -> Result<Output, Error> {
+        let key = self.get_key(spacename, keyname)?;
 
+        // 型チェック
         match value {
-            ValueEntry::INT(_) => {
-                if self.r#type != KeyType::INT {
-                    return Err(Error::TypeMismatchValue {
-                        expected_type: "INT".to_string(),
-                        received_type: format!("{:?}", value),
-                        location: "io::key::set_value",
-                    });
-                }
+            ValueEntry::INT(_) if key.r#type != KeyType::INT => {
+                return Err(Error::TypeMismatchValue {
+                    expected_type: "INT".to_string(),
+                    received_type: format!("{:?}", value),
+                    location: "io::key::set_value",
+                });
             }
-            ValueEntry::TEXT(_) => {
-                if self.r#type != KeyType::TEXT {
-                    return Err(Error::TypeMismatchValue {
-                        expected_type: "TEXT".to_string(),
-                        received_type: format!("{:?}", value),
-                        location: "io::key::set_value",
-                    });
-                }
+            ValueEntry::TEXT(_) if key.r#type != KeyType::TEXT => {
+                return Err(Error::TypeMismatchValue {
+                    expected_type: "TEXT".to_string(),
+                    received_type: format!("{:?}", value),
+                    location: "io::key::set_value",
+                });
             }
-            ValueEntry::BOOLEAN(_) => {
-                if self.r#type != KeyType::BOOLEAN {
-                    return Err(Error::TypeMismatchValue {
-                        expected_type: "BOOLEAN".to_string(),
-                        received_type: format!("{:?}", value),
-                        location: "io::key::set_value",
-                    });
-                }
+            ValueEntry::BOOLEAN(_) if key.r#type != KeyType::BOOLEAN => {
+                return Err(Error::TypeMismatchValue {
+                    expected_type: "BOOLEAN".to_string(),
+                    received_type: format!("{:?}", value),
+                    location: "io::key::set_value",
+                });
             }
-            ValueEntry::FLOAT(_) => {
-                if self.r#type != KeyType::FLOAT {
-                    return Err(Error::TypeMismatchValue {
-                        expected_type: "FLOAT".to_string(),
-                        received_type: format!("{:?}", value),
-                        location: "io::key::set_value",
-                    });
-                }
+            ValueEntry::FLOAT(_) if key.r#type != KeyType::FLOAT => {
+                return Err(Error::TypeMismatchValue {
+                    expected_type: "FLOAT".to_string(),
+                    received_type: format!("{:?}", value),
+                    location: "io::key::set_value",
+                });
             }
+            _ => {}
         }
 
         let mut is_push = false;
 
-        //valueが一致した場合はそこに出力
-        for v in self.value.iter_mut() {
-            if v.value == value {
-                v.set = v.set.clone() | set.clone();
-                is_push = true
+        for a in key.value.iter_mut() {
+            if a.value == value {
+                a.set = a.set.clone() | set.clone();
+                is_push = true;
             }
         }
 
-        //一致するvalueがなかった場合はそこに出力
         if !is_push {
-            self.value.push(super::Value { value, set });
+            key.value.push(super::Value { value, set });
         }
+
         Ok(Output::Success)
     }
-    pub fn put_value(&mut self, set: SpaceTimeIdSet, value: ValueEntry) -> Result<Output, Error> {
+
+    pub fn put_value(
+        &mut self,
+        spacename: &str,
+        keyname: &str,
+        value: ValueEntry,
+        set: SpaceTimeIdSet,
+    ) -> Result<Output, Error> {
+        // キー取得
+        let key = Self::get_key(self, spacename, keyname)?;
+
+        // 型チェック
         match value {
-            ValueEntry::INT(_) => {
-                if self.r#type != KeyType::INT {
-                    return Err(Error::TypeMismatchValue {
-                        expected_type: "INT".to_string(),
-                        received_type: format!("{:?}", value),
-                        location: "io::key::put_value",
-                    });
-                }
+            ValueEntry::INT(_) if key.r#type != KeyType::INT => {
+                return Err(Error::TypeMismatchValue {
+                    expected_type: "INT".to_string(),
+                    received_type: format!("{:?}", value),
+                    location: "io::key::put_value",
+                });
             }
-            ValueEntry::TEXT(_) => {
-                if self.r#type != KeyType::TEXT {
-                    return Err(Error::TypeMismatchValue {
-                        expected_type: "TEXT".to_string(),
-                        received_type: format!("{:?}", value),
-                        location: "io::key::put_value",
-                    });
-                }
+            ValueEntry::TEXT(_) if key.r#type != KeyType::TEXT => {
+                return Err(Error::TypeMismatchValue {
+                    expected_type: "TEXT".to_string(),
+                    received_type: format!("{:?}", value),
+                    location: "io::key::put_value",
+                });
             }
-            ValueEntry::BOOLEAN(_) => {
-                if self.r#type != KeyType::BOOLEAN {
-                    return Err(Error::TypeMismatchValue {
-                        expected_type: "BOOLEAN".to_string(),
-                        received_type: format!("{:?}", value),
-                        location: "io::key::put_value",
-                    });
-                }
+            ValueEntry::BOOLEAN(_) if key.r#type != KeyType::BOOLEAN => {
+                return Err(Error::TypeMismatchValue {
+                    expected_type: "BOOLEAN".to_string(),
+                    received_type: format!("{:?}", value),
+                    location: "io::key::put_value",
+                });
             }
-            ValueEntry::FLOAT(_) => {
-                if self.r#type != KeyType::FLOAT {
-                    return Err(Error::TypeMismatchValue {
-                        expected_type: "FLOAT".to_string(),
-                        received_type: format!("{:?}", value),
-                        location: "io::key::put_value",
-                    });
-                }
+            ValueEntry::FLOAT(_) if key.r#type != KeyType::FLOAT => {
+                return Err(Error::TypeMismatchValue {
+                    expected_type: "FLOAT".to_string(),
+                    received_type: format!("{:?}", value),
+                    location: "io::key::put_value",
+                });
             }
+            _ => {}
         }
+
         let mut is_push = false;
 
-        //valueが一致してかつ、既存範囲と競合がなければ加える
-        //範囲が競合した場合にはエラーを出す
-        for v in self.value.iter_mut() {
+        // 既存値と競合チェック
+        for v in key.value.iter_mut() {
             if v.value == value {
                 if !(v.set.clone() & set.clone()).is_empty() {
                     return Err(Error::ValueAlreadyExists {
@@ -301,19 +316,32 @@ impl Key {
                     });
                 }
                 v.set = v.set.clone() | set.clone();
-                is_push = true
+                is_push = true;
             }
         }
+
+        // 一致する値がなければ新規追加
         if !is_push {
-            self.value.push(super::Value { value, set });
+            key.value.push(super::Value { value, set });
         }
+
         Ok(Output::Success)
     }
-    pub fn delete_value(&mut self, set: SpaceTimeIdSet) -> Result<Output, Error> {
-        self.value.retain_mut(|v| {
-            v.set = v.set.clone() | !set.clone();
+    pub fn delete_value(
+        &mut self,
+        spacename: &str,
+        keyname: &str,
+        set: SpaceTimeIdSet,
+    ) -> Result<Output, Error> {
+        // キー取得
+        let key = Self::get_key(self, spacename, keyname)?;
+
+        // 対象の set を削除
+        key.value.retain_mut(|v| {
+            v.set = v.set.clone() & !set.clone();
             !v.set.is_empty()
         });
+
         Ok(Output::Success)
     }
 }

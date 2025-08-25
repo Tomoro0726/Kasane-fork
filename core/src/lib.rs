@@ -1,18 +1,17 @@
 #![cfg(feature = "wasm")]
 
-use crate::command::process;
-use crate::io::Storage;
-use crate::output::Output;
-use crate::parser::parser;
 use serde::Serialize;
 use wasm_bindgen::prelude::*;
 
+use crate::{
+    command::process,
+    io::memory::Storage,
+    json::{input::parser, output::Output},
+};
 pub mod command;
 pub mod error;
-pub mod interface;
 pub mod io;
-pub mod output;
-pub mod parser;
+pub mod json;
 
 #[derive(Serialize)]
 enum CommandResult {
@@ -37,21 +36,39 @@ impl Kasane {
     /// 実行メソッド（複数コマンド対応）
     #[wasm_bindgen]
     pub fn execute(&mut self, command_json: &str) -> String {
-        match parser(command_json) {
-            Ok(packet) => {
-                let mut results = Vec::new();
-
-                for cmd in packet.command {
-                    match process(cmd, &mut self.storage) {
-                        Ok(output) => results.push(CommandResult::Success(output)),
-                        Err(e) => results.push(CommandResult::Error(e.to_string())),
-                    }
-                }
-
-                to_json(results)
+        // まず serde_json::from_str で JSON をパース
+        let value: serde_json::Value = match serde_json::from_str(command_json) {
+            Ok(v) => v,
+            Err(e) => {
+                return to_json(vec![CommandResult::Error(format!(
+                    "JSON parse error: {}",
+                    e
+                ))]);
             }
-            Err(e) => to_json(vec![CommandResult::Error(format!("Parse error: {}", e))]),
-        }
+        };
+
+        // parser でさらに独自の構文解析
+        let packet = match parser(&value) {
+            Ok(p) => p,
+            Err(e) => {
+                return to_json(vec![CommandResult::Error(format!(
+                    "Command parse error: {}",
+                    e
+                ))]);
+            }
+        };
+
+        // 複数コマンドの処理
+        let results: Vec<CommandResult> = packet
+            .command
+            .into_iter()
+            .map(|cmd| match process(cmd, &mut self.storage) {
+                Ok(output) => CommandResult::Success(output),
+                Err(e) => CommandResult::Error(e.to_string()),
+            })
+            .collect();
+
+        to_json(results)
     }
 }
 

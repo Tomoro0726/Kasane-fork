@@ -1,15 +1,15 @@
 use crate::{
     command::tools::select::select,
     error::Error,
-    io::Storage,
     json::{input::DeleteValue, output::Output},
 };
 
+#[cfg(feature = "default")]
+use crate::io::kv::Storage;
+#[cfg(feature = "wasm")]
+use crate::io::memory::Storage;
+
 pub fn deletevalue(v: DeleteValue, s: &mut Storage) -> Result<Output, Error> {
     let set = select(s, v.range)?;
-
-    let space = s.get_space(&v.spacename)?;
-    let key = space.get_key(&v.keyname)?;
-
-    key.delete_value(set)
+    s.delete_value(&v.spacename, &v.keyname, set)
 }

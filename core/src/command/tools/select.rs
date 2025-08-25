@@ -4,9 +4,13 @@ use kasane_logic::set::SpaceTimeIdSet;
 use crate::command::line::line;
 use crate::command::triangle::triangle;
 use crate::error::Error;
-use crate::io::Storage;
 use crate::json::input::Prefix::{AND, NOT, OR, XOR};
 use crate::json::input::{Function, Range};
+
+#[cfg(feature = "default")]
+use crate::io::kv::Storage;
+#[cfg(feature = "wasm")]
+use crate::io::memory::Storage;
 
 pub fn select(s: &mut Storage, v: Range) -> Result<SpaceTimeIdSet, Error> {
     match v {
@@ -73,18 +77,10 @@ pub fn select(s: &mut Storage, v: Range) -> Result<SpaceTimeIdSet, Error> {
             Ok(set)
         }
         Range::Function(function) => match function {
-            Function::HasValue(v) => {
-                let space = s.get_space(&v.spacename)?;
-                let key = space.get_key(&v.keyname)?;
-                return Ok(key.has_value());
-            }
             Function::Line(v) => Ok(line(v)),
             Function::Triangle(v) => Ok(triangle(v)),
-            Function::FilterValue(v) => {
-                let space = s.get_space(&v.spacename)?;
-                let key = space.get_key(&v.keyname)?;
-                key.filter_value(v.filter)
-            }
+            Function::FilterValue(v) => s.filter_value(v),
+            Function::HasValue(v) => s.has_value(v),
         },
     }
 }

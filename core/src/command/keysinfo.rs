@@ -1,10 +1,13 @@
 use crate::{
     error::Error,
-    io::Storage,
     json::{input::KeysInfo, output::Output},
 };
 
+#[cfg(feature = "default")]
+use crate::io::kv::Storage;
+#[cfg(feature = "wasm")]
+use crate::io::memory::Storage;
+
 pub fn keysinfo(v: KeysInfo, s: &mut Storage) -> Result<Output, Error> {
-    let space = s.get_space(&v.spacename)?;
-    Ok(space.info_keys())
+    Ok(s.keys_info(v))
 }

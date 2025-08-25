@@ -1,11 +1,15 @@
 use crate::{
     error::Error,
-    io::Storage,
     json::{
         input::Select,
         output::{Output, SelectOutput},
     },
 };
+
+#[cfg(feature = "default")]
+use crate::io::kv::Storage;
+#[cfg(feature = "wasm")]
+use crate::io::memory::Storage;
 
 pub fn select(v: Select, s: &mut Storage) -> Result<Output, Error> {
     match crate::command::tools::select::select(s, v.range) {

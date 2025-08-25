@@ -1,15 +1,15 @@
 use crate::{
     command::tools::select::select,
     error::Error,
-    io::Storage,
     json::{input::SetValue, output::Output},
 };
 
+#[cfg(feature = "default")]
+use crate::io::kv::Storage;
+#[cfg(feature = "wasm")]
+use crate::io::memory::Storage;
+
 pub fn setvalue(v: SetValue, s: &mut Storage) -> Result<Output, Error> {
     let set = select(s, v.range)?;
-
-    let space = s.get_space(&v.spacename)?;
-    let key = space.get_key(&v.keyname)?;
-
-    key.set_value(set, v.value)
+    s.set_value(&v.spacename, &v.keyname, v.value, set)
 }
