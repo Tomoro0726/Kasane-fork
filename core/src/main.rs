@@ -1,11 +1,8 @@
-use std::fs::File;
-use std::io::Write;
-
-use schemars::JsonSchema;
-use serde::Serialize;
-
 use crate::io::Storage;
 use crate::{interface::input::json_file::json_file, parser::parser};
+use serde::Serialize;
+use std::fs::File;
+use std::io::Write;
 
 pub mod command;
 pub mod error;
@@ -17,7 +14,6 @@ use crate::output::Output;
 
 use crate::command::process;
 
-#[cfg(not(feature = "BuildJsonSchema"))]
 fn main() {
     let mut s = match Storage::new() {
         Ok(store) => store,
@@ -57,7 +53,7 @@ fn main() {
     return_packet(results);
 }
 
-#[derive(Serialize, JsonSchema)]
+#[derive(Serialize)]
 enum CommandResult {
     Success(Output),
     Error(String),
@@ -75,7 +71,10 @@ fn return_packet(results: Vec<CommandResult>) {
 }
 
 //Json Schemaを出力する
-#[cfg(feature = "BuildJsonSchema")]
+#[cfg(feature = "json_schema")]
+use schemars::JsonSchema;
+
+#[cfg(feature = "json_schema")]
 fn main() {
     use crate::parser::Command;
     use schemars::schema_for;

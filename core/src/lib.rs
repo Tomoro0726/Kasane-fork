@@ -1,3 +1,5 @@
+#![cfg(feature = "wasm")]
+
 use crate::command::process;
 use crate::io::Storage;
 use crate::output::Output;

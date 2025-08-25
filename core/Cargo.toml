@@ -3,19 +3,20 @@ name = "kasane"
 version = "0.0.2"
 edition = "2024"
 
+[features]
+default=["sled"]
+wasm=["once_cell","wasm-bindgen"]
+json_schema = ["schemars"]
+
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.141"
-schemars = "1.0.4"
-ascii = "1.1.0"
-wasm-bindgen = "0.2"
-once_cell = "1.21.3"
+schemars = {version="1.0.4", optional = true}
+wasm-bindgen = {version="0.2", optional = true}
+once_cell = { version="1.21.3", optional = true}
 kasane-logic = { version="0.0.2" , features = ["serde_support"]}
+sled = {version="0.34.7", optional = true}
 
 
 [lib]
 crate-type = ["cdylib"]
-
-[features]
-default=[]
-BuildJsonSchema=[]

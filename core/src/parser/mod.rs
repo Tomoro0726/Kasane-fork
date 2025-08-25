@@ -1,45 +1,48 @@
 use kasane_logic::id::{DimensionRange, coordinates::Point};
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::io::ValueEntry;
 
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[cfg(feature = "json_schema")]
+use schemars::JsonSchema;
+
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize)]
 
 pub struct AddSpace {
     pub spacename: String,
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize)]
 
 pub struct DeleteSpace {
     pub spacename: String,
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize)]
 
 pub struct AddKey {
     pub spacename: String,
     pub keyname: String,
     pub r#type: KeyType,
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema, PartialEq, Clone, Copy)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Copy)]
 pub enum KeyType {
     INT,
     BOOLEAN,
     TEXT,
     FLOAT,
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize)]
 
 pub struct DeleteKey {
     pub spacename: String,
     pub name: String,
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize)]
 
 pub struct PutValue {
     pub spacename: String,
@@ -47,8 +50,8 @@ pub struct PutValue {
     pub range: Range,
     pub value: ValueEntry,
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize)]
 
 pub struct SetValue {
     pub spacename: String,
@@ -56,16 +59,16 @@ pub struct SetValue {
     pub range: Range,
     pub value: ValueEntry,
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize)]
 
 pub struct DeleteValue {
     pub spacename: String,
     pub keyname: String,
     pub range: Range,
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct GetValue {
     pub spacename: String,
     pub keyname: String,
@@ -75,15 +78,15 @@ pub struct GetValue {
     pub id_string: bool,
     pub id_pure: bool,
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum Range {
     Function(Function),
     Prefix(Prefix),
     SpaceTimeIdSet(Vec<SpaceTimeIdInput>),
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct SpaceTimeIdInput {
     pub z: u16,
     pub f: DimensionRange<i64>,
@@ -92,51 +95,51 @@ pub struct SpaceTimeIdInput {
     pub i: u32,
     pub t: DimensionRange<u32>,
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Line {
     pub start: Point,
     pub end: Point,
     pub zoom: u16,
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Triangle {
     pub point1: Point,
     pub point2: Point,
     pub point3: Point,
     pub zoom: u16,
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct HasValue {
     pub spacename: String,
     pub keyname: String,
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct FilterValue {
     pub spacename: String,
     pub keyname: String,
     pub filter: FilterType,
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum FilterType {
     FilterBOOLEAN(FilterBOOLEAN),
     FilterINT(FilterINT),
     FilterTEXT(FilterTEXT),
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum FilterBOOLEAN {
     IsTrue,          // 真である
     IsFalse,         // 偽である
     Equals(bool),    // 指定の真偽値と等しいか
     NotEquals(bool), // 指定の真偽値と等しくないか
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum FilterINT {
     Equal(i32),        // 等しい
     NotEqual(i32),     // 等しくない
@@ -148,8 +151,8 @@ pub enum FilterINT {
     In(Vec<i32>),      // 指定した複数の値のいずれか
     NotIn(Vec<i32>),   // 指定した複数の値以外
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum FilterTEXT {
     Equal(String),                // 完全一致
     NotEqual(String),             // 完全不一致
@@ -159,16 +162,16 @@ pub enum FilterTEXT {
     EndsWith(String),             // 後方一致
     CaseInsensitiveEqual(String), // 大文字小文字無視の完全一致
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum Function {
     Line(Line),
     Triangle(Triangle),
     FilterValue(FilterValue),
     HasValue(HasValue),
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize)]
 
 pub enum Prefix {
     AND(Vec<Range>),
@@ -176,13 +179,13 @@ pub enum Prefix {
     XOR(Vec<Range>),
     NOT(Vec<Range>),
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Keys {
     pub spacename: String,
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Select {
     pub range: Range,
     pub vertex: bool,
@@ -190,13 +193,13 @@ pub struct Select {
     pub id_string: bool,
     pub id_pure: bool,
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct KeysInfo {
     pub spacename: String,
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum Command {
     AddSpace(AddSpace),
     DeleteSpace(DeleteSpace),
@@ -212,8 +215,8 @@ pub enum Command {
     Version,
     KeysInfo(KeysInfo),
 }
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Packet {
     pub command: Vec<Command>,
 }

@@ -2,7 +2,6 @@ use crate::error::Error;
 
 use crate::io::Key;
 use crate::output::{KeyInfoOutput, Output};
-use crate::parser::KeysInfo;
 use crate::{io::Space, parser::KeyType};
 
 impl Space {
