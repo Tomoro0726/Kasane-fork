@@ -6,6 +6,8 @@ use kasane_logic::{
 #[cfg(feature = "json_schema")]
 use schemars::JsonSchema;
 use serde::Serialize;
+
+use crate::{io::ValueEntry, json::input::KeyType};
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Serialize)]
 pub struct GetValueOutput {
@@ -30,7 +32,6 @@ pub struct KeyInfoOutput {
     pub keytype: KeyType,
 }
 
-use crate::{io::ValueEntry, parser::KeyType};
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Serialize)]
 pub enum Output {

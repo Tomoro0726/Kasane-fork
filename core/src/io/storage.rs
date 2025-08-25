@@ -1,7 +1,7 @@
 use crate::{
     error::Error,
     io::{Space, Storage},
-    output::Output,
+    json::output::Output,
 };
 
 impl Storage {

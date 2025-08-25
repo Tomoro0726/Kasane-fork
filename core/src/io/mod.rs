@@ -1,4 +1,3 @@
-use crate::parser::KeyType;
 use kasane_logic::set::SpaceTimeIdSet;
 use serde::{Deserialize, Serialize};
 pub mod key;
@@ -7,6 +6,8 @@ pub mod storage;
 
 #[cfg(feature = "json_schema")]
 use schemars::JsonSchema;
+
+use crate::json::input::KeyType;
 
 #[derive(Debug)]
 pub struct Storage {

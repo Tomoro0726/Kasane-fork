@@ -1,16 +1,14 @@
 use kasane_logic::set::SpaceTimeIdSet;
 
+use crate::json::input::FilterBOOLEAN::{Equals, IsFalse, IsTrue, NotEquals};
 use crate::{
     error::Error,
     io::{self, Key, ValueEntry},
-    output::{GetValueOutput, Output},
-    parser::{
-        FilterINT::{self},
-        FilterTEXT, FilterType, KeyType,
+    json::{
+        input::{FilterINT, FilterTEXT, FilterType, KeyType},
+        output::{GetValueOutput, Output},
     },
 };
-
-use crate::parser::FilterBOOLEAN::{Equals, IsFalse, IsTrue, NotEquals};
 
 impl Key {
     pub fn has_value(&self) -> SpaceTimeIdSet {

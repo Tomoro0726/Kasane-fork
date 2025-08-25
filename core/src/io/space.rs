@@ -1,8 +1,9 @@
 use crate::error::Error;
 
 use crate::io::Key;
-use crate::output::{KeyInfoOutput, Output};
-use crate::{io::Space, parser::KeyType};
+use crate::io::Space;
+use crate::json::input::KeyType;
+use crate::json::output::{KeyInfoOutput, Output};
 
 impl Space {
     pub fn add_key(&mut self, name: &str, r#type: KeyType) -> Result<Output, Error> {

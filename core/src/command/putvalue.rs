@@ -1,5 +1,8 @@
 use crate::{
-    command::tools::select::select, error::Error, io::Storage, output::Output, parser::PutValue,
+    command::tools::select::select,
+    error::Error,
+    io::Storage,
+    json::{input::PutValue, output::Output},
 };
 
 pub fn putvalue(v: PutValue, s: &mut Storage) -> Result<Output, Error> {

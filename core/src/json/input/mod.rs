@@ -1,5 +1,6 @@
 use kasane_logic::id::{DimensionRange, coordinates::Point};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 use crate::io::ValueEntry;
 
@@ -221,6 +222,6 @@ pub struct Packet {
     pub command: Vec<Command>,
 }
 
-pub fn parser(packet_raw: &str) -> Result<Packet, serde_json::Error> {
-    serde_json::from_str(packet_raw)
+pub fn parser(value: &Value) -> Result<Packet, serde_json::Error> {
+    serde_json::from_value(value.clone())
 }

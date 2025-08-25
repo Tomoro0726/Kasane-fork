@@ -1,6 +1,8 @@
 use crate::{
-    command::tools::valid_name::valid_name, error::Error, io::Storage, output::Output,
-    parser::AddKey,
+    command::tools::valid_name::valid_name,
+    error::Error,
+    io::Storage,
+    json::{input::AddKey, output::Output},
 };
 
 pub fn addkey(v: AddKey, s: &mut Storage) -> Result<Output, Error> {

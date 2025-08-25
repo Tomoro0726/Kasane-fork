@@ -1,5 +1,8 @@
 use crate::{
-    command::tools::select::select, error::Error, io::Storage, output::Output, parser::DeleteValue,
+    command::tools::select::select,
+    error::Error,
+    io::Storage,
+    json::{input::DeleteValue, output::Output},
 };
 
 pub fn deletevalue(v: DeleteValue, s: &mut Storage) -> Result<Output, Error> {

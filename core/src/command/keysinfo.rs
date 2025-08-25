@@ -1,4 +1,8 @@
-use crate::{error::Error, io::Storage, output::Output, parser::KeysInfo};
+use crate::{
+    error::Error,
+    io::Storage,
+    json::{input::KeysInfo, output::Output},
+};
 
 pub fn keysinfo(v: KeysInfo, s: &mut Storage) -> Result<Output, Error> {
     let space = s.get_space(&v.spacename)?;

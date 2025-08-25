@@ -1,10 +1,13 @@
 use crate::{
     error::Error,
     io::Storage,
-    output::{Output, SelectOutput},
+    json::{
+        input::Select,
+        output::{Output, SelectOutput},
+    },
 };
 
-pub fn select(v: crate::parser::Select, s: &mut Storage) -> Result<Output, Error> {
+pub fn select(v: Select, s: &mut Storage) -> Result<Output, Error> {
     match crate::command::tools::select::select(s, v.range) {
         Ok(a) => {
             let mut result = Vec::new();

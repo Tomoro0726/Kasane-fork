@@ -7,8 +7,7 @@ use crate::{
     },
     error::Error,
     io::Storage,
-    output::Output,
-    parser::Command,
+    json::{input::Command, output::Output},
 };
 pub mod addkey;
 pub mod addspace;

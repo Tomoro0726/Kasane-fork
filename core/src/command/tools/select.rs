@@ -5,9 +5,8 @@ use crate::command::line::line;
 use crate::command::triangle::triangle;
 use crate::error::Error;
 use crate::io::Storage;
-use crate::parser::Function::{self, FilterValue, HasValue};
-use crate::parser::Prefix::{AND, NOT, OR, XOR};
-use crate::parser::Range;
+use crate::json::input::Prefix::{AND, NOT, OR, XOR};
+use crate::json::input::{Function, Range};
 
 pub fn select(s: &mut Storage, v: Range) -> Result<SpaceTimeIdSet, Error> {
     match v {
@@ -74,18 +73,18 @@ pub fn select(s: &mut Storage, v: Range) -> Result<SpaceTimeIdSet, Error> {
             Ok(set)
         }
         Range::Function(function) => match function {
-            HasValue(v) => {
+            Function::HasValue(v) => {
                 let space = s.get_space(&v.spacename)?;
                 let key = space.get_key(&v.keyname)?;
                 return Ok(key.has_value());
             }
-            FilterValue(v) => {
+            Function::Line(v) => Ok(line(v)),
+            Function::Triangle(v) => Ok(triangle(v)),
+            Function::FilterValue(v) => {
                 let space = s.get_space(&v.spacename)?;
                 let key = space.get_key(&v.keyname)?;
                 key.filter_value(v.filter)
             }
-            Function::Line(v) => Ok(line(v)),
-            Function::Triangle(v) => Ok(triangle(v)),
         },
     }
 }

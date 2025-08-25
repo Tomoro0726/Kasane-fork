@@ -1,6 +1,8 @@
 use crate::{
-    command::tools::valid_name::valid_name, error::Error, io::Storage, output::Output,
-    parser::AddSpace,
+    command::tools::valid_name::valid_name,
+    error::Error,
+    io::Storage,
+    json::{input::AddSpace, output::Output},
 };
 
 pub fn addspace(v: AddSpace, s: &mut Storage) -> Result<Output, Error> {

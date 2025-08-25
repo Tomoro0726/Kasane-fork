@@ -2,8 +2,10 @@ use crate::{
     command::tools::select::select,
     error::Error,
     io::Storage,
-    output::{GetValueOutput, Output},
-    parser::GetValue,
+    json::{
+        input::GetValue,
+        output::{GetValueOutput, Output},
+    },
 };
 pub fn getvalue(v: GetValue, s: &mut Storage) -> Result<Output, Error> {
     let set = select(s, v.range)?;

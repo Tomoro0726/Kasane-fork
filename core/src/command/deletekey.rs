@@ -1,6 +1,8 @@
 use crate::{
-    command::tools::valid_name::valid_name, error::Error, io::Storage, output::Output,
-    parser::DeleteKey,
+    command::tools::valid_name::valid_name,
+    error::Error,
+    io::Storage,
+    json::{input::DeleteKey, output::Output},
 };
 
 pub fn deletekey(v: DeleteKey, s: &mut Storage) -> Result<Output, Error> {
