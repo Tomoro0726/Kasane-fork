@@ -7,11 +7,11 @@ use crate::{
 };
 
 #[cfg(feature = "full")]
-use crate::io::kv::Storage;
+use crate::io::sled::Storage;
 #[cfg(feature = "wasm")]
 use crate::io::memory::Storage;
 
-pub fn select(v: Select, s: &mut Storage) -> Result<Output, Error> {
+pub fn select(v: Select, s: & Storage) -> Result<Output, Error> {
     match crate::command::tools::select::select(s, v.range) {
         Ok(a) => {
             let mut result = Vec::new();

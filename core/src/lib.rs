@@ -1,11 +1,13 @@
 #![cfg(feature = "wasm")]
 
+use std::sync::Arc;
+
 use serde::Serialize;
 use wasm_bindgen::prelude::*;
 
 use crate::{
     command::process,
-    io::memory::Storage,
+    io::Storage,
     json::{input::parser, output::Output},
 };
 pub mod command;
@@ -23,6 +25,7 @@ enum CommandResult {
 pub struct Kasane {
     storage: Storage,
 }
+
 #[wasm_bindgen]
 impl Kasane {
     /// Rust側の純粋な new（init後に呼ばれる）
@@ -62,7 +65,7 @@ impl Kasane {
         let results: Vec<CommandResult> = packet
             .command
             .into_iter()
-            .map(|cmd| match process(cmd, &mut self.storage) {
+            .map(|cmd| match process(cmd, Arc::new(self.storage.clone())) {
                 Ok(output) => CommandResult::Success(output),
                 Err(e) => CommandResult::Error(e.to_string()),
             })

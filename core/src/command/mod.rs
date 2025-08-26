@@ -1,3 +1,9 @@
+#[cfg(feature = "wasm")]
+use std::sync::Arc;
+#[cfg(feature = "full")]
+use std::sync::{Arc, Mutex};
+
+use crate::io::Storage;
 use crate::{
     command::{
         addkey::addkey, addspace::addspace, deletekey::deletekey, deletespace::deletespace,
@@ -25,12 +31,7 @@ pub mod tools;
 pub mod triangle;
 pub mod version;
 
-#[cfg(feature = "full")]
-use crate::io::kv::Storage;
-#[cfg(feature = "wasm")]
-use crate::io::memory::Storage;
-
-pub fn process(cmd: Command, s: &mut Storage) -> Result<Output, Error> {
+pub fn process(cmd: Command, s: Arc<Storage>) -> Result<Output, Error> {
     match cmd {
         Command::AddSpace(v) => addspace(v, s),
         Command::DeleteSpace(v) => deletespace(v, s),
@@ -45,5 +46,6 @@ pub fn process(cmd: Command, s: &mut Storage) -> Result<Output, Error> {
         Command::Select(v) => select(v, s),
         Command::Version => version(),
         Command::KeysInfo(v) => keysinfo(v, s),
+        Command::Transaction(v) => todo!(),
     }
 }

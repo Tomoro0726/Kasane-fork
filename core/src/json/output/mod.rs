@@ -42,5 +42,5 @@ pub enum Output {
     SpaceTimeIdSet(SpaceTimeIdSet),
     Version(String),
     KeysInfo(Vec<KeyInfoOutput>),
-    Success,
+    Success(),
 }

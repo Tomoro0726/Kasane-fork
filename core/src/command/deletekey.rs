@@ -5,11 +5,11 @@ use crate::{
 };
 
 #[cfg(feature = "full")]
-use crate::io::kv::Storage;
+use crate::io::sled::Storage;
 #[cfg(feature = "wasm")]
 use crate::io::memory::Storage;
 
-pub fn deletekey(v: DeleteKey, s: &mut Storage) -> Result<Output, Error> {
+pub fn deletekey(v: DeleteKey, s: & Storage) -> Result<Output, Error> {
     if !valid_name(&v.keyname) {
         Err(Error::KeyNameValidationError {
             name: v.keyname.clone(),

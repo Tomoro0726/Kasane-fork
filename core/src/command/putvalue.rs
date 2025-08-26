@@ -5,11 +5,11 @@ use crate::{
 };
 
 #[cfg(feature = "full")]
-use crate::io::kv::Storage;
+use crate::io::sled::Storage;
 #[cfg(feature = "wasm")]
 use crate::io::memory::Storage;
 
-pub fn putvalue(v: PutValue, s: &mut Storage) -> Result<Output, Error> {
+pub fn putvalue(v: PutValue, s: & Storage) -> Result<Output, Error> {
     let set = select(s, v.range)?;
     s.put_value(&v.spacename, &v.keyname, v.value, set)
 }

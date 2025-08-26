@@ -4,10 +4,10 @@ use crate::{
 };
 
 #[cfg(feature = "full")]
-use crate::io::kv::Storage;
+use crate::io::sled::Storage;
 #[cfg(feature = "wasm")]
 use crate::io::memory::Storage;
 
-pub fn keysinfo(v: KeysInfo, s: &mut Storage) -> Result<Output, Error> {
+pub fn keysinfo(v: KeysInfo, s: & Storage) -> Result<Output, Error> {
     Ok(s.keys_info(v))
 }

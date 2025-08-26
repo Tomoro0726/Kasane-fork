@@ -7,12 +7,12 @@ use crate::error::Error;
 use crate::json::input::Prefix::{AND, NOT, OR, XOR};
 use crate::json::input::{Function, Range};
 
-#[cfg(feature = "full")]
-use crate::io::kv::Storage;
 #[cfg(feature = "wasm")]
 use crate::io::memory::Storage;
+#[cfg(feature = "full")]
+use crate::io::sled::Storage;
 
-pub fn select(s: &mut Storage, v: Range) -> Result<SpaceTimeIdSet, Error> {
+pub fn select(s: &Storage, v: Range) -> Result<SpaceTimeIdSet, Error> {
     match v {
         Range::Prefix(prefix) => match prefix {
             AND(and) => {

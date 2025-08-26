@@ -1,4 +1,9 @@
-#[derive(Debug)]
+#[cfg(feature = "json_schema")]
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
+
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum Error {
     // Name validation errors with context
     SpaceNameValidationError {
@@ -53,9 +58,13 @@ pub enum Error {
         received_type: String,
         location: &'static str,
     },
-    // sled エラーをラップ
-    StorageError {
-        source: sled::Error,
+    QueueSendError {
+        location: &'static str,
+    },
+    QueueReceiveError {
+        location: &'static str,
+    },
+    QueueFull {
         location: &'static str,
     },
 }
@@ -156,8 +165,14 @@ impl fmt::Display for Error {
                     expected_type, received_type, location
                 )
             }
-            Error::StorageError { source, location } => {
-                write!(f, "Storage error: {} (at {})", source, location)
+            Error::QueueSendError { location } => {
+                write!(f, "Failed to send job to queue (at {})", location)
+            }
+            Error::QueueReceiveError { location } => {
+                write!(f, "Failed to receive job from queue (at {})", location)
+            }
+            Error::QueueFull { location } => {
+                write!(f, "Queue is full, cannot enqueue job (at {})", location)
             }
         }
     }

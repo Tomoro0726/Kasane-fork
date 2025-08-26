@@ -4,12 +4,12 @@ use crate::{
     json::{input::AddSpace, output::Output},
 };
 
-#[cfg(feature = "full")]
-use crate::io::kv::Storage;
 #[cfg(feature = "wasm")]
 use crate::io::memory::Storage;
+#[cfg(feature = "full")]
+use crate::io::sled::Storage;
 
-pub fn addspace(v: AddSpace, s: &mut Storage) -> Result<Output, Error> {
+pub fn addspace(v: AddSpace, s: &Storage) -> Result<Output, Error> {
     if !valid_name(&v.spacename) {
         Err(Error::SpaceNameValidationError {
             name: v.spacename,

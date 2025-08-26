@@ -8,11 +8,11 @@ use crate::{
 };
 
 #[cfg(feature = "full")]
-use crate::io::kv::Storage;
+use crate::io::sled::Storage;
 #[cfg(feature = "wasm")]
 use crate::io::memory::Storage;
 
-pub fn getvalue(v: GetValue, s: &mut Storage) -> Result<Output, Error> {
+pub fn getvalue(v: GetValue, s: & Storage) -> Result<Output, Error> {
     let set = select(s, v.range)?;
 
     let mut result = s.get_value(&v.spacename, &v.keyname, set)?;
