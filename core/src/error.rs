@@ -26,11 +26,9 @@ pub enum Error {
     // Resource existence errors
     SpaceAlreadyExists {
         space_name: String,
-        location: &'static str,
     },
     SpaceNotFound {
         space_name: String,
-        location: &'static str,
     },
     KeyNotFound {
         key_name: String,
@@ -65,10 +63,23 @@ pub enum Error {
     QueueFull {
         location: &'static str,
     },
-    SledError {
+    LmdbError {
         message: String,
         location: &'static str,
     },
+    LmdbMapFull {
+        attempted_size: usize,
+        location: &'static str,
+    },
+    LmdbTxnError {
+        message: String,
+        location: &'static str,
+    },
+    LmdbDbNotFound {
+        db_name: String,
+        location: &'static str,
+    },
+    NnKnown,
 }
 
 use std::fmt;
@@ -176,9 +187,27 @@ impl fmt::Display for Error {
             Error::QueueFull { location } => {
                 write!(f, "Queue is full, cannot enqueue job (at {})", location)
             }
-            Error::SledError { location, message } => {
-                write!(f, "{} (at {})", message, location)
+            Error::LmdbError { message, location } => {
+                write!(f, "LMDB error: {} (at {})", message, location)
             }
+            Error::LmdbMapFull {
+                attempted_size,
+                location,
+            } => {
+                write!(
+                    f,
+                    "LMDB map full: attempted size {} bytes (at {})",
+                    attempted_size, location
+                )
+            }
+            Error::LmdbTxnError { message, location } => {
+                write!(f, "LMDB transaction error: {} (at {})", message, location)
+            }
+            Error::LmdbDbNotFound { db_name, location } => {
+                write!(f, "LMDB database '{}' not found (at {})", db_name, location)
+            }
+            // 他の既存バリアントは省略
+            _ => write!(f, "Other error"),
         }
     }
 }

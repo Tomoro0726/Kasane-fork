@@ -1,8 +1,5 @@
-use sled::Db;
-use sled::transaction::{
-    ConflictableTransactionError, TransactionError, TransactionResult, Transactional,
-};
-use std::convert::TryInto;
+use std::env;
+use std::fmt::format;
 use std::path::PathBuf;
 
 use super::{Error, StorageTrait, ValueEntry};
@@ -10,287 +7,154 @@ use crate::io::tools::keytype_id::keytype_id;
 use crate::json::input::{FilterType, KeyType};
 use crate::json::output::Output;
 use kasane_logic::set::SpaceTimeIdSet;
+use lmdb::{Cursor, Error as LmdbError};
+use lmdb::{Database, DatabaseFlags, Environment, Transaction, WriteFlags};
+use uuid::Uuid;
 
-#[derive(Clone)]
 pub struct Storage {
-    pub inner: Db,
+    pub space: Database,
+    pub key: Database,
+    pub value: Database,
+    pub env: Environment,
 }
 
-impl Storage {
-    pub fn new(path: Option<PathBuf>) -> Result<Self, String> {
-        let db_path = path.unwrap_or_else(|| std::env::current_dir().unwrap());
-        let kv = sled::open(db_path).map_err(|e| e.to_string())?;
-        kv.open_tree("main").map_err(|e| e.to_string())?;
-        Ok(Self { inner: kv })
-    }
-}
-
-impl From<sled::Error> for Error {
-    fn from(e: sled::Error) -> Self {
-        Error::ParseError {
-            message: format!("sled error: {}", e),
-            location: "sled",
+impl From<lmdb::Error> for Error {
+    fn from(e: lmdb::Error) -> Self {
+        match e {
+            lmdb::Error::MapFull => Error::LmdbMapFull {
+                attempted_size: 0, // 必要に応じて Environment から取得して渡す
+                location: "unknown",
+            },
+            lmdb::Error::NotFound => Error::LmdbDbNotFound {
+                db_name: "unknown".to_string(),
+                location: "unknown",
+            },
+            _ => Error::LmdbError {
+                message: format!("{}", e),
+                location: "unknown",
+            },
         }
     }
 }
+
+impl Storage {
+    pub fn new(path: Option<PathBuf>) -> Result<Self, Error> {
+        // LMDB 環境を作成
+        let env = Environment::new()
+            .set_max_dbs(10) // 名前付きDBの上限
+            .set_map_size(1024 * 1024 * 1024) // 1GB
+            .open(&path.unwrap_or(env::current_dir().unwrap()))?;
+
+        // データベースを開く（なければ作成）
+        let space = env.create_db(Some("space"), DatabaseFlags::empty())?;
+
+        let key = env.create_db(Some("key"), DatabaseFlags::empty())?;
+        let value = env.create_db(Some("value"), DatabaseFlags::empty())?;
+
+        Ok(Self {
+            space,
+            key,
+            value,
+            env,
+        })
+    }
+}
+
 impl StorageTrait for Storage {
     fn show_spaces(&self) -> Result<Output, Error> {
-        let tree = self.inner.open_tree("data").map_err(Error::from)?;
-        let prefix = b"s:"; // space は "s:" + spaceid の形式
-        let spaces: Vec<String> = tree
-            .scan_prefix(prefix)
-            .keys()
-            .filter_map(|res| res.ok())
-            .filter_map(|ivec| {
-                let b = ivec.as_ref();
-                Some(format!("{}", u64::from_le_bytes(b[2..10].try_into().ok()?)))
-            })
-            .collect();
+        let txn = self.env.begin_ro_txn()?;
+        let mut cursor = txn.open_ro_cursor(self.space)?;
+
+        let mut spaces = Vec::new();
+
+        for result in cursor.iter_start() {
+            let (key, _value) = result;
+            // key が &[u8] なので String に変換
+            if let Ok(name) = std::str::from_utf8(key) {
+                spaces.push(name.to_string());
+            }
+        }
+
         Ok(Output::SpaceNames(spaces))
     }
 
     fn add_space(&self, spacename: &str) -> Result<Output, Error> {
-        let tree = self.inner.open_tree("data").map_err(Error::from)?;
-        let spaceid = self.inner.generate_id().map_err(Error::from)?;
-        let key = [&b"s:"[..], &spaceid.to_le_bytes()[..]].concat();
-        if tree.get(&key)?.is_some() {
-            return Err(Error::SpaceAlreadyExists {
-                space_name: spacename.to_string(),
-                location: "Storage::add_space",
-            });
-        }
-        tree.insert(key, spacename.as_bytes())?;
+        let space_id: [u8; 16] = *Uuid::new_v4().as_bytes();
+        let space_bytes = spacename.as_bytes();
+
+        let mut txn = self.env.begin_rw_txn()?;
+        txn.put(
+            self.space,
+            &space_bytes,
+            &space_id,
+            lmdb::WriteFlags::empty(),
+        )
+        //既に同じ名前のSpaceが存在する場合にはエラーを返す
+        .map_err(|e| match e {
+            LmdbError::KeyExist => Error::SpaceAlreadyExists {
+                space_name: spacename.to_owned(),
+            },
+            _ => Error::from(e),
+        })?;
+        txn.commit()?;
         Ok(Output::Success())
     }
 
     fn delete_space(&self, spacename: &str) -> Result<Output, Error> {
-        let tree = self.inner.open_tree("data").map_err(Error::from)?;
-        let prefix = b"s:"; // space prefix
+        let space_bytes = spacename.as_bytes();
 
-        // spaceid を検索
-        let spaceid_opt = tree
-            .scan_prefix(prefix)
-            .filter_map(|res| res.ok())
-            .find_map(|(k, v)| {
-                if v.as_ref() == spacename.as_bytes() {
-                    Some(k)
-                } else {
-                    None
-                }
-            });
+        let mut txn = self.env.begin_rw_txn()?;
+        txn.del(self.space, &space_bytes, None)
+            .map_err(|e| match e {
+                LmdbError::NotFound => Error::SpaceNotFound {
+                    space_name: spacename.to_owned(),
+                },
+                _ => Error::from(e),
+            })?;
 
-        let spaceid_bytes = spaceid_opt.ok_or(Error::SpaceNotFound {
-            space_name: spacename.to_string(),
-            location: "Storage::delete_space",
-        })?;
+        //Todo:keyからの削除
 
-        let spaceid = u64::from_le_bytes(spaceid_bytes[2..10].try_into().unwrap());
-
-        // トランザクションで space, key, value を削除
-        let result: TransactionResult<(), Error> = tree.transaction(|t| {
-            // key プレフィックス sID:keyID:keytypeID
-            let key_prefix = [&b"k:"[..], &spaceid.to_le_bytes()[..]].concat();
-            let keys_to_delete: Vec<Vec<u8>> = t
-                .scan_prefix(&key_prefix)
-                .keys()
-                .filter_map(|res| res.ok())
-                .map(|ivec| ivec.to_vec())
-                .collect();
-
-            for k in &keys_to_delete {
-                // value prefix: sID:keyID:keytypeID:
-                let value_prefix = [&b"v:"[..], k.as_slice(), &b":"[..]].concat();
-                let vals_to_delete: Vec<Vec<u8>> = t
-                    .scan_prefix(&value_prefix)
-                    .keys()
-                    .filter_map(|res| res.ok())
-                    .map(|ivec| ivec.to_vec())
-                    .collect();
-                for v in vals_to_delete {
-                    t.remove(v)?;
-                }
-                t.remove(k)?;
-            }
-
-            // space 削除
-            t.remove(spaceid_bytes)?;
-
-            Ok(())
-        });
-
-        match result {
-            Ok(_) => Ok(Output::Success()),
-            Err(TransactionError::Abort(e)) => Err(e),
-            Err(TransactionError::Storage(e)) => Err(Error::from(e)),
-        }
+        //Todo:valueからの削除
+        txn.commit()?;
+        Ok(Output::Success())
     }
 
     fn show_keys(&self, spacename: &str) -> Result<Output, Error> {
-        let tree = self.inner.open_tree("data").map_err(Error::from)?;
-        // spaceid を取得
-        let prefix = b"s:";
-        let spaceid_bytes = tree
-            .scan_prefix(prefix)
-            .filter_map(|res| res.ok())
-            .find_map(|(k, v)| {
-                if v.as_ref() == spacename.as_bytes() {
-                    Some(k)
-                } else {
-                    None
-                }
-            })
-            .ok_or(Error::SpaceNotFound {
-                space_name: spacename.to_string(),
-                location: "Storage::show_keys",
-            })?;
-        let spaceid = u64::from_le_bytes(spaceid_bytes[2..10].try_into().unwrap());
-
-        // key を取得
-        let key_prefix = [&b"k:"[..], &spaceid.to_le_bytes()[..]].concat();
-        let keys: Vec<String> = tree
-            .scan_prefix(&key_prefix)
-            .keys()
-            .filter_map(|res| res.ok())
-            .filter_map(|k| {
-                let k_bytes = k.as_ref();
-                // k: "k:" + spaceid(8) + keyID(8) + keytype(1)
-                if k_bytes.len() >= 17 {
-                    Some(format!(
-                        "{}",
-                        u64::from_le_bytes(k_bytes[10..18].try_into().ok()?)
-                    ))
-                } else {
-                    None
-                }
-            })
-            .collect();
-
-        Ok(Output::KeyNames(keys))
+        todo!()
     }
 
     fn add_key(&self, spacename: &str, keyname: &str, keytype: KeyType) -> Result<Output, Error> {
-        let tree = self.inner.open_tree("data").map_err(Error::from)?;
-        let keytype_id = keytype_id(keytype);
+        let spacename_bytes = spacename.as_bytes();
+        let mut txn = self.env.begin_rw_txn()?;
 
-        // spaceid を取得
-        let prefix = b"s:";
-        let spaceid_bytes = tree
-            .scan_prefix(prefix)
-            .filter_map(|res| res.ok())
-            .find_map(|(k, v)| {
-                if v.as_ref() == spacename.as_bytes() {
-                    Some(k)
-                } else {
-                    None
-                }
-            })
-            .ok_or(Error::SpaceNotFound {
-                space_name: spacename.to_string(),
-                location: "Storage::add_key",
+        //Spaceの存在の検証
+        let space_id = txn.get(self.space, &spacename_bytes).map_err(|e| match e {
+            LmdbError::NotFound => Error::SpaceNotFound {
+                space_name: spacename.to_owned(),
+            },
+            _ => Error::from(e),
+        })?;
+
+        //Keyの作成
+        let space_id_str = std::str::from_utf8(&space_id).map_err(|_| Error::NnKnown)?;
+
+        let key_bytes = format!("{}:{}:{}", space_id_str, keyname, keytype_id(keytype));
+
+        let key_id: [u8; 16] = *Uuid::new_v4().as_bytes();
+
+        txn.put(self.key, &key_bytes, &key_id, lmdb::WriteFlags::empty())
+            .map_err(|e| match e {
+                LmdbError::KeyExist => Error::SpaceAlreadyExists {
+                    space_name: spacename.to_owned(),
+                },
+                _ => Error::from(e),
             })?;
-        let spaceid = u64::from_le_bytes(spaceid_bytes[2..10].try_into().unwrap());
 
-        // keyID を生成
-        let keyid = self.inner.generate_id().map_err(Error::from)?;
-        let key_bytes = [
-            &b"k:"[..],
-            &spaceid.to_le_bytes()[..],
-            &keyid.to_le_bytes()[..],
-            &[keytype_id],
-        ]
-        .concat();
-        if tree.get(&key_bytes)?.is_some() {
-            return Err(Error::KeyAlreadyExists {
-                key_name: keyname.to_string(),
-                space_name: spacename.to_string(),
-                location: "Storage::add_key",
-            });
-        }
-
-        tree.insert(key_bytes, keyname.as_bytes())?;
+        txn.commit()?;
         Ok(Output::Success())
     }
 
     fn delete_key(&self, spacename: &str, keyname: &str) -> Result<Output, Error> {
-        let tree = self.inner.open_tree("data").map_err(Error::from)?;
-        let prefix = b"s:";
-        // spaceid を取得
-        let spaceid_bytes = tree
-            .scan_prefix(prefix)
-            .filter_map(|res| res.ok())
-            .find_map(|(k, v)| {
-                if v.as_ref() == spacename.as_bytes() {
-                    Some(k)
-                } else {
-                    None
-                }
-            })
-            .ok_or(Error::SpaceNotFound {
-                space_name: spacename.to_string(),
-                location: "Storage::delete_key",
-            })?;
-        let spaceid = u64::from_le_bytes(spaceid_bytes[2..10].try_into().unwrap());
-
-        // key を検索して削除
-        let key_prefix = [&b"k:"[..], &spaceid.to_le_bytes()[..]].concat();
-        let keys_to_delete: Vec<Vec<u8>> = tree
-            .scan_prefix(&key_prefix)
-            .filter_map(|res| res.ok())
-            .filter_map(|(k, v)| {
-                if v.as_ref() == keyname.as_bytes() {
-                    Some(k.to_vec())
-                } else {
-                    None
-                }
-            })
-            .collect();
-
-        if keys_to_delete.is_empty() {
-            return Err(Error::KeyNotFound {
-                key_name: keyname.to_string(),
-                space_name: spacename.to_string(),
-                location: "Storage::delete_key",
-            });
-        }
-
-        for k in keys_to_delete {
-            tree.remove(k)?;
-        }
-
-        Ok(Output::Success())
-    }
-
-    fn info_space(&self, _: &str) -> Result<Output, Error> {
-        todo!()
-    }
-    fn info_key(&self, _: &str, _: &str) -> Result<Output, Error> {
-        todo!()
-    }
-    fn filter_value(&self, _: &str, _: &str, _: FilterType) -> Result<Output, Error> {
-        todo!()
-    }
-    fn get_value(&self, _: &str, _: &str, _: SpaceTimeIdSet) -> Result<Output, Error> {
-        todo!()
-    }
-    fn set_value(
-        &self,
-        _: &str,
-        _: &str,
-        _: ValueEntry,
-        _: SpaceTimeIdSet,
-    ) -> Result<Output, Error> {
-        todo!()
-    }
-    fn put_value(
-        &self,
-        _: &str,
-        _: &str,
-        _: ValueEntry,
-        _: SpaceTimeIdSet,
-    ) -> Result<Output, Error> {
-        todo!()
-    }
-    fn delete_value(&self, _: &str, _: &str, _: SpaceTimeIdSet) -> Result<Output, Error> {
         todo!()
     }
 
@@ -298,6 +162,61 @@ impl StorageTrait for Storage {
     where
         F: Fn(&Self) -> Result<Output, Error>,
     {
+        todo!()
+    }
+
+    fn info_space(&self, spacename: &str) -> Result<Output, Error> {
+        todo!()
+    }
+
+    fn info_key(&self, spacename: &str, keyname: &str) -> Result<Output, Error> {
+        todo!()
+    }
+
+    fn filter_value(
+        &self,
+        spacename: &str,
+        keyname: &str,
+        filter: FilterType,
+    ) -> Result<Output, Error> {
+        todo!()
+    }
+
+    fn get_value(
+        &self,
+        spacename: &str,
+        keyname: &str,
+        set: SpaceTimeIdSet,
+    ) -> Result<Output, Error> {
+        todo!()
+    }
+
+    fn set_value(
+        &self,
+        spacename: &str,
+        keyname: &str,
+        value: ValueEntry,
+        set: SpaceTimeIdSet,
+    ) -> Result<Output, Error> {
+        todo!()
+    }
+
+    fn put_value(
+        &self,
+        spacename: &str,
+        keyname: &str,
+        value: ValueEntry,
+        set: SpaceTimeIdSet,
+    ) -> Result<Output, Error> {
+        todo!()
+    }
+
+    fn delete_value(
+        &self,
+        spacename: &str,
+        keyname: &str,
+        set: SpaceTimeIdSet,
+    ) -> Result<Output, Error> {
         todo!()
     }
 }

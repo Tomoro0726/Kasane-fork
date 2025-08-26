@@ -8,13 +8,12 @@ edition = "2024"
 default = ["full"]
 
 # ネイティブ向けフル機能
-full = ["sled", "actix-web", "tokio", "num_cpus"]
+full = ["actix-web", "tokio", "num_cpus","lmdb"]
 
 # WASM向け機能
 wasm = [
     "wasm-bindgen",
     "once_cell",
-    "kasane-logic/serde_support",
 ]
 
 # json schemaを書き出すための機能
@@ -26,12 +25,15 @@ serde_json = "1.0.141"
 wasm-bindgen = { version = "0.2", optional = true }
 once_cell = { version = "1.21.3", optional = true }
 kasane-logic = { version = "0.0.2", features = ["serde_support"] }
+uuid = { version="1.18.0", features = ["v4"]}
+
 
 # ネイティブ専用
-sled = { version = "0.34.7", optional = true }
 tokio = { version = "1.47.1", optional = true }
 actix-web = { version = "4", optional = true }
 num_cpus = { version = "1.17.0", optional = true }
+lmdb = {version="0.8.0",optional = true }
+
 
 # json schemaを書き出すための機能
 schemars = { version = "1.0.4", optional = true }
