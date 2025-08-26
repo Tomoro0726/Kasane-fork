@@ -42,8 +42,6 @@ pub enum Error {
         space_name: String,
         location: &'static str,
     },
-
-    // Value operation errors
     ValueAlreadyExists {
         space_time_id: String,
         location: &'static str,
@@ -65,6 +63,10 @@ pub enum Error {
         location: &'static str,
     },
     QueueFull {
+        location: &'static str,
+    },
+    SledError {
+        message: String,
         location: &'static str,
     },
 }
@@ -173,6 +175,9 @@ impl fmt::Display for Error {
             }
             Error::QueueFull { location } => {
                 write!(f, "Queue is full, cannot enqueue job (at {})", location)
+            }
+            Error::SledError { location, message } => {
+                write!(f, "{} (at {})", message, location)
             }
         }
     }

@@ -26,7 +26,7 @@ pub struct DeleteSpace {
 pub struct AddKey {
     pub spacename: String,
     pub keyname: String,
-    pub r#type: KeyType,
+    pub keytype: KeyType,
 }
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Copy)]

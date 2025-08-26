@@ -1,6 +1,9 @@
 use crate::{
     error::Error,
-    json::{input::FilterType, output::Output},
+    json::{
+        input::{FilterType, KeyType},
+        output::Output,
+    },
 };
 use kasane_logic::set::SpaceTimeIdSet;
 use serde::{Deserialize, Serialize};
@@ -27,46 +30,46 @@ pub enum ValueEntry {
 
 // StorageTrait は共通
 pub trait StorageTrait {
-    fn transaction<F>(&mut self, cmds: Vec<F>) -> Result<Vec<Output>, Error>
+    fn transaction<F>(&self, cmds: Vec<F>) -> Result<Vec<Output>, Error>
     where
-        F: Fn(&mut Self) -> Result<Output, Error>;
+        F: Fn(&Self) -> Result<Output, Error>;
 
-    fn show_spaces(&mut self) -> Result<Output, Error>;
-    fn add_space(&mut self, spacename: &str) -> Result<Output, Error>;
-    fn delete_space(&mut self, spacename: &str) -> Result<Output, Error>;
-    fn show_keys(&self, spacename: &str) -> Result<Vec<String>, Error>;
-    fn info_space(&mut self, spacename: &str) -> Result<Output, Error>;
-    fn add_key(&mut self, spacename: &str, keyname: &str) -> Result<Output, Error>;
-    fn delete_key(&mut self, spacename: &str, keyname: &str) -> Result<Output, Error>;
-    fn info_key(&mut self, spacename: &str, keyname: &str) -> Result<Output, Error>;
+    fn show_spaces(&self) -> Result<Output, Error>;
+    fn add_space(&self, spacename: &str) -> Result<Output, Error>;
+    fn delete_space(&self, spacename: &str) -> Result<Output, Error>;
+    fn show_keys(&self, spacename: &str) -> Result<Output, Error>;
+    fn info_space(&self, spacename: &str) -> Result<Output, Error>;
+    fn add_key(&self, spacename: &str, keyname: &str, keytype: KeyType) -> Result<Output, Error>;
+    fn delete_key(&self, spacename: &str, keyname: &str) -> Result<Output, Error>;
+    fn info_key(&self, spacename: &str, keyname: &str) -> Result<Output, Error>;
     fn filter_value(
-        &mut self,
+        &self,
         spacename: &str,
         keyname: &str,
         filter: FilterType,
     ) -> Result<Output, Error>;
     fn get_value(
-        &mut self,
+        &self,
         spacename: &str,
         keyname: &str,
         set: SpaceTimeIdSet,
     ) -> Result<Output, Error>;
     fn set_value(
-        &mut self,
+        &self,
         spacename: &str,
         keyname: &str,
         value: ValueEntry,
         set: SpaceTimeIdSet,
     ) -> Result<Output, Error>;
     fn put_value(
-        &mut self,
+        &self,
         spacename: &str,
         keyname: &str,
         value: ValueEntry,
         set: SpaceTimeIdSet,
     ) -> Result<Output, Error>;
     fn delete_value(
-        &mut self,
+        &self,
         spacename: &str,
         keyname: &str,
         set: SpaceTimeIdSet,

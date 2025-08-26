@@ -13,6 +13,6 @@ pub fn addkey(v: AddKey, s: Arc<Storage>) -> Result<Output, Error> {
             location: "command::addkey::addkey",
         })
     } else {
-        s.add_key(&v.spacename, &v.keyname)
+        s.add_key(&v.spacename, &v.keyname, v.keytype)
     }
 }

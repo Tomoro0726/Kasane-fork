@@ -5,7 +5,7 @@ use crate::{
 };
 
 #[cfg(feature = "full")]
-use crate::io::sled::Storage;
+use crate::io::Storage;
 #[cfg(feature = "wasm")]
 use crate::io::memory::Storage;
 
