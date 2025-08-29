@@ -3,6 +3,7 @@ use std::sync::Arc;
 #[cfg(feature = "full")]
 use std::sync::{Arc, Mutex};
 
+use crate::command::transaction::transaction;
 use crate::io::Storage;
 use crate::{
     command::{
@@ -28,6 +29,7 @@ pub mod setvalue;
 pub mod showkeys;
 pub mod showspaces;
 pub mod tools;
+pub mod transaction;
 pub mod triangle;
 pub mod version;
 
@@ -46,6 +48,6 @@ pub fn process(cmd: Command, s: Arc<Storage>) -> Result<Output, Error> {
         Command::Select(v) => select(v, s),
         Command::Version => version(),
         Command::KeysInfo(v) => keysinfo(v, s),
-        Command::Transaction(v) => todo!(),
+        Command::Transaction(v) => transaction(v, s),
     }
 }

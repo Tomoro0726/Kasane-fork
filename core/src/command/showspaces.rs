@@ -1,10 +1,11 @@
-use crate::{error::Error, json::output::Output};
+use std::sync::Arc;
 
-#[cfg(feature = "full")]
-use crate::io::sled::Storage;
-#[cfg(feature = "wasm")]
-use crate::io::memory::Storage;
+use crate::{
+    error::Error,
+    io::{Storage, StorageTrait},
+    json::output::Output,
+};
 
-pub fn showspaces(s: & Storage) -> Result<Output, Error> {
+pub fn showspaces(s: Arc<Storage>) -> Result<Output, Error> {
     s.show_spaces()
 }

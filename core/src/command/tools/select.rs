@@ -1,18 +1,16 @@
+use std::sync::Arc;
+
 use kasane_logic::id::SpaceTimeId;
 use kasane_logic::set::SpaceTimeIdSet;
 
 use crate::command::line::line;
 use crate::command::triangle::triangle;
 use crate::error::Error;
+use crate::io::Storage;
 use crate::json::input::Prefix::{AND, NOT, OR, XOR};
 use crate::json::input::{Function, Range};
 
-#[cfg(feature = "wasm")]
-use crate::io::memory::Storage;
-#[cfg(feature = "full")]
-use crate::io::sled::Storage;
-
-pub fn select(s: &Storage, v: Range) -> Result<SpaceTimeIdSet, Error> {
+pub fn select(s: Arc<Storage>, v: Range) -> Result<SpaceTimeIdSet, Error> {
     match v {
         Range::Prefix(prefix) => match prefix {
             AND(and) => {
@@ -80,7 +78,6 @@ pub fn select(s: &Storage, v: Range) -> Result<SpaceTimeIdSet, Error> {
             Function::Line(v) => Ok(line(v)),
             Function::Triangle(v) => Ok(triangle(v)),
             Function::FilterValue(v) => s.filter_value(v),
-            Function::HasValue(v) => s.has_value(v),
         },
     }
 }

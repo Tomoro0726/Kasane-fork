@@ -1,15 +1,13 @@
+use std::sync::Arc;
+
 use crate::{
     command::tools::select::select,
     error::Error,
+    io::Storage,
     json::{input::SetValue, output::Output},
 };
 
-#[cfg(feature = "full")]
-use crate::io::sled::Storage;
-#[cfg(feature = "wasm")]
-use crate::io::memory::Storage;
-
-pub fn setvalue(v: SetValue, s: & Storage) -> Result<Output, Error> {
+pub fn setvalue(v: SetValue, s: Arc<Storage>) -> Result<Output, Error> {
     let set = select(s, v.range)?;
     s.set_value(&v.spacename, &v.keyname, v.value, set)
 }

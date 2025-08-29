@@ -1,13 +1,11 @@
+use std::sync::Arc;
+
 use crate::{
     error::Error,
+    io::{Storage, StorageTrait},
     json::{input::Keys, output::Output},
 };
 
-#[cfg(feature = "full")]
-use crate::io::sled::Storage;
-#[cfg(feature = "wasm")]
-use crate::io::memory::Storage;
-
-pub fn showkeys(v: Keys, s: & Storage) -> Result<Output, Error> {
-    Ok(s.show_keys(v))
+pub fn showkeys(v: Keys, s: Arc<Storage>) -> Result<Output, Error> {
+    s.show_keys(&v.spacename)
 }

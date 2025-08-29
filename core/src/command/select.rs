@@ -1,17 +1,15 @@
+use std::sync::Arc;
+
 use crate::{
     error::Error,
+    io::Storage,
     json::{
         input::Select,
         output::{Output, SelectOutput},
     },
 };
 
-#[cfg(feature = "full")]
-use crate::io::sled::Storage;
-#[cfg(feature = "wasm")]
-use crate::io::memory::Storage;
-
-pub fn select(v: Select, s: & Storage) -> Result<Output, Error> {
+pub fn select(v: Select, s: Arc<Storage>) -> Result<Output, Error> {
     match crate::command::tools::select::select(s, v.range) {
         Ok(a) => {
             let mut result = Vec::new();
