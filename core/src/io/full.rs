@@ -233,9 +233,18 @@ impl StorageTrait for Storage {
 
     fn transaction<F>(&self, cmds: Vec<F>) -> Result<Vec<Output>, Error>
     where
-        F: Fn(&Self) -> Result<Output, Error>,
+        F: Fn(&mut lmdb::RwTransaction<'_>, &Self) -> Result<Output, Error>,
     {
-        todo!()
+        let mut txn = self.env.begin_rw_txn()?; // 1つのトランザクションを開始
+        let mut results = Vec::new();
+
+        for cmd in cmds {
+            let res = cmd(&mut txn, self)?; // トランザクションを共有
+            results.push(res);
+        }
+
+        txn.commit()?; // 成功したら一括コミット
+        Ok(results)
     }
 
     fn info_space(&self, spacename: &str) -> Result<Output, Error> {

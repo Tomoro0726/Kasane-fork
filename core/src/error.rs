@@ -112,17 +112,11 @@ impl fmt::Display for Error {
             Error::ParseError { message, location } => {
                 write!(f, "Parse error: {} (at {})", message, location)
             }
-            Error::SpaceAlreadyExists {
-                space_name,
-                location,
-            } => {
-                write!(f, "Space '{}' already exists (at {})", space_name, location)
+            Error::SpaceAlreadyExists { space_name } => {
+                write!(f, "Space '{}' already exists (at)", space_name,)
             }
-            Error::SpaceNotFound {
-                space_name,
-                location,
-            } => {
-                write!(f, "Space '{}' not found (at {})", space_name, location)
+            Error::SpaceNotFound { space_name } => {
+                write!(f, "Space '{}' not found (at)", space_name)
             }
             Error::KeyNotFound {
                 key_name,

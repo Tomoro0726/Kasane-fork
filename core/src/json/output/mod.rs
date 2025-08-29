@@ -34,7 +34,26 @@ pub struct KeyInfoOutput {
 
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Serialize)]
+pub struct InfoSpace {
+    pub spacename: String,
+    pub infokeys: Vec<InfoKey>,
+    pub key_count: u64,
+}
+
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Serialize)]
+pub struct InfoKey {
+    pub spacename: String,
+    pub keyname: String,
+    pub keytype: KeyType,
+    pub value_count: u64,
+}
+
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Serialize)]
 pub enum Output {
+    InfoSpace(InfoSpace),
+    InfoKey(InfoKey),
     SpaceNames(Vec<String>),
     KeyNames(Vec<String>),
     GetValue(Vec<GetValueOutput>),

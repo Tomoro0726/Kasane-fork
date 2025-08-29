@@ -33,7 +33,7 @@ pub enum ValueEntry {
 pub trait StorageTrait {
     fn transaction<F>(&self, cmds: Vec<F>) -> Result<Vec<Output>, Error>
     where
-        F: Fn(&Self) -> Result<Output, Error>;
+        F: Fn(&mut lmdb::RwTransaction<'_>, &Self) -> Result<Output, Error>;
 
     fn show_spaces(&self) -> Result<Output, Error>;
     fn add_space(&self, spacename: &str) -> Result<Output, Error>;

@@ -8,3 +8,13 @@ pub fn keytype_id(keytype: KeyType) -> u8 {
         KeyType::FLOAT => 4,
     }
 }
+
+pub fn id_keytype(id: u8) -> KeyType {
+    match id {
+        1 => KeyType::INT,
+        2 => KeyType::BOOLEAN,
+        3 => KeyType::TEXT,
+        4 => KeyType::FLOAT,
+        _ => panic!("ありえん"), // デフォルト
+    }
+}
