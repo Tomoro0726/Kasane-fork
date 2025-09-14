@@ -1,10 +1,10 @@
-use std::clone;
+use std::collections::HashSet;
 
 use kasane_logic::id::{DimensionRange, coordinates::Point};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::io::ValueEntry;
+use crate::{command::putvalue, io::ValueEntry};
 
 #[cfg(feature = "json_schema")]
 use schemars::JsonSchema;
@@ -73,7 +73,7 @@ pub struct DeleteValue {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct GetValue {
     pub spacename: String,
-    pub keyname: String,
+    pub keynames: Vec<String>,
     pub range: Range,
     pub vertex: bool,
     pub center: bool,
@@ -126,6 +126,7 @@ pub enum FilterType {
     FilterBOOLEAN(FilterBOOLEAN),
     FilterINT(FilterINT),
     FilterTEXT(FilterTEXT),
+    //TODO FLOATに対するFilterを考える
 }
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -162,6 +163,8 @@ pub enum FilterTEXT {
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum Function {
+    //特定の次元についての情報を消す関数
+    //粒度を操作する関数
     Line(Line),
     Triangle(Triangle),
     FilterValue(FilterValue),
@@ -177,41 +180,126 @@ pub enum Prefix {
 }
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Keys {
+pub struct ShowKeys {
     pub spacename: String,
 }
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Select {
-    pub range: Range,
-    pub vertex: bool,
-    pub center: bool,
-    pub id_string: bool,
-    pub id_pure: bool,
+pub struct InfoKey {
+    pub spacename: String,
+    pub keyname: String,
 }
+
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct KeysInfo {
+pub struct InfoSpace {
     pub spacename: String,
 }
 
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ShowValues {
+    pub spacename: String,
+    pub keyname: String,
+}
+
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct CreateUser {
+    pub username: String,
+    pub password: String,
+}
+
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct DropUser {
+    pub username: String,
+}
+
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Grant {
+    pub username: String,
+    pub db: HashSet<GrandDB>,
+    pub space: (SpecifySpace, GrandSpace),
+}
+
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
+pub enum GrandDB {
+    AddSpace,
+    DeleteSpace,
+    ShowSpaces,
+    Version,
+}
+
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub enum SpecifySpace {
+    All,
+    Specify(HashSet<String>),
+}
+
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
+pub enum GrandSpace {
+    AddKey,
+    DeleteKey,
+    InfoSpace,
+    ShowKeys,
+}
+
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub enum SpecifyKey {
+    All,
+    Specify(HashSet<String>),
+}
+
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
+pub enum GrandKey {
+    PutValue,
+    SetValue,
+    DeleteKey,
+    GetValue,
+    InfoKey,
+    ShowValues,
+}
+
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum Command {
+    //DB管理系
     AddSpace(AddSpace),
     DeleteSpace(DeleteSpace),
+    ShowSpaces,
+    Version,
+
+    //Space管理系
     AddKey(AddKey),
     DeleteKey(DeleteKey),
+    InfoSpace(InfoSpace),
+    ShowKeys(ShowKeys),
+
+    //Key管理系
     PutValue(PutValue),
     SetValue(SetValue),
     DeleteValue(DeleteValue),
     GetValue(GetValue),
-    Keys(Keys),
-    Spaces,
-    Select(Select),
-    Version,
-    KeysInfo(KeysInfo),
+    InfoKey(InfoKey),
+    Range(Range),
+    ShowValues(ShowValues),
+
+    //ツール系
     Transaction(Vec<Command>),
+
+    //ユーザーの作成と削除
+    CreateUser(CreateUser),
+    DropUser(DropUser),
+
+    //ユーザーへ権限の付与
+    Grant(Grant),
 }
 
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]

@@ -6,6 +6,4 @@ use crate::{
     json::{input::Command, output::Output},
 };
 
-pub fn transaction(v: Vec<Command>, s: Arc<Storage>) -> Result<Output, Error> {
-    todo!()
-}
+pub fn transaction(v: Vec<Command>, s: Arc<Storage>) -> Result<Output, Error> {}

@@ -23,9 +23,9 @@ pub use wasm::*;
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Clone, PartialEq, Serialize, Deserialize, Debug)]
 pub enum ValueEntry {
-    INT(i32),
     TEXT(String),
     BOOLEAN(bool),
+    INT(i32),
     FLOAT(f32),
 }
 
