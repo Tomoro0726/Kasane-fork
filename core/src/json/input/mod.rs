@@ -330,6 +330,7 @@ pub struct RevokeKeyPrivilege {
 // ---------------------- Packet & Command ----------------------
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub enum Command {
     //データベース操作系
     CreateSpace(CreateSpace),
