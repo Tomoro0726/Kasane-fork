@@ -42,12 +42,8 @@ pub fn process(cmd: Command, s: Arc<Storage>) -> Result<Output, Error> {
         Command::PutValue(v) => putvalue(v, s),
         Command::SetValue(v) => setvalue(v, s),
         Command::DeleteValue(v) => deletevalue(v, s),
-        Command::Keys(v) => showkeys(v, s),
-        Command::Spaces => showspaces(s),
         Command::GetValue(v) => getvalue(v, s),
-        Command::Select(v) => select(v, s),
         Command::Version => version(),
-        Command::KeysInfo(v) => keysinfo(v, s),
         Command::Transaction(v) => transaction(v, s),
     }
 }
