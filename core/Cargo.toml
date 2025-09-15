@@ -24,7 +24,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.141"
 wasm-bindgen = { version = "0.2", optional = true }
 once_cell = { version = "1.21.3", optional = true }
-kasane-logic = { version = "0.0.2", features = ["serde_support"] }
+kasane-logic = { version = "0.0.3", features = ["serde_support"] }
 uuid = { version="1.18.0", features = ["v4"]}
 
 

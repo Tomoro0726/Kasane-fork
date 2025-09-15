@@ -7,7 +7,7 @@ use crate::{
     json::{input::CreateSpace, output::Output},
 };
 
-pub fn addspace(v: CreateSpace, s: Arc<Storage>) -> Result<Output, Error> {
+pub fn create_space(v: CreateSpace, s: Arc<Storage>) -> Result<Output, Error> {
     if !valid_name(&v.space_name) {
         Err(Error::SpaceNameValidationError {
             name: v.space_name,

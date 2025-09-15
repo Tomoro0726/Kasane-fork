@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 use kasane_logic::id::{DimensionRange, coordinates::Point};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -335,21 +333,21 @@ pub enum Command {
     //データベース操作系
     CreateSpace(CreateSpace),
     DropSpace(DropSpace),
+    InfoSpace(InfoSpace),
     ShowSpaces,
     Version,
 
     //Key操作系
     CreateKey(CreateKey),
     DropKey(DropKey),
-    InfoSpace(InfoSpace),
     ShowKeys(ShowKeys),
+    InfoKey(InfoKey),
 
     //Value操作系
     InsertValue(InsertValue),
     UpdateValue(UpdateValue),
     DeleteValue(DeleteValue),
     SelectValue(SelectValue),
-    InfoKey(InfoKey),
     ShowValues(ShowValues),
 
     //ツール系
