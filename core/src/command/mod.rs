@@ -9,13 +9,9 @@ use crate::command::drop_key::drop_key;
 use crate::command::drop_space::drop_space;
 use crate::command::show_keys::show_keys;
 use crate::command::show_spaces::show_spaces;
-use crate::command::transaction::transaction;
 use crate::io::Storage;
 use crate::{
-    command::{
-        getvalue::getvalue, keysinfo::keysinfo, putvalue::putvalue, select::select,
-        setvalue::setvalue, version::version,
-    },
+    command::version::version,
     error::Error,
     json::{input::Command, output::Output},
 };
@@ -33,7 +29,6 @@ pub mod setvalue;
 pub mod show_keys;
 pub mod show_spaces;
 pub mod tools;
-pub mod transaction;
 pub mod triangle;
 pub mod version;
 
@@ -52,33 +47,34 @@ pub fn process(cmd: Command, s: Arc<Storage>) -> Result<Output, Error> {
         Command::CreateKey(v) => create_key(v, s),
         Command::DropKey(v) => drop_key(v, s),
         Command::ShowKeys(v) => show_keys(v, s),
-        Command::InfoKey(info_key) => todo!(),
+        Command::InfoKey(v) => todo!(),
 
         //Value操作系
-        Command::InsertValue(insert_value) => todo!(),
-        Command::UpdateValue(update_value) => todo!(),
-        Command::DeleteValue(delete_value) => todo!(),
-        Command::SelectValue(select_value) => todo!(),
-        Command::ShowValues(show_values) => todo!(),
+        Command::InsertValue(v) => todo!(),
+        Command::UpdateValue(v) => todo!(),
+        Command::DeleteValue(v) => todo!(),
+        Command::SelectValue(v) => todo!(),
+        Command::ShowValues(v) => todo!(),
 
         //ツール系
-        Command::Transaction(commands) => todo!(),
-        Command::Range(range) => todo!(),
+        //Command::Transaction(v) => todo!(),
 
         //ユーザー操作系
-        Command::CreateUser(create_user) => todo!(),
-        Command::DropUser(drop_user) => todo!(),
-        Command::InfoUser(info_user) => todo!(),
+        Command::CreateUser(v) => todo!(),
+        Command::DropUser(v) => todo!(),
+        Command::InfoUser(v) => todo!(),
         Command::ShowUsers => todo!(),
 
         //権限付与系
-        Command::GrantDatabase(grant_database) => todo!(),
-        Command::GrantSpacePrivilege(grant_space_privilege) => todo!(),
-        Command::GrantKeyPrivilege(grant_key_privilege) => todo!(),
+        Command::GrantDatabase(v) => todo!(),
+        Command::GrantSpacePrivilege(v) => todo!(),
+        Command::GrantKeyPrivilege(v) => todo!(),
+        Command::GrantToolPrivilege(v) => todo!(),
 
         //権限取り上げる系
-        Command::RevokeDatabase(revoke_database) => todo!(),
-        Command::RevokeSpacePrivilege(revoke_space_privilege) => todo!(),
-        Command::RevokeKeyPrivilege(revoke_key_privilege) => todo!(),
+        Command::RevokeDatabase(v) => todo!(),
+        Command::RevokeSpacePrivilege(v) => todo!(),
+        Command::RevokeKeyPrivilege(v) => todo!(),
+        Command::RevokeToolPrivilege(v) => todo!(),
     }
 }

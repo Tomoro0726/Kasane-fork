@@ -89,12 +89,12 @@ pub struct SelectValue {
 pub enum Range {
     Function(Function),
     Prefix(Prefix),
-    SpaceTimeIdSet(Vec<SpaceTimeIdInput>),
+    IdSet(Vec<IdInput>),
 }
 
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct SpaceTimeIdInput {
+pub struct IdInput {
     pub z: u8,
     pub f: DimensionRange<i32>,
     pub x: DimensionRange<u32>,
@@ -220,27 +220,27 @@ pub struct ShowValues {
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct CreateUser {
-    pub username: String,
+    pub user_name: String,
     pub password: String,
 }
 
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct DropUser {
-    pub username: String,
+    pub user_name: String,
 }
 
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct InfoUser {
-    pub username: String,
+    pub user_name: String,
 }
 
 // ---------------------- 権限管理 ----------------------
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct GrantDatabase {
-    pub username: String,
+    pub user_name: String,
     pub command: Vec<CommandDatabase>,
 }
 
@@ -256,7 +256,7 @@ pub enum CommandDatabase {
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct GrantSpacePrivilege {
-    pub username: String,
+    pub user_name: String,
     pub target_space: Vec<TargetSpace>,
     pub command: Vec<CommandSpace>,
 }
@@ -280,7 +280,7 @@ pub enum TargetSpace {
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct GrantKeyPrivilege {
-    pub username: String,
+    pub user_name: String,
     pub target_space: String,
     pub target_key: TargetKey,
     pub command: Vec<CommandKey>,
@@ -295,6 +295,7 @@ pub enum CommandKey {
     SelectValue,
     InfoKey,
     ShowValues,
+    FilterValue,
 }
 
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
@@ -304,25 +305,44 @@ pub enum TargetKey {
     KeyNames(Vec<String>),
 }
 
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct GrantToolPrivilege {
+    pub user_name: String,
+    pub command: Vec<CommandTool>,
+}
+
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub enum CommandTool {
+    Transaction,
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RevokeDatabase {
-    pub username: String,
+    pub user_name: String,
     pub command: Vec<CommandDatabase>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RevokeSpacePrivilege {
-    pub username: String,
+    pub user_name: String,
     pub target_space: Vec<TargetSpace>,
     pub command: Vec<CommandSpace>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RevokeKeyPrivilege {
-    pub username: String,
+    pub user_name: String,
     pub target_space: String,
     pub target_key: TargetKey,
     pub command: Vec<CommandKey>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct RevokeToolPrivilege {
+    pub user_name: String,
+    pub command: Vec<CommandTool>,
 }
 
 // ---------------------- Packet & Command ----------------------
@@ -351,8 +371,7 @@ pub enum Command {
     ShowValues(ShowValues),
 
     //ツール系
-    Transaction(Vec<Command>),
-    Range(Range),
+    //Transaction(Vec<Command>),
 
     //ユーザー操作系
     CreateUser(CreateUser),
@@ -364,11 +383,13 @@ pub enum Command {
     GrantDatabase(GrantDatabase),
     GrantSpacePrivilege(GrantSpacePrivilege),
     GrantKeyPrivilege(GrantKeyPrivilege),
+    GrantToolPrivilege(GrantToolPrivilege),
 
     //権限取り上げ系
     RevokeDatabase(RevokeDatabase),
     RevokeSpacePrivilege(RevokeSpacePrivilege),
     RevokeKeyPrivilege(RevokeKeyPrivilege),
+    RevokeToolPrivilege(RevokeToolPrivilege),
 }
 
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]

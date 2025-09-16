@@ -28,6 +28,6 @@ impl StorageTrait for Storage {
             _ => Error::from(e),
         })?;
         txn.commit()?;
-        Ok(Output::Success())
+        Ok(Output::Success)
     }
 }

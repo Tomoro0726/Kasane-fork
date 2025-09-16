@@ -31,10 +31,6 @@ pub enum ValueEntry {
 
 // StorageTrait は共通
 pub trait StorageTrait {
-    fn transaction<F>(&self, cmds: Vec<F>) -> Result<Vec<Output>, Error>
-    where
-        F: Fn(&mut lmdb::RwTransaction<'_>, &Self) -> Result<Output, Error>;
-
     fn show_spaces(&self) -> Result<Output, Error>;
     fn add_space(&self, spacename: &str) -> Result<Output, Error>;
     fn delete_space(&self, spacename: &str) -> Result<Output, Error>;
