@@ -26,6 +26,14 @@ pub struct CreateKey {
     pub space_name: String,
     pub key_name: String,
     pub key_type: KeyType,
+    pub key_mode: KeyMode,
+}
+
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Copy)]
+pub enum KeyMode {
+    UniqueKey,
+    MultiKey,
 }
 
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
@@ -48,6 +56,15 @@ pub struct DropKey {
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct InsertValue {
+    pub space_name: String,
+    pub key_name: String,
+    pub range: Range,
+    pub value: ValueEntry,
+}
+
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct PatchValue {
     pub space_name: String,
     pub key_name: String,
     pub range: Range,
@@ -290,6 +307,7 @@ pub struct GrantKeyPrivilege {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum CommandKey {
     InsertValue,
+    PatchValue,
     UpdateValue,
     DropKey,
     SelectValue,
@@ -365,6 +383,7 @@ pub enum Command {
 
     //Value操作系
     InsertValue(InsertValue),
+    PatchValue(PatchValue),
     UpdateValue(UpdateValue),
     DeleteValue(DeleteValue),
     SelectValue(SelectValue),
