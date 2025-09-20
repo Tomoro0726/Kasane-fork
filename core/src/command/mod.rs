@@ -4,12 +4,16 @@ use std::sync::Arc;
 #[cfg(feature = "full")]
 use std::sync::{Arc, Mutex};
 
+use rand::prelude;
+
 use crate::command::create_key::create_key;
 use crate::command::create_space::create_space;
 use crate::command::create_user::create_user;
 use crate::command::drop_key::drop_key;
 use crate::command::drop_space::drop_space;
 use crate::command::drop_user::drop_user;
+use crate::command::info_key::info_key;
+use crate::command::info_space::info_space;
 use crate::command::info_user::info_user;
 use crate::command::show_keys::show_keys;
 use crate::command::show_spaces::show_spaces;
@@ -28,6 +32,7 @@ pub mod drop_key;
 pub mod drop_space;
 pub mod drop_user;
 pub mod info_key;
+pub mod info_space;
 pub mod info_user;
 pub mod insert_value;
 pub mod line;
@@ -49,14 +54,14 @@ pub fn process(cmd: Command, s: Arc<Storage>) -> Result<Output, Error> {
         Command::CreateSpace(v) => create_space(v, s),
         Command::DropSpace(v) => drop_space(v, s),
         Command::ShowSpaces => show_spaces(s),
-        Command::InfoSpace(v) => todo!(),
+        Command::InfoSpace(v) => info_space(v, s),
         Command::Version => version(),
 
         //Key操作系
         Command::CreateKey(v) => create_key(v, s),
         Command::DropKey(v) => drop_key(v, s),
         Command::ShowKeys(v) => show_keys(v, s),
-        Command::InfoKey(v) => todo!(),
+        Command::InfoKey(v) => info_key(v, s),
 
         //Value操作系
         Command::InsertValue(v) => todo!(),
