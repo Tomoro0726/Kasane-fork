@@ -6,10 +6,14 @@ use std::sync::{Arc, Mutex};
 
 use crate::command::create_key::create_key;
 use crate::command::create_space::create_space;
+use crate::command::create_user::create_user;
 use crate::command::drop_key::drop_key;
 use crate::command::drop_space::drop_space;
+use crate::command::drop_user::drop_user;
+use crate::command::info_user::info_user;
 use crate::command::show_keys::show_keys;
 use crate::command::show_spaces::show_spaces;
+use crate::command::show_user::show_users;
 use crate::io::full::Storage;
 use crate::{
     command::version::version,
@@ -18,16 +22,20 @@ use crate::{
 };
 pub mod create_key;
 pub mod create_space;
+pub mod create_user;
 pub mod deletevalue;
 pub mod drop_key;
 pub mod drop_space;
+pub mod drop_user;
 pub mod info_key;
+pub mod info_user;
 pub mod insert_value;
 pub mod line;
 pub mod patch_value;
 pub mod select_value;
 pub mod show_keys;
 pub mod show_spaces;
+pub mod show_user;
 pub mod tools;
 pub mod triangle;
 pub mod update_value;
@@ -62,10 +70,10 @@ pub fn process(cmd: Command, s: Arc<Storage>) -> Result<Output, Error> {
         //Command::Transaction(v) => todo!(),
 
         //ユーザー操作系
-        Command::CreateUser(v) => todo!(),
-        Command::DropUser(v) => todo!(),
-        Command::InfoUser(v) => todo!(),
-        Command::ShowUsers => todo!(),
+        Command::CreateUser(v) => create_user(v, s),
+        Command::DropUser(v) => drop_user(v, s),
+        Command::InfoUser(v) => info_user(v, s),
+        Command::ShowUsers => show_users(s),
         //権限付与系
         // Command::GrantDatabase(v) => todo!(),
         // Command::GrantSpacePrivilege(v) => todo!(),
