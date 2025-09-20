@@ -1,8 +1,11 @@
-use std::{env, path::PathBuf};
+use std::{collections::HashSet, env, path::PathBuf};
 
 use crate::{
-    io::StorageTrait,
-    json::output::{InfoKey, InfoSpace, InfoUser, Output, ShowUsers, Showkeys},
+    io::{StorageTrait, ValueEntry, tools::keytype_id::keytype_id},
+    json::{
+        input::KeyType,
+        output::{InfoKey, InfoSpace, InfoUser, Output, ShowUsers, Showkeys},
+    },
 };
 use argon2::password_hash::PasswordHasher;
 use argon2::{Argon2, PasswordHash, PasswordVerifier, password_hash::SaltString};
@@ -89,7 +92,7 @@ impl Storage {
             if !admin_exists {
                 // デフォルトパスワードは "admin" にしておく
                 // 必要なら env から読み込むことも可能
-                storage.create_user("admin", "admin")?;
+                storage.create_user("admin", "nekocute")?;
                 println!(
                     "✔ 初回起動: admin ユーザーを作成しました (username=admin, password=admin)"
                 );
@@ -248,7 +251,13 @@ impl StorageTrait for Storage {
         };
 
         // Key用バイト列
-        let key_bytes = format!("{}:{}:{:?}:{:?}", space_uuid, keyname, keytype, keymode);
+        let key_bytes = format!(
+            "{}:{}:{:?}:{:?}",
+            space_uuid,
+            keyname,
+            keytype_id(keytype),
+            keymode
+        );
 
         let key_id: [u8; 16] = *Uuid::new_v4().as_bytes();
 
@@ -390,10 +399,52 @@ impl StorageTrait for Storage {
         &self,
         spacename: &str,
         keyname: &str,
-        ids: std::collections::HashSet<kasane_logic::id::SpaceTimeId>,
-        value: super::ValueEntry,
-    ) -> Result<crate::json::output::Output, Error> {
-        todo!()
+        ids: HashSet<kasane_logic::id::SpaceTimeId>,
+        value: ValueEntry,
+    ) -> Result<Output, Error> {
+        let mut txn = self.env.begin_rw_txn()?;
+
+        // 1. Space存在確認
+        let space_bytes = spacename.as_bytes();
+        let space_uuid_bytes = match txn.get(self.space, &space_bytes) {
+            Ok(v) => v,
+            Err(LmdbError::NotFound) => {
+                return Err(Error::SpaceNotFound {
+                    space_name: spacename.to_string(),
+                });
+            }
+            Err(e) => return Err(Error::from(e)),
+        };
+
+        // 2. Key存在確認
+        let mut key_cursor = txn.open_ro_cursor(self.key)?;
+        let mut key_found = None;
+        for result in key_cursor.iter_start() {
+            let (k, v) = result;
+            if k.starts_with(space_uuid_bytes) && std::str::from_utf8(k)?.contains(keyname) {
+                key_found = Some((k.to_vec(), v.to_vec()));
+                break;
+            }
+        }
+
+        let (key_bytes, key_id_bytes) = match key_found {
+            Some(kv) => kv,
+            None => {
+                return Err(Error::KeyNotFound {
+                    space_name: spacename.to_string(),
+                    key_name: keyname.to_string(),
+                    location: "insert_value",
+                });
+            }
+        };
+
+        // ここまでで型が合致していれば、実際の値挿入処理に進める
+        // TODO: Valueの保存処理
+
+        //入ってきたidsを1つづつ、bitmaskに変換していく
+        //入ってきたids
+
+        Ok(Output::Success)
     }
 
     fn patch_value(

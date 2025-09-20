@@ -116,9 +116,15 @@ pub struct IdInput {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Spot {
+    pub point1: Point,
+    pub zoom: u8,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Line {
-    pub start: Point,
-    pub end: Point,
+    pub point1: Point,
+    pub point2: Point,
     pub zoom: u8,
 }
 
@@ -179,6 +185,7 @@ pub enum FilterTEXT {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum Function {
+    Spot(Spot),
     Line(Line),
     Triangle(Triangle),
     FilterValue(FilterValue),

@@ -84,6 +84,9 @@ pub enum Error {
         db_name: &'static str,
         location: &'static str,
     },
+    RangeError {
+        message: String,
+    },
     NnKnown,
 }
 

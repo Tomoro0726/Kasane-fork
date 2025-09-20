@@ -1,11 +1,19 @@
 use std::sync::Arc;
 
+use serde::de::value::IsizeDeserializer;
+
 use crate::{
     error::Error,
-    io::full::Storage,
+    io::{StorageTrait, full::Storage, tools::range::range},
     json::{input::InsertValue, output::Output},
 };
 
 pub fn insert_value(v: InsertValue, s: Arc<Storage>) -> Result<Output, Error> {
-    todo!()
+    let range = match range(v.range) {
+        Ok(v) => v,
+        Err(e) => {
+            return Err(Error::RangeError { message: e });
+        }
+    };
+    s.insert_value(&v.space_name, &v.key_name, ids, v.value)
 }
