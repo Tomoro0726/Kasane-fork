@@ -353,6 +353,7 @@ pub enum Command {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Packet {
+    pub session: String,
     pub command: Vec<Command>,
 }
 
