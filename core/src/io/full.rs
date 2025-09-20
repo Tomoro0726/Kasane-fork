@@ -1,7 +1,13 @@
 use std::{env, path::PathBuf};
 
-use crate::{io::StorageTrait, json::output::Output};
-use lmdb::{DatabaseFlags, Error as LmdbError};
+use crate::{
+    io::StorageTrait,
+    json::{
+        output::InfoSpace,
+        output::{InfoKey, Output, Showkeys},
+    },
+};
+use lmdb::{Cursor, DatabaseFlags, Error as LmdbError};
 
 use super::Error;
 use lmdb::{Database, Environment, Transaction};
@@ -11,6 +17,8 @@ pub struct Storage {
     pub space: Database,
     pub key: Database,
     pub value: Database,
+    pub user: Database,
+
     pub env: Environment,
 }
 
@@ -22,13 +30,31 @@ impl From<lmdb::Error> for Error {
                 location: "unknown",
             },
             lmdb::Error::NotFound => Error::LmdbDbNotFound {
-                db_name: "unknown".to_string(),
+                db_name: "unknown",
                 location: "unknown",
             },
             _ => Error::LmdbError {
-                message: format!("{}", e),
+                message: e,
                 location: "unknown",
             },
+        }
+    }
+}
+
+impl From<std::str::Utf8Error> for Error {
+    fn from(e: std::str::Utf8Error) -> Self {
+        Error::ParseError {
+            message: format!("Invalid UTF-8: {}", e),
+            location: "unknown",
+        }
+    }
+}
+
+impl From<std::string::FromUtf8Error> for Error {
+    fn from(e: std::string::FromUtf8Error) -> Self {
+        Error::ParseError {
+            message: format!("Invalid UTF-8 (from Vec<u8>): {}", e),
+            location: "unknown",
         }
     }
 }
@@ -43,14 +69,15 @@ impl Storage {
 
         // データベースを開く（なければ作成）
         let space = env.create_db(Some("space"), DatabaseFlags::empty())?;
-
         let key = env.create_db(Some("key"), DatabaseFlags::empty())?;
         let value = env.create_db(Some("value"), DatabaseFlags::empty())?;
+        let user = env.create_db(Some("user"), DatabaseFlags::empty())?;
 
         Ok(Self {
             space,
             key,
             value,
+            user,
             env,
         })
     }
@@ -60,7 +87,6 @@ impl StorageTrait for Storage {
     fn create_space(&self, spacename: &str) -> Result<Output, Error> {
         let space_id: [u8; 16] = *Uuid::new_v4().as_bytes();
         let space_bytes = spacename.as_bytes();
-
         let mut txn = self.env.begin_rw_txn()?;
         txn.put(
             self.space,
@@ -80,19 +106,108 @@ impl StorageTrait for Storage {
     }
 
     fn drop_space(&self, spacename: &str) -> Result<crate::json::output::Output, Error> {
-        todo!()
+        let space_bytes = spacename.as_bytes();
+        let mut txn = self.env.begin_rw_txn()?;
+
+        // 1. Space の削除
+        txn.del(self.space, &space_bytes, None)
+            .map_err(|e| match e {
+                LmdbError::NotFound => Error::SpaceNotFound {
+                    space_name: spacename.to_string(),
+                },
+                _ => Error::from(e),
+            })?;
+
+        // 2. Space に属するキーを先にコピー
+        let mut keys_to_delete = Vec::new();
+        {
+            let mut cursor = txn.open_ro_cursor(self.key)?; // 読み取り専用カーソルで走査
+            let prefix = space_bytes; // space UUID が key のプレフィックス
+            for result in cursor.iter_start() {
+                let (k, _) = result;
+                if k.starts_with(prefix) {
+                    keys_to_delete.push(k.to_vec()); // Vec にコピー
+                }
+            }
+        }
+
+        // 3. コピーしたキーを削除
+        for k in keys_to_delete {
+            txn.del(self.key, &k, None)?;
+        }
+
+        txn.commit()?;
+        Ok(Output::Success)
     }
 
     fn info_space(&self, spacename: &str) -> Result<crate::json::output::Output, Error> {
-        todo!()
+        // 1. Space の存在確認
+        let space_bytes = spacename.as_bytes();
+        let txn = self.env.begin_ro_txn()?;
+        let space_uuid = match txn.get(self.space, &space_bytes) {
+            Ok(v) => std::str::from_utf8(v)?,
+            Err(LmdbError::NotFound) => {
+                return Err(Error::SpaceNotFound {
+                    space_name: spacename.to_string(),
+                });
+            }
+            Err(e) => return Err(Error::from(e)),
+        };
+
+        // 2. キーを走査してこのスペースに属するものだけ抽出
+        let mut cursor = txn.open_ro_cursor(self.key)?;
+        let mut keys_info: Vec<InfoKey> = Vec::new();
+        let prefix = format!("{}:", space_uuid);
+
+        for result in cursor.iter_start() {
+            let (k, _v) = result;
+            if k.starts_with(prefix.as_bytes()) {
+                let key_str = std::str::from_utf8(k)?;
+                let parts: Vec<&str> = key_str.split(':').collect();
+                if parts.len() != 4 {
+                    return Err(Error::ParseError {
+                        message: format!("Invalid key format: {}", key_str),
+                        location: "io::info_space",
+                    });
+                }
+
+                keys_info.push(InfoKey {
+                    keyname: parts[1].to_string(),
+                    keytype: parts[2].to_string(),
+                    keymode: parts[3].to_string(),
+                });
+            }
+        }
+
+        let info = InfoSpace {
+            spacename: spacename.to_string(),
+            keynames: keys_info,
+        };
+
+        Ok(crate::json::output::Output::InfoSpace(info))
     }
 
     fn show_spaces(&self) -> Result<crate::json::output::Output, Error> {
-        todo!()
-    }
+        let txn = self.env.begin_ro_txn()?; // 読み取り専用トランザクション
+        let mut cursor = txn.open_ro_cursor(self.space)?; // space DB のカーソルを開く
 
-    fn version() -> Result<crate::json::output::Output, Error> {
-        todo!()
+        let mut spaces = Vec::new();
+
+        for result in cursor.iter_start() {
+            let (key_bytes, _val_bytes) = result;
+
+            // &[u8] -> &str への変換。? で Error に変換可能
+            let s: &str = std::str::from_utf8(key_bytes)?;
+
+            // &str -> String
+            let string: String = s.to_string();
+
+            spaces.push(string);
+        }
+
+        Ok(Output::ShowSpaces(crate::json::output::ShowSpaces {
+            spacenames: spaces,
+        }))
     }
 
     fn create_key(
@@ -102,7 +217,41 @@ impl StorageTrait for Storage {
         keytype: crate::json::input::KeyType,
         keymode: crate::json::input::KeyMode,
     ) -> Result<crate::json::output::Output, Error> {
-        todo!()
+        // Spaceの存在を確認
+        let space_bytes = spacename.as_bytes();
+        let mut txn = self.env.begin_rw_txn()?;
+        let space_uuid = match txn.get(self.space, &space_bytes) {
+            Ok(v) => std::str::from_utf8(v)?,
+            Err(LmdbError::NotFound) => {
+                return Err(Error::SpaceNotFound {
+                    space_name: spacename.to_string(),
+                });
+            }
+            Err(e) => return Err(Error::from(e)),
+        };
+
+        // Key用バイト列
+        let key_bytes = format!("{}:{}:{:?}:{:?}", space_uuid, keyname, keytype, keymode);
+
+        let key_id: [u8; 16] = *Uuid::new_v4().as_bytes();
+
+        txn.put(
+            self.key,
+            &key_bytes.as_bytes(),
+            &key_id,
+            lmdb::WriteFlags::empty(),
+        )
+        .map_err(|e| match e {
+            LmdbError::KeyExist => Error::KeyAlreadyExists {
+                space_name: spacename.to_owned(),
+                key_name: keyname.to_owned(),
+                location: "io::create_key",
+            },
+            e => Error::from(e),
+        })?;
+
+        txn.commit()?;
+        Ok(Output::Success)
     }
 
     fn drop_key(
@@ -110,11 +259,62 @@ impl StorageTrait for Storage {
         spacename: &str,
         keyname: &str,
     ) -> Result<crate::json::output::Output, Error> {
-        todo!()
+        let space_bytes = spacename.as_bytes();
+        let mut txn = self.env.begin_rw_txn()?;
+        let space_uuid = match txn.get(self.space, &space_bytes) {
+            Ok(v) => std::str::from_utf8(v)?,
+            Err(LmdbError::NotFound) => {
+                return Err(Error::SpaceNotFound {
+                    space_name: spacename.to_string(),
+                });
+            }
+            Err(e) => return Err(Error::from(e)),
+        };
+
+        // Keyのprefix
+        let key_prefix = format!("{}:{}", space_uuid, keyname);
+
+        match txn.del(self.key, &key_prefix.as_bytes(), None) {
+            Ok(_) => {
+                txn.commit()?;
+                Ok(Output::Success)
+            }
+            Err(LmdbError::NotFound) => Err(Error::KeyNotFound {
+                space_name: spacename.to_owned(),
+                key_name: keyname.to_owned(),
+                location: "io::drop_key",
+            }),
+            Err(e) => Err(Error::from(e)),
+        }
     }
 
     fn show_keys(&self, spacename: &str) -> Result<crate::json::output::Output, Error> {
-        todo!()
+        let space_bytes = spacename.as_bytes();
+        let txn = self.env.begin_ro_txn()?;
+        let space_uuid = match txn.get(self.space, &space_bytes) {
+            Ok(v) => std::str::from_utf8(v)?,
+            Err(LmdbError::NotFound) => {
+                return Err(Error::SpaceNotFound {
+                    space_name: spacename.to_string(),
+                });
+            }
+            Err(e) => return Err(Error::from(e)),
+        };
+
+        let mut cursor = txn.open_ro_cursor(self.key)?;
+        let prefix = format!("{}:", space_uuid);
+        let mut keys = Vec::new();
+
+        for result in cursor.iter_start() {
+            let (k, _v) = result;
+            if k.starts_with(prefix.as_bytes()) {
+                // prefixを除いたkey名を抽出
+                let key_str = std::str::from_utf8(&k[prefix.len()..])?.to_string();
+                keys.push(key_str);
+            }
+        }
+
+        Ok(Output::Showkeys(Showkeys { keynames: keys }))
     }
 
     fn info_key(
@@ -122,7 +322,51 @@ impl StorageTrait for Storage {
         spacename: &str,
         keyname: &str,
     ) -> Result<crate::json::output::Output, Error> {
-        todo!()
+        // 1. Space の存在確認
+        let space_bytes = spacename.as_bytes();
+        let txn = self.env.begin_ro_txn()?;
+        let space_uuid = match txn.get(self.space, &space_bytes) {
+            Ok(v) => std::str::from_utf8(v)?,
+            Err(LmdbError::NotFound) => {
+                return Err(Error::SpaceNotFound {
+                    space_name: spacename.to_string(),
+                });
+            }
+            Err(e) => return Err(Error::from(e)),
+        };
+
+        // 2. Key の prefix を作成
+        let key_prefix = format!("{}:{}", space_uuid, keyname);
+        let mut cursor = txn.open_ro_cursor(self.key)?;
+
+        for result in cursor.iter_start() {
+            let (k, _v) = result;
+            if k.starts_with(key_prefix.as_bytes()) {
+                // k は "space_uuid:keyname:keytype:keymode" 形式
+                let key_str = std::str::from_utf8(k)?;
+                let parts: Vec<&str> = key_str.split(':').collect();
+                if parts.len() != 4 {
+                    return Err(Error::ParseError {
+                        message: format!("Invalid key format: {}", key_str),
+                        location: "io::info_key",
+                    });
+                }
+
+                let info = InfoKey {
+                    keyname: parts[1].to_string(),
+                    keytype: parts[2].to_string(),
+                    keymode: parts[3].to_string(),
+                };
+
+                return Ok(crate::json::output::Output::InfoKey(info));
+            }
+        }
+
+        Err(Error::KeyNotFound {
+            space_name: spacename.to_string(),
+            key_name: keyname.to_string(),
+            location: "io::info_key",
+        })
     }
 
     fn insert_value(

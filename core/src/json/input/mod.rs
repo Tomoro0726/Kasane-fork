@@ -4,11 +4,8 @@ use serde_json::Value;
 
 use crate::io::ValueEntry;
 
-#[cfg(feature = "json_schema")]
-use schemars::JsonSchema;
-
 //共通型
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum AllOrChoose<T> {
     Choose(T),
@@ -16,19 +13,17 @@ pub enum AllOrChoose<T> {
 }
 
 // ---------------------- Space管理 ----------------------
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct CreateSpace {
     pub space_name: String,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct DropSpace {
     pub space_name: String,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct CreateKey {
     pub space_name: String,
@@ -37,14 +32,12 @@ pub struct CreateKey {
     pub key_mode: KeyMode,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Copy)]
 pub enum KeyMode {
     UniqueKey,
     MultiKey,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Copy)]
 pub enum KeyType {
     INT,
@@ -53,7 +46,6 @@ pub enum KeyType {
     FLOAT,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct DropKey {
     pub space_name: String,
@@ -61,7 +53,7 @@ pub struct DropKey {
 }
 
 // ---------------------- Value管理 ----------------------
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct InsertValue {
     pub space_name: String,
@@ -70,7 +62,6 @@ pub struct InsertValue {
     pub value: ValueEntry,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PatchValue {
     pub space_name: String,
@@ -79,7 +70,6 @@ pub struct PatchValue {
     pub value: ValueEntry,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UpdateValue {
     pub space_name: String,
@@ -88,7 +78,6 @@ pub struct UpdateValue {
     pub value: ValueEntry,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct DeleteValue {
     pub space_name: String,
@@ -96,7 +85,6 @@ pub struct DeleteValue {
     pub range: Range,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SelectValue {
     pub space_name: String,
@@ -109,7 +97,7 @@ pub struct SelectValue {
 }
 
 // ---------------------- Range & Function ----------------------
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum Range {
     Function(Function),
@@ -117,7 +105,6 @@ pub enum Range {
     IdSet(Vec<IdInput>),
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct IdInput {
     pub z: u8,
@@ -128,7 +115,6 @@ pub struct IdInput {
     pub t: DimensionRange<u32>,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Line {
     pub start: Point,
@@ -136,7 +122,6 @@ pub struct Line {
     pub zoom: u8,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Triangle {
     pub point1: Point,
@@ -145,7 +130,6 @@ pub struct Triangle {
     pub zoom: u8,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct FilterValue {
     pub space_name: String,
@@ -153,7 +137,6 @@ pub struct FilterValue {
     pub filter: FilterType,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum FilterType {
     HasValue,
@@ -162,7 +145,6 @@ pub enum FilterType {
     FilterTEXT(FilterTEXT),
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum FilterBOOLEAN {
     IsTrue,
@@ -171,7 +153,6 @@ pub enum FilterBOOLEAN {
     NotEquals(bool),
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum FilterINT {
     Equal(i32),
@@ -185,7 +166,6 @@ pub enum FilterINT {
     NotIn(Vec<i32>),
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum FilterTEXT {
     Equal(String),
@@ -197,7 +177,6 @@ pub enum FilterTEXT {
     CaseInsensitiveEqual(String),
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum Function {
     Line(Line),
@@ -205,7 +184,6 @@ pub enum Function {
     FilterValue(FilterValue),
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum Prefix {
     AND(Vec<Range>),
@@ -215,26 +193,23 @@ pub enum Prefix {
 }
 
 // ---------------------- Key / Space情報 ----------------------
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ShowKeys {
     pub space_name: String,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct InfoKey {
     pub space_name: String,
     pub key_name: String,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct InfoSpace {
     pub space_name: String,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ShowValues {
     pub space_name: String,
@@ -242,34 +217,31 @@ pub struct ShowValues {
 }
 
 // ---------------------- User管理 ----------------------
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct CreateUser {
     pub user_name: String,
     pub password: String,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct DropUser {
     pub user_name: String,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct InfoUser {
     pub user_name: String,
 }
 
 // ---------------------- 権限管理 ----------------------
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct GrantDatabase {
     pub user_name: String,
     pub command: AllOrChoose<Vec<CommandDatabase>>,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
 pub enum CommandDatabase {
     CreateSpace,
@@ -278,7 +250,6 @@ pub enum CommandDatabase {
     Version,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct GrantSpacePrivilege {
     pub user_name: String,
@@ -286,7 +257,6 @@ pub struct GrantSpacePrivilege {
     pub command: AllOrChoose<Vec<CommandSpace>>,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
 pub enum CommandSpace {
     CreateKey,
@@ -295,7 +265,6 @@ pub enum CommandSpace {
     ShowKeys,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct GrantKeyPrivilege {
     pub user_name: String,
@@ -304,7 +273,6 @@ pub struct GrantKeyPrivilege {
     pub command: AllOrChoose<Vec<CommandKey>>,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum CommandKey {
     InsertValue,
@@ -317,20 +285,19 @@ pub enum CommandKey {
     FilterValue,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RevokeDatabase {
     pub user_name: String,
     pub command: AllOrChoose<Vec<CommandDatabase>>,
 }
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RevokeSpacePrivilege {
     pub user_name: String,
     pub target_space: AllOrChoose<Vec<String>>,
     pub command: AllOrChoose<Vec<CommandSpace>>,
 }
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RevokeKeyPrivilege {
     pub user_name: String,
@@ -340,7 +307,7 @@ pub struct RevokeKeyPrivilege {
 }
 
 // ---------------------- Packet & Command ----------------------
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub enum Command {
@@ -384,7 +351,6 @@ pub enum Command {
     // RevokeKeyPrivilege(RevokeKeyPrivilege),
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Packet {
     pub command: Vec<Command>,

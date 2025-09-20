@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use kasane_logic::id::{SpaceTimeId, coordinates::Point};
 use serde::Serialize;
@@ -8,45 +8,39 @@ use crate::{
     json::input::{CommandDatabase, CommandKey, CommandSpace},
 };
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Serialize)]
 pub struct ShowSpaces {
     pub spacenames: Vec<String>,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Serialize)]
 pub struct Version {
     pub version: String,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Serialize)]
 pub struct InfoSpace {
     pub spacename: String,
     pub keynames: Vec<InfoKey>,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Serialize)]
 pub struct InfoKey {
     pub keyname: String,
     pub keytype: String,
+    pub keymode: String,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Serialize)]
 pub struct Showkeys {
     pub keynames: Vec<String>,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Serialize)]
 pub struct SelectValue {
     values: Vec<Value>,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Serialize)]
 pub struct Value {
     id: SpaceTimeId,
@@ -56,7 +50,6 @@ pub struct Value {
     value: HashMap<String, ValueEntry>,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Serialize)]
 pub struct InfoUser {
     user_name: String,
@@ -65,14 +58,12 @@ pub struct InfoUser {
     key_commnad: Vec<InfoUserKey>,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Serialize)]
 pub struct InfoUserSpace {
     space_name: String,
     space_commnad: Vec<CommandSpace>,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Serialize)]
 pub struct InfoUserKey {
     space_name: String,
@@ -80,7 +71,6 @@ pub struct InfoUserKey {
     space_commnad: Vec<CommandKey>,
 }
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Output {

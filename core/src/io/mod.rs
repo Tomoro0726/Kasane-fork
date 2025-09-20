@@ -12,8 +12,6 @@ use serde::{Deserialize, Serialize};
 pub mod full;
 pub mod tools;
 
-// ValueEntry は共通
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Clone, PartialEq, Serialize, Deserialize, Debug)]
 pub enum ValueEntry {
     TEXT(String),
@@ -29,7 +27,6 @@ pub trait StorageTrait {
     fn drop_space(&self, spacename: &str) -> Result<Output, Error>;
     fn info_space(&self, spacename: &str) -> Result<Output, Error>;
     fn show_spaces(&self) -> Result<Output, Error>;
-    fn version() -> Result<Output, Error>;
 
     //key操作系
     fn create_key(

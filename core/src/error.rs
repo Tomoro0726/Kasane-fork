@@ -1,8 +1,5 @@
-#[cfg(feature = "json_schema")]
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Error {
     // Name validation errors with context
@@ -64,7 +61,7 @@ pub enum Error {
         location: &'static str,
     },
     LmdbError {
-        message: String,
+        message: &str,
         location: &'static str,
     },
     LmdbMapFull {
@@ -72,11 +69,11 @@ pub enum Error {
         location: &'static str,
     },
     LmdbTxnError {
-        message: String,
+        message: &'static str,
         location: &'static str,
     },
     LmdbDbNotFound {
-        db_name: String,
+        db_name: &'static str,
         location: &'static str,
     },
     NnKnown,
