@@ -61,7 +61,7 @@ pub enum Error {
         location: &'static str,
     },
     LmdbError {
-        message: &str,
+        message: String,
         location: &'static str,
     },
     LmdbMapFull {
