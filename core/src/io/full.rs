@@ -72,13 +72,31 @@ impl Storage {
         let value = env.create_db(Some("value"), DatabaseFlags::empty())?;
         let user = env.create_db(Some("user"), DatabaseFlags::empty())?;
 
-        Ok(Self {
+        let storage = Self {
             space,
             key,
             value,
             user,
             env,
-        })
+        };
+
+        // === 初回起動時の admin ユーザー作成 ===
+        {
+            let txn = storage.env.begin_ro_txn()?;
+            let admin_exists = txn.get(storage.user, b"admin").is_ok();
+            drop(txn);
+
+            if !admin_exists {
+                // デフォルトパスワードは "admin" にしておく
+                // 必要なら env から読み込むことも可能
+                storage.create_user("admin", "admin")?;
+                println!(
+                    "✔ 初回起動: admin ユーザーを作成しました (username=admin, password=admin)"
+                );
+            }
+        }
+
+        Ok(storage)
     }
 }
 
@@ -462,6 +480,12 @@ impl StorageTrait for Storage {
     }
 
     fn drop_user(&self, username: &str) -> Result<Output, Error> {
+        if username == "admin" {
+            return Err(Error::UserNotFound {
+                user_name: "admin".to_string(),
+            }); // もしくは専用のエラーを作っても良い
+        }
+
         let mut txn = self.env.begin_rw_txn()?;
         match txn.del(self.user, &username.as_bytes(), None) {
             Ok(_) => {
