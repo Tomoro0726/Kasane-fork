@@ -14,6 +14,10 @@ pub enum Error {
         location: &'static str,
     },
 
+    UserAlreadyExists {
+        name: String,
+    },
+
     // Parse errors with context
     ParseError {
         message: String,

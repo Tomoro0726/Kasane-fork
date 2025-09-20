@@ -2,12 +2,12 @@ use std::{env, path::PathBuf};
 
 use crate::{
     io::StorageTrait,
-    json::{
-        output::InfoSpace,
-        output::{InfoKey, Output, Showkeys},
-    },
+    json::output::{InfoKey, InfoSpace, InfoUser, Output, ShowUsers, Showkeys},
 };
+use argon2::password_hash::PasswordHasher;
+use argon2::{Argon2, PasswordHash, PasswordVerifier, password_hash::SaltString};
 use lmdb::{Cursor, DatabaseFlags, Error as LmdbError};
+use rand::rngs::OsRng;
 
 use super::Error;
 use lmdb::{Database, Environment, Transaction};
@@ -431,44 +431,47 @@ impl StorageTrait for Storage {
         let mut txn = self.env.begin_rw_txn()?;
 
         // ユーザー名が既に存在するか確認
-        if txn.get(self.user, username.as_bytes()).is_ok() {
-            return Err(Error::SpaceAlreadyExists {
-                // ここは専用の UserAlreadyExists に置き換え可
-                space_name: username.to_string(),
+        if txn.get(self.user, &username.as_bytes()).is_ok() {
+            return Err(Error::UserAlreadyExists {
+                name: username.to_string(),
             });
         }
 
-        // パスワードをハッシュ化
-        let mut salt = [0u8; 16];
-        thread_rng().fill_bytes(&mut salt);
-        let config = Config::default();
-        let hash = argon2::hash_encoded(password.as_bytes(), &salt, &config).map_err(|_| {
-            Error::LmdbError {
-                message: "Password hash failed",
-                location: "create_user",
-            }
-        })?;
+        // ソルトを生成
+        let salt = SaltString::generate(&mut OsRng);
 
-        // ユーザー名 → ハッシュ を保存
+        // Argon2 インスタンスを作成
+        let argon2 = Argon2::default();
+
+        // パスワードをハッシュ化
+        let password_hash = argon2
+            .hash_password(password.as_bytes(), &salt)
+            .map_err(|_| Error::LmdbError {
+                message: "Password hash failed".to_string(),
+                location: "create_user",
+            })?
+            .to_string();
+
+        // ユーザー名とハッシュを保存
         txn.put(
             self.user,
-            username.as_bytes(),
-            hash.as_bytes(),
+            &username.as_bytes(),
+            &password_hash.as_bytes(),
             lmdb::WriteFlags::empty(),
         )?;
         txn.commit()?;
+
         Ok(Output::Success)
     }
 
     fn drop_user(&self, username: &str) -> Result<Output, Error> {
         let mut txn = self.env.begin_rw_txn()?;
-        match txn.del(self.user, username.as_bytes(), None) {
+        match txn.del(self.user, &username.as_bytes(), None) {
             Ok(_) => {
                 txn.commit()?;
                 Ok(Output::Success)
             }
             Err(LmdbError::NotFound) => Err(Error::SpaceNotFound {
-                // UserNotFoundに置き換え可
                 space_name: username.to_string(),
             }),
             Err(e) => Err(Error::from(e)),
@@ -478,43 +481,55 @@ impl StorageTrait for Storage {
     fn info_user(&self, username: &str) -> Result<Output, Error> {
         let txn = self.env.begin_ro_txn()?;
         let hash_bytes =
-            txn.get(self.user, username.as_bytes())
+            txn.get(self.user, &username.as_bytes())
                 .map_err(|_| Error::SpaceNotFound {
                     space_name: username.to_string(),
                 })?;
-        let hash_str = std::str::from_utf8(hash_bytes)?;
-        Ok(Output::UserInfo {
-            username: username.to_string(),
-            password_hash: hash_str.to_string(),
-        })
+        Ok(Output::InfoUser(InfoUser {
+            user_name: username.to_string(),
+        }))
     }
-
     fn show_users(&self) -> Result<Output, Error> {
         let txn = self.env.begin_ro_txn()?;
-        let cursor = txn.open_ro_cursor(self.user)?;
-        let users: Vec<String> = cursor
-            .iter_start()
-            .filter_map(|res| {
-                res.ok()
-                    .map(|(k, _v)| String::from_utf8_lossy(k).to_string())
-            })
-            .collect();
-        Ok(Output::ShowUsers(users))
+        let mut cursor = txn.open_ro_cursor(self.user)?;
+
+        let mut users = Vec::new();
+
+        for result in cursor.iter_start() {
+            let (key_bytes, _value_bytes) = result;
+            let username = std::str::from_utf8(key_bytes)?.to_string();
+            users.push(username);
+        }
+
+        Ok(Output::ShowUsers(ShowUsers { users }))
     }
 
     fn verify_user(&self, username: &str, password: &str) -> Result<bool, Error> {
         let txn = self.env.begin_ro_txn()?;
-        let hash_bytes = match txn.get(self.user, username.as_bytes()) {
+
+        // ユーザー名に対応するハッシュを取得
+        let hash_bytes = match txn.get(self.user, &username.as_bytes()) {
             Ok(v) => v,
-            Err(_) => return Ok(false),
+            Err(_) => return Ok(false), // ユーザーが存在しない場合は false
         };
+
+        // ハッシュ文字列に変換
         let hash_str = std::str::from_utf8(hash_bytes)?;
-        let valid = argon2::verify_encoded(hash_str, password.as_bytes()).map_err(|_| {
-            Error::LmdbError {
-                message: "Password verify failed",
-                location: "verify_user",
-            }
+
+        // PasswordHash に変換
+        let parsed_hash = PasswordHash::new(hash_str).map_err(|_| Error::LmdbError {
+            message: "Invalid stored password hash".to_string(),
+            location: "verify_user",
         })?;
+
+        // Argon2 インスタンス
+        let argon2 = Argon2::default();
+
+        // パスワードを検証
+        let valid = argon2
+            .verify_password(password.as_bytes(), &parsed_hash)
+            .is_ok();
+
         Ok(valid)
     }
 }

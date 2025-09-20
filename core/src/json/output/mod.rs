@@ -49,26 +49,30 @@ pub struct Value {
     id_string: Option<String>,
     value: HashMap<String, ValueEntry>,
 }
+#[derive(Serialize)]
+pub struct ShowUsers {
+    pub users: Vec<String>,
+}
 
 #[derive(Serialize)]
 pub struct InfoUser {
-    user_name: String,
-    database_command: Vec<CommandDatabase>,
-    space_command: Vec<InfoUserSpace>,
-    key_commnad: Vec<InfoUserKey>,
+    pub user_name: String,
+    // database_command: Vec<CommandDatabase>,
+    // space_command: Vec<InfoUserSpace>,
+    // key_commnad: Vec<InfoUserKey>,
 }
 
 #[derive(Serialize)]
 pub struct InfoUserSpace {
     space_name: String,
-    space_commnad: Vec<CommandSpace>,
+    //space_commnad: Vec<CommandSpace>,
 }
 
 #[derive(Serialize)]
 pub struct InfoUserKey {
     space_name: String,
     key_name: String,
-    space_commnad: Vec<CommandKey>,
+    //space_commnad: Vec<CommandKey>,
 }
 
 #[derive(Serialize)]
@@ -91,4 +95,5 @@ pub enum Output {
 
     //ユーザー操作系
     InfoUser(InfoUser),
+    ShowUsers(ShowUsers),
 }

@@ -82,5 +82,5 @@ pub trait StorageTrait {
     fn drop_user(&self, username: &str) -> Result<Output, Error>;
     fn info_user(&self, username: &str) -> Result<Output, Error>;
     fn show_users(&self) -> Result<Output, Error>;
-    fn verify_user(&self, username: &str, password: &str) -> Result<bool, Error> {}
+    fn verify_user(&self, username: &str, password: &str) -> Result<bool, Error>;
 }
