@@ -15,7 +15,11 @@ pub enum Error {
     },
 
     UserAlreadyExists {
-        name: String,
+        user_name: String,
+    },
+
+    UserNotFound {
+        user_name: String,
     },
 
     // Parse errors with context

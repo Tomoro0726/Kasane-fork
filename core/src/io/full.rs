@@ -18,7 +18,6 @@ pub struct Storage {
     pub key: Database,
     pub value: Database,
     pub user: Database,
-    pub pw: Database,
     pub env: Environment,
 }
 
@@ -72,14 +71,12 @@ impl Storage {
         let key = env.create_db(Some("key"), DatabaseFlags::empty())?;
         let value = env.create_db(Some("value"), DatabaseFlags::empty())?;
         let user = env.create_db(Some("user"), DatabaseFlags::empty())?;
-        let pw = env.create_db(Some("pw"), DatabaseFlags::empty())?;
 
         Ok(Self {
             space,
             key,
             value,
             user,
-            pw,
             env,
         })
     }
@@ -433,7 +430,7 @@ impl StorageTrait for Storage {
         // ユーザー名が既に存在するか確認
         if txn.get(self.user, &username.as_bytes()).is_ok() {
             return Err(Error::UserAlreadyExists {
-                name: username.to_string(),
+                user_name: username.to_string(),
             });
         }
 
@@ -471,8 +468,8 @@ impl StorageTrait for Storage {
                 txn.commit()?;
                 Ok(Output::Success)
             }
-            Err(LmdbError::NotFound) => Err(Error::SpaceNotFound {
-                space_name: username.to_string(),
+            Err(LmdbError::NotFound) => Err(Error::UserNotFound {
+                user_name: username.to_string(),
             }),
             Err(e) => Err(Error::from(e)),
         }
@@ -482,8 +479,8 @@ impl StorageTrait for Storage {
         let txn = self.env.begin_ro_txn()?;
         let hash_bytes =
             txn.get(self.user, &username.as_bytes())
-                .map_err(|_| Error::SpaceNotFound {
-                    space_name: username.to_string(),
+                .map_err(|_| Error::UserNotFound {
+                    user_name: username.to_string(),
                 })?;
         Ok(Output::InfoUser(InfoUser {
             user_name: username.to_string(),
