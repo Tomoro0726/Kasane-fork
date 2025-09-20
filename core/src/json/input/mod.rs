@@ -7,6 +7,14 @@ use crate::io::ValueEntry;
 #[cfg(feature = "json_schema")]
 use schemars::JsonSchema;
 
+//共通型
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub enum AllOrChoose<T> {
+    Choose(T),
+    All,
+}
+
 // ---------------------- Space管理 ----------------------
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -125,7 +133,7 @@ pub struct IdInput {
 pub struct Line {
     pub start: Point,
     pub end: Point,
-    pub zoom: u16,
+    pub zoom: u8,
 }
 
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
@@ -134,7 +142,7 @@ pub struct Triangle {
     pub point1: Point,
     pub point2: Point,
     pub point3: Point,
-    pub zoom: u16,
+    pub zoom: u8,
 }
 
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
@@ -258,7 +266,7 @@ pub struct InfoUser {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct GrantDatabase {
     pub user_name: String,
-    pub command: Vec<CommandDatabase>,
+    pub command: AllOrChoose<Vec<CommandDatabase>>,
 }
 
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
@@ -274,8 +282,8 @@ pub enum CommandDatabase {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct GrantSpacePrivilege {
     pub user_name: String,
-    pub target_space: Vec<TargetSpace>,
-    pub command: Vec<CommandSpace>,
+    pub target_space: AllOrChoose<Vec<String>>,
+    pub command: AllOrChoose<Vec<CommandSpace>>,
 }
 
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
@@ -289,18 +297,11 @@ pub enum CommandSpace {
 
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub enum TargetSpace {
-    All,
-    SpaceNames(Vec<String>),
-}
-
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
-#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct GrantKeyPrivilege {
     pub user_name: String,
     pub target_space: String,
-    pub target_key: TargetKey,
-    pub command: Vec<CommandKey>,
+    pub target_key: AllOrChoose<Vec<String>>,
+    pub command: AllOrChoose<Vec<CommandKey>>,
 }
 
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
@@ -318,49 +319,24 @@ pub enum CommandKey {
 
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub enum TargetKey {
-    All,
-    KeyNames(Vec<String>),
-}
-
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct GrantToolPrivilege {
-    pub user_name: String,
-    pub command: Vec<CommandTool>,
-}
-
-#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub enum CommandTool {
-    Transaction,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RevokeDatabase {
     pub user_name: String,
-    pub command: Vec<CommandDatabase>,
+    pub command: AllOrChoose<Vec<CommandDatabase>>,
 }
-
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RevokeSpacePrivilege {
     pub user_name: String,
-    pub target_space: Vec<TargetSpace>,
-    pub command: Vec<CommandSpace>,
+    pub target_space: AllOrChoose<Vec<String>>,
+    pub command: AllOrChoose<Vec<CommandSpace>>,
 }
-
+#[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RevokeKeyPrivilege {
     pub user_name: String,
     pub target_space: String,
-    pub target_key: TargetKey,
-    pub command: Vec<CommandKey>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct RevokeToolPrivilege {
-    pub user_name: String,
-    pub command: Vec<CommandTool>,
+    pub target_key: AllOrChoose<Vec<String>>,
+    pub command: AllOrChoose<Vec<CommandKey>>,
 }
 
 // ---------------------- Packet & Command ----------------------
@@ -397,18 +373,15 @@ pub enum Command {
     DropUser(DropUser),
     InfoUser(InfoUser),
     ShowUsers,
+    // //権限付与系
+    // GrantDatabase(GrantDatabase),
+    // GrantSpacePrivilege(GrantSpacePrivilege),
+    // GrantKeyPrivilege(GrantKeyPrivilege),
 
-    //権限付与系
-    GrantDatabase(GrantDatabase),
-    GrantSpacePrivilege(GrantSpacePrivilege),
-    GrantKeyPrivilege(GrantKeyPrivilege),
-    GrantToolPrivilege(GrantToolPrivilege),
-
-    //権限取り上げ系
-    RevokeDatabase(RevokeDatabase),
-    RevokeSpacePrivilege(RevokeSpacePrivilege),
-    RevokeKeyPrivilege(RevokeKeyPrivilege),
-    RevokeToolPrivilege(RevokeToolPrivilege),
+    // //権限取り上げ系
+    // RevokeDatabase(RevokeDatabase),
+    // RevokeSpacePrivilege(RevokeSpacePrivilege),
+    // RevokeKeyPrivilege(RevokeKeyPrivilege),
 }
 
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]

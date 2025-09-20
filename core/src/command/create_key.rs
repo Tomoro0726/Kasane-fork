@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::io::{Storage, StorageTrait};
+use crate::io::{StorageTrait, full::Storage};
 use crate::json::input::CreateKey;
 use crate::json::output::Output;
 use crate::{command::tools::valid_name::valid_name, error::Error};
@@ -13,6 +13,6 @@ pub fn create_key(v: CreateKey, s: Arc<Storage>) -> Result<Output, Error> {
             location: "command::addkey::addkey",
         })
     } else {
-        s.add_key(&v.space_name, &v.key_name, v.key_type)
+        s.create_key(&v.space_name, &v.key_name, v.key_type, v.key_mode)
     }
 }

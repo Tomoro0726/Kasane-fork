@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::{
     error::Error,
-    io::{Storage, StorageTrait},
+    io::{StorageTrait, full::Storage},
     json::{input::ShowKeys, output::Output},
 };
 

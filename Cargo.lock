@@ -973,13 +973,11 @@ dependencies = [
  "kasane-logic",
  "lmdb",
  "num_cpus",
- "once_cell",
  "schemars",
  "serde",
  "serde_json",
  "tokio",
  "uuid",
- "wasm-bindgen",
 ]
 
 [[package]]

@@ -1,23 +1,16 @@
+use std::collections::HashSet;
+
 use crate::{
     error::Error,
     json::{
-        input::{FilterType, KeyType},
+        input::{KeyMode, KeyType},
         output::Output,
     },
 };
-use kasane_logic::set::SpaceTimeIdSet;
+use kasane_logic::id::SpaceTimeId;
 use serde::{Deserialize, Serialize};
+pub mod full;
 pub mod tools;
-
-#[cfg(feature = "full")]
-mod full;
-#[cfg(feature = "wasm")]
-mod wasm;
-
-#[cfg(feature = "full")]
-pub use full::*;
-#[cfg(feature = "wasm")]
-pub use wasm::*;
 
 // ValueEntry は共通
 #[cfg_attr(feature = "json_schema", derive(schemars::JsonSchema))]
@@ -31,44 +24,65 @@ pub enum ValueEntry {
 
 // StorageTrait は共通
 pub trait StorageTrait {
-    fn show_spaces(&self) -> Result<Output, Error>;
-    fn add_space(&self, spacename: &str) -> Result<Output, Error>;
-    fn delete_space(&self, spacename: &str) -> Result<Output, Error>;
-    fn show_keys(&self, spacename: &str) -> Result<Output, Error>;
+    //データベース操作系
+    fn create_space(&self, spacename: &str) -> Result<Output, Error>;
+    fn drop_space(&self, spacename: &str) -> Result<Output, Error>;
     fn info_space(&self, spacename: &str) -> Result<Output, Error>;
-    fn add_key(&self, spacename: &str, keyname: &str, keytype: KeyType) -> Result<Output, Error>;
-    fn delete_key(&self, spacename: &str, keyname: &str) -> Result<Output, Error>;
+    fn show_spaces(&self) -> Result<Output, Error>;
+    fn version() -> Result<Output, Error>;
+
+    //key操作系
+    fn create_key(
+        &self,
+        spacename: &str,
+        keyname: &str,
+        keytype: KeyType,
+        keymode: KeyMode,
+    ) -> Result<Output, Error>;
+    fn drop_key(&self, spacename: &str, keyname: &str) -> Result<Output, Error>;
+    fn show_keys(&self, spacename: &str) -> Result<Output, Error>;
     fn info_key(&self, spacename: &str, keyname: &str) -> Result<Output, Error>;
-    fn filter_value(
+
+    //Value操作系
+
+    fn insert_value(
         &self,
         spacename: &str,
         keyname: &str,
-        filter: FilterType,
-    ) -> Result<Output, Error>;
-    fn get_value(
-        &self,
-        spacename: &str,
-        keyname: &str,
-        set: SpaceTimeIdSet,
-    ) -> Result<Output, Error>;
-    fn set_value(
-        &self,
-        spacename: &str,
-        keyname: &str,
+        ids: HashSet<SpaceTimeId>,
         value: ValueEntry,
-        set: SpaceTimeIdSet,
     ) -> Result<Output, Error>;
-    fn put_value(
+    fn patch_value(
         &self,
         spacename: &str,
         keyname: &str,
+        ids: HashSet<SpaceTimeId>,
         value: ValueEntry,
-        set: SpaceTimeIdSet,
+    ) -> Result<Output, Error>;
+    fn update_value(
+        &self,
+        spacename: &str,
+        keyname: &str,
+        ids: HashSet<SpaceTimeId>,
+        value: ValueEntry,
     ) -> Result<Output, Error>;
     fn delete_value(
         &self,
         spacename: &str,
         keyname: &str,
-        set: SpaceTimeIdSet,
+        ids: HashSet<SpaceTimeId>,
     ) -> Result<Output, Error>;
+    fn select_value(
+        &self,
+        spacename: &str,
+        keyname: &str,
+        id: HashSet<SpaceTimeId>,
+    ) -> Result<Output, Error>;
+    fn show_values(&self, spacename: &str, keyname: &str) -> Result<Output, Error>;
+
+    //ユーザー操作系
+    fn create_user(&self, username: &str, password: &str) -> Result<Output, Error>;
+    fn drop_user(&self, username: &str) -> Result<Output, Error>;
+    fn info_user(&self, username: &str) -> Result<Output, Error>;
+    fn show_users(&self) -> Result<Output, Error>;
 }
