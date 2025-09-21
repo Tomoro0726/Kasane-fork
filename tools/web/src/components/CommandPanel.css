@@ -18,6 +18,10 @@
   min-height: 0;
 }
 
+textarea {
+  color: #333;
+}
+
 .json-section {
   display: flex;
   flex-direction: column;
@@ -162,7 +166,7 @@
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
+
   .json-section {
     flex-direction: row;
   }
