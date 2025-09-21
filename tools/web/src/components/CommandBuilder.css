@@ -68,6 +68,13 @@
   border-color: #007bff;
 }
 
+select {
+  color: #333;
+}
+.command-item {
+  color: #333;
+}
+
 .add-command-btn {
   background: #007bff;
   color: white;
