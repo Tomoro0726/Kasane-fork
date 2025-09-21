@@ -106,7 +106,7 @@ pub trait StorageTrait {
     fn select_value(
         &self,
         spacename: &str,
-        keyname: Vec<&str>,
+        keyname: Vec<String>,
         id: Vec<Vec<u8>>,
     ) -> Result<HashMap<Vec<u8>, Vec<(String, ValueEntry)>>, Error>;
     fn show_values(

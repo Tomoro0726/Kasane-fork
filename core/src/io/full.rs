@@ -656,7 +656,7 @@ impl StorageTrait for Storage {
     fn select_value(
         &self,
         spacename: &str,
-        keynames: Vec<&str>,
+        keynames: Vec<String>,
         ids: Vec<Vec<u8>>,
     ) -> Result<HashMap<Vec<u8>, Vec<(String, ValueEntry)>>, Error> {
         let txn = self.env.begin_ro_txn()?;
@@ -678,7 +678,7 @@ impl StorageTrait for Storage {
                 let mut key_cursor = txn.open_ro_cursor(self.key)?;
                 let mut found = None;
                 for (k, v) in key_cursor.iter_start() {
-                    if k.starts_with(space_uuid) && std::str::from_utf8(k)?.contains(keyname) {
+                    if k.starts_with(space_uuid) && std::str::from_utf8(k)?.contains(&keyname) {
                         let keytype_id_byte = k[k.len() - 2];
                         found = Some((v.to_vec(), id_keytype(keytype_id_byte)));
                         break;

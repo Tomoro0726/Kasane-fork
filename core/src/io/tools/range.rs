@@ -6,7 +6,7 @@ use kasane_logic::{
         point::{self, point},
         triangle::triangle,
     },
-    id::SpaceTimeId,
+    id::{SpaceTimeId, pure::PureSpaceTimeId},
 };
 
 use crate::json::input::Range;
@@ -167,4 +167,47 @@ pub fn and_vecs_optimized(mut masks: Vec<Vec<u8>>) -> Vec<Vec<u8>> {
     }
 
     result
+}
+
+pub fn bitmask_to_id(bits: &[u8]) -> PureSpaceTimeId {
+    assert!(!bits.is_empty());
+
+    let sign = bits[0];
+    let z = ((bits.len() - 1) / 3) as u8;
+
+    let mut x: u32 = 0;
+    let mut y: u32 = 0;
+    let mut f_abs: u32 = 0;
+
+    for shift in 0..z {
+        let idx = 1 + (shift as usize) * 3;
+        let bx = bits[idx];
+        let by = bits[idx + 1];
+        let bf = bits[idx + 2];
+
+        if bx == 1 {
+            x |= 1 << shift;
+        }
+        if by == 1 {
+            y |= 1 << shift;
+        }
+        if bf == 1 {
+            f_abs |= 1 << shift;
+        }
+    }
+
+    let f = if sign == 1 {
+        f_abs as i32
+    } else {
+        -(f_abs as i32)
+    };
+
+    PureSpaceTimeId {
+        z,
+        f,
+        x,
+        y,
+        i: 0,
+        t: 0,
+    }
 }

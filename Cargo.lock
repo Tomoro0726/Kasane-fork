@@ -1038,9 +1038,9 @@ dependencies = [
 
 [[package]]
 name = "kasane-logic"
-version = "0.0.5"
+version = "0.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2b4433ad456903d091d1f37de0cdae43f09a842fc05b063598a33fcec42242ec"
+checksum = "cf58f6679033013647bf8be8d85799fd4905c2a258b06d7678e0294dc3e81231"
 dependencies = [
  "chrono",
  "criterion",

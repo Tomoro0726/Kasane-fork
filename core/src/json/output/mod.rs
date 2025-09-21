@@ -37,17 +37,12 @@ pub struct Showkeys {
 }
 
 #[derive(Serialize)]
-pub struct SelectValue {
-    values: Vec<Value>,
-}
-
-#[derive(Serialize)]
 pub struct Value {
-    id: SpaceTimeId,
-    center: Option<Point>,
-    vertex: Option<[Point; 8]>,
-    id_string: Option<String>,
-    value: HashMap<String, ValueEntry>,
+    pub id: SpaceTimeId,
+    pub center: Point,
+    pub vertex: [Point; 8],
+    pub id_string: String,
+    pub value: Vec<(std::string::String, ValueEntry)>,
 }
 #[derive(Serialize)]
 pub struct ShowUsers {
@@ -91,7 +86,8 @@ pub enum Output {
     InfoKey(InfoKey),
 
     //Value操作系
-    SelectValue(SelectValue),
+    SelectValue(Vec<Value>),
+    ShowValues(Vec<Value>),
 
     //ユーザー操作系
     InfoUser(InfoUser),

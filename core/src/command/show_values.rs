@@ -4,25 +4,15 @@ use kasane_logic::id::{DimensionRange, SpaceTimeId};
 
 use crate::{
     error::Error,
-    io::{
-        StorageTrait,
-        full::Storage,
-        tools::range::{bitmask_to_id, range},
-    },
+    io::{StorageTrait, full::Storage, tools::range::bitmask_to_id},
     json::{
-        input::SelectValue,
+        input::ShowValues,
         output::{Output, Value},
     },
 };
 
-pub fn select_value(v: SelectValue, s: Arc<Storage>) -> Result<Output, Error> {
-    let range = match range(v.range) {
-        Ok(v) => v,
-        Err(e) => {
-            return Err(Error::RangeError { message: e });
-        }
-    };
-    let a = s.select_value(&v.space_name, v.key_names, range)?;
+pub fn show_values(v: ShowValues, s: Arc<Storage>) -> Result<Output, Error> {
+    let a = s.show_values(&v.space_name, &v.key_name)?;
 
     let mut result = vec![];
 
@@ -48,5 +38,5 @@ pub fn select_value(v: SelectValue, s: Arc<Storage>) -> Result<Output, Error> {
         });
     }
 
-    return Ok(Output::SelectValue(result));
+    return Ok(Output::ShowValues(result));
 }

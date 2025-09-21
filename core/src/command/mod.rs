@@ -9,15 +9,21 @@ use rand::prelude;
 use crate::command::create_key::create_key;
 use crate::command::create_space::create_space;
 use crate::command::create_user::create_user;
+use crate::command::delete_value::delete_value;
 use crate::command::drop_key::drop_key;
 use crate::command::drop_space::drop_space;
 use crate::command::drop_user::drop_user;
 use crate::command::info_key::info_key;
 use crate::command::info_space::info_space;
 use crate::command::info_user::info_user;
+use crate::command::insert_value::insert_value;
+use crate::command::patch_value::patch_value;
+use crate::command::select_value::select_value;
 use crate::command::show_keys::show_keys;
 use crate::command::show_spaces::show_spaces;
 use crate::command::show_user::show_users;
+use crate::command::update_value::update_value;
+
 use crate::io::full::Storage;
 use crate::{
     command::version::version,
@@ -27,7 +33,7 @@ use crate::{
 pub mod create_key;
 pub mod create_space;
 pub mod create_user;
-pub mod deletevalue;
+pub mod delete_value;
 pub mod drop_key;
 pub mod drop_space;
 pub mod drop_user;
@@ -41,6 +47,7 @@ pub mod select_value;
 pub mod show_keys;
 pub mod show_spaces;
 pub mod show_user;
+pub mod show_values;
 pub mod tools;
 pub mod triangle;
 pub mod update_value;
@@ -64,11 +71,11 @@ pub fn process(cmd: Command, s: Arc<Storage>) -> Result<Output, Error> {
         Command::InfoKey(v) => info_key(v, s),
 
         //Value操作系
-        Command::InsertValue(v) => todo!(),
-        Command::PatchValue(v) => todo!(),
-        Command::UpdateValue(v) => todo!(),
-        Command::DeleteValue(v) => todo!(),
-        Command::SelectValue(v) => todo!(),
+        Command::InsertValue(v) => insert_value(v, s),
+        Command::PatchValue(v) => patch_value(v, s),
+        Command::UpdateValue(v) => update_value(v, s),
+        Command::DeleteValue(v) => delete_value(v, s),
+        Command::SelectValue(v) => select_value(v, s),
         Command::ShowValues(v) => todo!(),
 
         //ツール系
