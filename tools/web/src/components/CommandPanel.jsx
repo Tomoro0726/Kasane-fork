@@ -3,7 +3,7 @@ import './CommandPanel.css'
 import CommandBuilder from './CommandBuilder'
 import JsonViewer from './JsonViewer'
 
-const CommandPanel = ({ session }) => {
+const CommandPanel = ({ session, serverUrl }) => {
   const [commands, setCommands] = useState([])
   const [requestJson, setRequestJson] = useState('')
   const [responseJson, setResponseJson] = useState('')
@@ -36,13 +36,32 @@ const CommandPanel = ({ session }) => {
     setRequestJson(requestJsonStr)
 
     try {
-      const response = await fetch('/api/execute', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: requestJsonStr,
-      })
+      let response;
+      
+      // Try direct connection first, fall back to proxy if CORS fails
+      try {
+        const executeUrl = serverUrl.endsWith('/') ? `${serverUrl}execute` : `${serverUrl}/execute`
+        response = await fetch(executeUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: requestJsonStr,
+        })
+      } catch (corsError) {
+        // If direct connection fails (likely CORS), try proxy
+        if (serverUrl === 'http://127.0.0.1:8080' || serverUrl === 'http://localhost:8080') {
+          response = await fetch('/api/execute', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: requestJsonStr,
+          })
+        } else {
+          throw corsError
+        }
+      }
 
       const responseText = await response.text()
       

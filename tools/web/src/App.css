@@ -44,6 +44,11 @@ body {
   font-size: 0.9rem;
 }
 
+.server-url {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
 .logout-btn {
   background: rgba(255, 255, 255, 0.2);
   color: white;

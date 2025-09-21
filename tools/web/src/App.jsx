@@ -24,6 +24,7 @@ function App() {
         {user && (
           <div className="user-info">
             <span>Logged in as: {user.username}</span>
+            <span className="server-url">Server: {user.serverUrl}</span>
             <button onClick={handleLogout} className="logout-btn">Logout</button>
           </div>
         )}
@@ -33,7 +34,7 @@ function App() {
         {!session ? (
           <LoginForm onLogin={handleLogin} />
         ) : (
-          <CommandPanel session={session} />
+          <CommandPanel session={session} serverUrl={user.serverUrl} />
         )}
       </main>
     </div>
