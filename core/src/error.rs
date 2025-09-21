@@ -87,6 +87,10 @@ pub enum Error {
     RangeError {
         message: String,
     },
+    InsertError {
+        space_name: String,
+        key_name: String,
+    },
     NnKnown,
 }
 

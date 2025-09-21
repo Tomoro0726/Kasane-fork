@@ -1,15 +1,23 @@
-use std::{collections::HashSet, env, path::PathBuf};
+use std::{
+    collections::{HashMap, HashSet},
+    env,
+    path::PathBuf,
+};
 
 use crate::{
-    io::{StorageTrait, ValueEntry, tools::keytype_id::keytype_id},
+    io::{
+        StorageTrait, ValueEntry,
+        tools::keytype_id::{id_keytype, keytype_id},
+    },
     json::{
-        input::KeyType,
+        input::{KeyMode, KeyType},
         output::{InfoKey, InfoSpace, InfoUser, Output, ShowUsers, Showkeys},
     },
 };
 use argon2::password_hash::PasswordHasher;
 use argon2::{Argon2, PasswordHash, PasswordVerifier, password_hash::SaltString};
-use lmdb::{Cursor, DatabaseFlags, Error as LmdbError};
+use kasane_logic::id::SpaceTimeId;
+use lmdb::{Cursor, DatabaseFlags, Error as LmdbError, WriteFlags};
 use rand::rngs::OsRng;
 
 use super::Error;
@@ -57,6 +65,19 @@ impl From<std::string::FromUtf8Error> for Error {
         Error::ParseError {
             message: format!("Invalid UTF-8 (from Vec<u8>): {}", e),
             location: "unknown",
+        }
+    }
+}
+use std::convert::TryFrom;
+
+impl TryFrom<u8> for KeyMode {
+    type Error = ();
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(KeyMode::UniqueKey),
+            1 => Ok(KeyMode::MultiKey),
+            _ => Err(()),
         }
     }
 }
@@ -237,11 +258,10 @@ impl StorageTrait for Storage {
         keytype: crate::json::input::KeyType,
         keymode: crate::json::input::KeyMode,
     ) -> Result<crate::json::output::Output, Error> {
-        // Spaceの存在を確認
         let space_bytes = spacename.as_bytes();
         let mut txn = self.env.begin_rw_txn()?;
         let space_uuid = match txn.get(self.space, &space_bytes) {
-            Ok(v) => std::str::from_utf8(v)?,
+            Ok(v) => v,
             Err(LmdbError::NotFound) => {
                 return Err(Error::SpaceNotFound {
                     space_name: spacename.to_string(),
@@ -250,31 +270,26 @@ impl StorageTrait for Storage {
             Err(e) => return Err(Error::from(e)),
         };
 
-        // Key用バイト列
-        let key_bytes = format!(
-            "{}:{}:{:?}:{:?}",
-            space_uuid,
-            keyname,
-            keytype_id(keytype),
-            keymode
-        );
-
         let key_id: [u8; 16] = *Uuid::new_v4().as_bytes();
 
-        txn.put(
-            self.key,
-            &key_bytes.as_bytes(),
-            &key_id,
-            lmdb::WriteFlags::empty(),
-        )
-        .map_err(|e| match e {
-            LmdbError::KeyExist => Error::KeyAlreadyExists {
-                space_name: spacename.to_owned(),
-                key_name: keyname.to_owned(),
-                location: "io::create_key",
-            },
-            e => Error::from(e),
-        })?;
+        // バイト列形式: [space_uuid][keyname][keytype][keymode]
+        let key_bytes = [
+            &space_uuid[..],
+            keyname.as_bytes(),
+            &[keytype_id(keytype)],
+            &[keymode as u8],
+        ]
+        .concat();
+
+        txn.put(self.key, &key_bytes, &key_id, lmdb::WriteFlags::empty())
+            .map_err(|e| match e {
+                LmdbError::KeyExist => Error::KeyAlreadyExists {
+                    space_name: spacename.to_string(),
+                    key_name: keyname.to_string(),
+                    location: "io::create_key",
+                },
+                _ => Error::from(e),
+            })?;
 
         txn.commit()?;
         Ok(Output::Success)
@@ -287,8 +302,10 @@ impl StorageTrait for Storage {
     ) -> Result<crate::json::output::Output, Error> {
         let space_bytes = spacename.as_bytes();
         let mut txn = self.env.begin_rw_txn()?;
+
+        // Space の存在確認
         let space_uuid = match txn.get(self.space, &space_bytes) {
-            Ok(v) => std::str::from_utf8(v)?,
+            Ok(v) => v,
             Err(LmdbError::NotFound) => {
                 return Err(Error::SpaceNotFound {
                     space_name: spacename.to_string(),
@@ -297,28 +314,41 @@ impl StorageTrait for Storage {
             Err(e) => return Err(Error::from(e)),
         };
 
-        // Keyのprefix
-        let key_prefix = format!("{}:{}", space_uuid, keyname);
+        let key_prefix = [space_uuid, keyname.as_bytes()].concat();
 
-        match txn.del(self.key, &key_prefix.as_bytes(), None) {
-            Ok(_) => {
-                txn.commit()?;
-                Ok(Output::Success)
+        // Cursor を使って削除対象のキーを収集
+        let mut keys_to_delete = Vec::new();
+        {
+            let mut cursor = txn.open_ro_cursor(self.key)?;
+            for (k, _) in cursor.iter_start() {
+                if k.starts_with(&key_prefix) {
+                    keys_to_delete.push(k.to_vec());
+                }
             }
-            Err(LmdbError::NotFound) => Err(Error::KeyNotFound {
-                space_name: spacename.to_owned(),
-                key_name: keyname.to_owned(),
-                location: "io::drop_key",
-            }),
-            Err(e) => Err(Error::from(e)),
+        } // <- cursor がここで drop され、txn は再び mutable に
+
+        if keys_to_delete.is_empty() {
+            return Err(Error::KeyNotFound {
+                space_name: spacename.to_string(),
+                key_name: keyname.to_string(),
+                location: "drop_key",
+            });
         }
+
+        // コピーしたキーを削除
+        for k in keys_to_delete {
+            txn.del(self.key, &k, None)?;
+        }
+
+        txn.commit()?;
+        Ok(Output::Success)
     }
 
     fn show_keys(&self, spacename: &str) -> Result<crate::json::output::Output, Error> {
         let space_bytes = spacename.as_bytes();
         let txn = self.env.begin_ro_txn()?;
         let space_uuid = match txn.get(self.space, &space_bytes) {
-            Ok(v) => std::str::from_utf8(v)?,
+            Ok(v) => v,
             Err(LmdbError::NotFound) => {
                 return Err(Error::SpaceNotFound {
                     space_name: spacename.to_string(),
@@ -328,31 +358,29 @@ impl StorageTrait for Storage {
         };
 
         let mut cursor = txn.open_ro_cursor(self.key)?;
-        let prefix = format!("{}:", space_uuid);
         let mut keys = Vec::new();
-
-        for result in cursor.iter_start() {
-            let (k, _v) = result;
-            if k.starts_with(prefix.as_bytes()) {
-                // prefixを除いたkey名を抽出
-                let key_str = std::str::from_utf8(&k[prefix.len()..])?.to_string();
-                keys.push(key_str);
+        for (k, _v) in cursor.iter_start() {
+            if k.starts_with(space_uuid) {
+                let keyname_len = k.len() - space_uuid.len() - 2;
+                let keyname_bytes = &k[space_uuid.len()..space_uuid.len() + keyname_len];
+                let keyname = std::str::from_utf8(keyname_bytes)?.to_string();
+                keys.push(keyname);
             }
         }
 
         Ok(Output::Showkeys(Showkeys { keynames: keys }))
     }
-
     fn info_key(
         &self,
         spacename: &str,
         keyname: &str,
     ) -> Result<crate::json::output::Output, Error> {
-        // 1. Space の存在確認
         let space_bytes = spacename.as_bytes();
         let txn = self.env.begin_ro_txn()?;
+
+        // Space の存在確認
         let space_uuid = match txn.get(self.space, &space_bytes) {
-            Ok(v) => std::str::from_utf8(v)?,
+            Ok(v) => v,
             Err(LmdbError::NotFound) => {
                 return Err(Error::SpaceNotFound {
                     space_name: spacename.to_string(),
@@ -361,47 +389,132 @@ impl StorageTrait for Storage {
             Err(e) => return Err(Error::from(e)),
         };
 
-        // 2. Key の prefix を作成
-        let key_prefix = format!("{}:{}", space_uuid, keyname);
-        let mut cursor = txn.open_ro_cursor(self.key)?;
+        let key_prefix = [space_uuid, keyname.as_bytes()].concat();
+        let mut found_key: Option<&[u8]> = None;
 
-        for result in cursor.iter_start() {
-            let (k, _v) = result;
-            if k.starts_with(key_prefix.as_bytes()) {
-                // k は "space_uuid:keyname:keytype:keymode" 形式
-                let key_str = std::str::from_utf8(k)?;
-                let parts: Vec<&str> = key_str.split(':').collect();
-                if parts.len() != 4 {
-                    return Err(Error::ParseError {
-                        message: format!("Invalid key format: {}", key_str),
-                        location: "io::info_key",
-                    });
+        // Cursor のスコープをブロックで限定
+        {
+            let mut cursor = txn.open_ro_cursor(self.key)?;
+            for (k, _v) in cursor.iter_start() {
+                if k.starts_with(&key_prefix) {
+                    found_key = Some(k);
+                    break;
                 }
-
-                let info = InfoKey {
-                    keyname: parts[1].to_string(),
-                    keytype: parts[2].to_string(),
-                    keymode: parts[3].to_string(),
-                };
-
-                return Ok(crate::json::output::Output::InfoKey(info));
             }
+        } // <- cursor がここで drop される
+
+        let k = match found_key {
+            Some(k) => k,
+            None => {
+                return Err(Error::KeyNotFound {
+                    space_name: spacename.to_string(),
+                    key_name: keyname.to_string(),
+                    location: "info_key",
+                });
+            }
+        };
+
+        if k.len() < space_uuid.len() + keyname.len() + 2 {
+            return Err(Error::ParseError {
+                message: "Invalid key length".to_string(),
+                location: "info_key",
+            });
         }
 
-        Err(Error::KeyNotFound {
-            space_name: spacename.to_string(),
-            key_name: keyname.to_string(),
-            location: "io::info_key",
-        })
+        // keytype と keymode を取得
+        let keytype = id_keytype(k[k.len() - 2]);
+        let keymode = KeyMode::try_from(k[k.len() - 1]).map_err(|_| Error::ParseError {
+            message: "Invalid keymode value".to_string(),
+            location: "info_key",
+        })?;
+
+        Ok(Output::InfoKey(InfoKey {
+            keyname: keyname.to_string(),
+            keytype: format!("{:?}", keytype),
+            keymode: format!("{:?}", keymode),
+        }))
     }
 
     fn insert_value(
         &self,
         spacename: &str,
         keyname: &str,
-        ids: HashSet<kasane_logic::id::SpaceTimeId>,
+        ids: Vec<Vec<u8>>,
         value: ValueEntry,
     ) -> Result<Output, Error> {
+        let mut txn = self.env.begin_rw_txn()?;
+
+        // 1. Space存在確認
+        let space_bytes = spacename.as_bytes();
+        let space_uuid_bytes = txn.get(self.space, &space_bytes).map_err(|e| match e {
+            LmdbError::NotFound => Error::SpaceNotFound {
+                space_name: spacename.to_string(),
+            },
+            _ => Error::from(e),
+        })?;
+
+        // 2. Key存在確認 & key_uuid取得
+        let (key_uuid, keytype) = {
+            let mut key_cursor = txn.open_ro_cursor(self.key)?;
+            let mut found = None;
+            for (k, v) in key_cursor.iter_start() {
+                if k.starts_with(space_uuid_bytes) && std::str::from_utf8(k)?.contains(keyname) {
+                    let keytype_id_byte = k[k.len() - 2];
+                    found = Some((v.to_vec(), id_keytype(keytype_id_byte)));
+                    break;
+                }
+            }
+            found.ok_or(Error::KeyNotFound {
+                space_name: spacename.to_string(),
+                key_name: keyname.to_string(),
+                location: "insert_value",
+            })?
+        }; // <- key_cursor drop で txn が再び可変借用可能
+
+        // 3. ValueEntry と Key の型チェック
+        let type_matches = match (&keytype, &value) {
+            (KeyType::INT, ValueEntry::INT(_)) => true,
+            (KeyType::FLOAT, ValueEntry::FLOAT(_)) => true,
+            (KeyType::BOOLEAN, ValueEntry::BOOLEAN(_)) => true,
+            (KeyType::TEXT, ValueEntry::TEXT(_)) => true,
+            _ => false,
+        };
+        if !type_matches {
+            return Err(Error::TypeMismatchFilter {
+                expected_type: format!("{:?}", keytype),
+                operation: format!("{:?}", value),
+                location: "insert_value",
+            });
+        }
+
+        // 4. すべてのIDを事前チェック（重複が1つでもあればエラー）
+        for id in &ids {
+            let db_key = [key_uuid.clone(), id.clone()].concat();
+            if txn.get(self.value, &db_key).is_ok() {
+                return Err(Error::InsertError {
+                    space_name: spacename.to_string(),
+                    key_name: keyname.to_string(),
+                });
+            }
+        }
+
+        // 5. すべて重複なしならまとめて LMDB に保存
+        for id in ids {
+            let db_key = [key_uuid.clone(), id].concat();
+            txn.put(self.value, &db_key, &value.to_bytes(), WriteFlags::empty())?;
+        }
+
+        txn.commit()?;
+        Ok(Output::Success)
+    }
+
+    fn patch_value(
+        &self,
+        spacename: &str,
+        keyname: &str,
+        ids: Vec<Vec<u8>>,
+        value: super::ValueEntry,
+    ) -> Result<crate::json::output::Output, Error> {
         let mut txn = self.env.begin_rw_txn()?;
 
         // 1. Space存在確認
@@ -416,81 +529,244 @@ impl StorageTrait for Storage {
             Err(e) => return Err(Error::from(e)),
         };
 
-        // 2. Key存在確認
-        let mut key_cursor = txn.open_ro_cursor(self.key)?;
-        let mut key_found = None;
-        for result in key_cursor.iter_start() {
-            let (k, v) = result;
-            if k.starts_with(space_uuid_bytes) && std::str::from_utf8(k)?.contains(keyname) {
-                key_found = Some((k.to_vec(), v.to_vec()));
-                break;
-            }
-        }
+        // 2. Key存在確認（カーソルはスコープで即 drop）
+        let (key_bytes, _key_id_bytes) = {
+            let mut key_cursor = txn.open_ro_cursor(self.key)?;
+            let mut key_found = None;
 
-        let (key_bytes, key_id_bytes) = match key_found {
-            Some(kv) => kv,
-            None => {
-                return Err(Error::KeyNotFound {
-                    space_name: spacename.to_string(),
-                    key_name: keyname.to_string(),
-                    location: "insert_value",
-                });
+            for result in key_cursor.iter_start() {
+                let (k, v) = result;
+                if k.starts_with(space_uuid_bytes) && std::str::from_utf8(k)?.contains(keyname) {
+                    key_found = Some((k.to_vec(), v.to_vec()));
+                    break;
+                }
             }
+
+            key_found.ok_or(Error::KeyNotFound {
+                space_name: spacename.to_string(),
+                key_name: keyname.to_string(),
+                location: "patch_value",
+            })?
         };
 
-        // ここまでで型が合致していれば、実際の値挿入処理に進める
-        // TODO: Valueの保存処理
+        // 3. ValueEntry と Key の型チェック
+        let keytype_id_byte = key_bytes[key_bytes.len() - 2];
+        let keytype = id_keytype(keytype_id_byte);
 
-        //入ってきたidsを1つづつ、bitmaskに変換していく
-        //入ってきたids
+        let type_matches = match (keytype, &value) {
+            (KeyType::INT, ValueEntry::INT(_)) => true,
+            (KeyType::FLOAT, ValueEntry::FLOAT(_)) => true,
+            (KeyType::BOOLEAN, ValueEntry::BOOLEAN(_)) => true,
+            (KeyType::TEXT, ValueEntry::TEXT(_)) => true,
+            _ => false,
+        };
 
+        if !type_matches {
+            return Err(Error::TypeMismatchFilter {
+                expected_type: format!("{:?}", keytype),
+                operation: format!("{:?}", value),
+                location: "patch_value",
+            });
+        }
+
+        // 4. IDごとに既存値確認 & 新規挿入
+        for id in ids {
+            let db_key = [key_bytes.clone(), id.clone()].concat();
+
+            // 既に存在する場合はスキップ
+            if txn.get(self.value, &db_key).is_ok() {
+                continue;
+            }
+
+            // 存在しなければ挿入
+            txn.put(self.value, &db_key, &value.to_bytes(), WriteFlags::empty())?;
+        }
+
+        txn.commit()?;
         Ok(Output::Success)
-    }
-
-    fn patch_value(
-        &self,
-        spacename: &str,
-        keyname: &str,
-        ids: std::collections::HashSet<kasane_logic::id::SpaceTimeId>,
-        value: super::ValueEntry,
-    ) -> Result<crate::json::output::Output, Error> {
-        todo!()
     }
 
     fn update_value(
         &self,
         spacename: &str,
         keyname: &str,
-        ids: std::collections::HashSet<kasane_logic::id::SpaceTimeId>,
+        ids: Vec<Vec<u8>>,
         value: super::ValueEntry,
     ) -> Result<crate::json::output::Output, Error> {
         todo!()
     }
-
     fn delete_value(
         &self,
         spacename: &str,
         keyname: &str,
-        ids: std::collections::HashSet<kasane_logic::id::SpaceTimeId>,
+        ids: Vec<Vec<u8>>,
     ) -> Result<crate::json::output::Output, Error> {
-        todo!()
+        let mut txn = self.env.begin_rw_txn()?;
+
+        // 1. Space存在確認
+        let space_bytes = spacename.as_bytes();
+        let space_uuid_bytes = txn.get(self.space, &space_bytes).map_err(|e| match e {
+            LmdbError::NotFound => Error::SpaceNotFound {
+                space_name: spacename.to_string(),
+            },
+            _ => Error::from(e),
+        })?;
+
+        // 2. Key存在確認 & key_uuid取得
+        let key_uuid = {
+            let mut key_cursor = txn.open_ro_cursor(self.key)?;
+            let mut found = None;
+            for (k, v) in key_cursor.iter_start() {
+                if k.starts_with(space_uuid_bytes) && std::str::from_utf8(k)?.contains(keyname) {
+                    found = Some(v.to_vec());
+                    break;
+                }
+            }
+            found.ok_or(Error::KeyNotFound {
+                space_name: spacename.to_string(),
+                key_name: keyname.to_string(),
+                location: "delete_value",
+            })?
+        };
+
+        // 3. IDsごとに前方一致で削除
+        for id in ids {
+            let mut cursor = txn.open_rw_cursor(self.value)?;
+            let mut keys_to_delete = Vec::new();
+
+            for (k, _v) in cursor.iter_start() {
+                if k.starts_with(&key_uuid) {
+                    let id_bytes = &k[key_uuid.len()..]; // key_uuid を除いた部分
+                    if id_bytes.starts_with(&id) {
+                        keys_to_delete.push(k.to_vec());
+                    }
+                }
+            }
+            drop(cursor);
+
+            for k in keys_to_delete {
+                txn.del(self.value, &k, None)?;
+            }
+        }
+
+        txn.commit()?;
+        Ok(crate::json::output::Output::Success)
     }
 
     fn select_value(
         &self,
         spacename: &str,
-        keyname: &str,
-        id: std::collections::HashSet<kasane_logic::id::SpaceTimeId>,
-    ) -> Result<crate::json::output::Output, Error> {
-        todo!()
+        keynames: Vec<&str>,
+        ids: Vec<Vec<u8>>,
+    ) -> Result<HashMap<Vec<u8>, Vec<(String, ValueEntry)>>, Error> {
+        let txn = self.env.begin_ro_txn()?;
+
+        // 1. Space UUID の取得
+        let space_bytes = spacename.as_bytes();
+        let space_uuid = txn.get(self.space, &space_bytes).map_err(|e| match e {
+            LmdbError::NotFound => Error::SpaceNotFound {
+                space_name: spacename.to_string(),
+            },
+            _ => Error::from(e),
+        })?;
+
+        let mut result_map: HashMap<Vec<u8>, Vec<(String, ValueEntry)>> = HashMap::new();
+
+        for keyname in keynames {
+            // 2. Key UUID と KeyType の取得
+            let (key_uuid, keytype) = {
+                let mut key_cursor = txn.open_ro_cursor(self.key)?;
+                let mut found = None;
+                for (k, v) in key_cursor.iter_start() {
+                    if k.starts_with(space_uuid) && std::str::from_utf8(k)?.contains(keyname) {
+                        let keytype_id_byte = k[k.len() - 2];
+                        found = Some((v.to_vec(), id_keytype(keytype_id_byte)));
+                        break;
+                    }
+                }
+                found.ok_or(Error::KeyNotFound {
+                    space_name: spacename.to_string(),
+                    key_name: keyname.to_string(),
+                    location: "select_value",
+                })?
+            };
+
+            // 3. value DB を全走査
+            let mut cursor = txn.open_ro_cursor(self.value)?;
+            for (k, v) in cursor.iter_start() {
+                if !k.starts_with(&key_uuid) {
+                    continue;
+                }
+
+                let id_bytes = k[key_uuid.len()..].to_vec();
+
+                // 入力された ids のいずれかで前方一致するか
+                if ids.iter().any(|input_id| id_bytes.starts_with(input_id)) {
+                    let value_entry = ValueEntry::from_bytes(keytype, v).ok_or(Error::NnKnown)?;
+                    result_map
+                        .entry(id_bytes.clone())
+                        .or_insert_with(Vec::new)
+                        .push((keyname.to_string(), value_entry));
+                }
+            }
+        }
+
+        Ok(result_map)
     }
 
     fn show_values(
         &self,
         spacename: &str,
         keyname: &str,
-    ) -> Result<crate::json::output::Output, Error> {
-        todo!()
+    ) -> Result<HashMap<Vec<u8>, Vec<(String, ValueEntry)>>, Error> {
+        let txn = self.env.begin_ro_txn()?;
+
+        // 1. SpaceのUUIDを取得
+        let space_bytes = spacename.as_bytes();
+        let space_uuid = txn.get(self.space, &space_bytes).map_err(|e| match e {
+            LmdbError::NotFound => Error::SpaceNotFound {
+                space_name: spacename.to_string(),
+            },
+            _ => Error::from(e),
+        })?;
+
+        // 2. KeyのUUIDとKeyTypeを取得
+        let (key_uuid, keytype) = {
+            let mut key_cursor = txn.open_ro_cursor(self.key)?;
+            let mut found = None;
+            for (k, v) in key_cursor.iter_start() {
+                if k.starts_with(space_uuid) && std::str::from_utf8(k)?.contains(keyname) {
+                    let keytype_id_byte = k[k.len() - 2];
+                    found = Some((v.to_vec(), id_keytype(keytype_id_byte)));
+                    break;
+                }
+            }
+            found.ok_or(Error::KeyNotFound {
+                space_name: spacename.to_string(),
+                key_name: keyname.to_string(),
+                location: "show_values",
+            })?
+        };
+
+        // 3. value DB から key_uuid で始まる全ての値を取得
+        let mut cursor = txn.open_ro_cursor(self.value)?;
+        let mut result_map: HashMap<Vec<u8>, Vec<(String, ValueEntry)>> = HashMap::new();
+
+        for result in cursor.iter_start() {
+            let (k, v) = result;
+            if k.starts_with(&key_uuid) {
+                // k の先頭16バイトは key_uuid, 残りが id_bytes
+                let id_bytes = k[key_uuid.len()..].to_vec();
+                let value_entry = ValueEntry::from_bytes(keytype, v).ok_or(Error::NnKnown)?;
+
+                result_map
+                    .entry(id_bytes)
+                    .or_insert_with(Vec::new)
+                    .push((keyname.to_string(), value_entry));
+            }
+        }
+
+        Ok(result_map)
     }
 
     fn create_user(&self, username: &str, password: &str) -> Result<Output, Error> {

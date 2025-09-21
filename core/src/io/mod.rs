@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use crate::{
     error::Error,
@@ -20,6 +20,40 @@ pub enum ValueEntry {
     FLOAT(f32),
 }
 
+impl ValueEntry {
+    pub fn to_bytes(&self) -> Vec<u8> {
+        match self {
+            ValueEntry::TEXT(s) => s.as_bytes().to_vec(),
+            ValueEntry::BOOLEAN(b) => vec![*b as u8], // true=1, false=0
+            ValueEntry::INT(i) => i.to_le_bytes().to_vec(), // i32 → 4バイト
+            ValueEntry::FLOAT(f) => f.to_le_bytes().to_vec(), // f32 → 4バイト
+        }
+    }
+
+    // 逆変換もあると便利
+    pub fn from_bytes(keytype: KeyType, data: &[u8]) -> Option<Self> {
+        match keytype {
+            KeyType::TEXT => Some(ValueEntry::TEXT(String::from_utf8_lossy(data).to_string())),
+            KeyType::BOOLEAN => Some(ValueEntry::BOOLEAN(data.get(0)? != &0)),
+            KeyType::INT => {
+                if data.len() != 4 {
+                    return None;
+                }
+                let mut arr = [0u8; 4];
+                arr.copy_from_slice(data);
+                Some(ValueEntry::INT(i32::from_le_bytes(arr)))
+            }
+            KeyType::FLOAT => {
+                if data.len() != 4 {
+                    return None;
+                }
+                let mut arr = [0u8; 4];
+                arr.copy_from_slice(data);
+                Some(ValueEntry::FLOAT(f32::from_le_bytes(arr)))
+            }
+        }
+    }
+}
 // StorageTrait は共通
 pub trait StorageTrait {
     //データベース操作系
@@ -46,36 +80,40 @@ pub trait StorageTrait {
         &self,
         spacename: &str,
         keyname: &str,
-        ids: HashSet<SpaceTimeId>,
+        ids: Vec<Vec<u8>>,
         value: ValueEntry,
     ) -> Result<Output, Error>;
     fn patch_value(
         &self,
         spacename: &str,
         keyname: &str,
-        ids: HashSet<SpaceTimeId>,
+        ids: Vec<Vec<u8>>,
         value: ValueEntry,
     ) -> Result<Output, Error>;
     fn update_value(
         &self,
         spacename: &str,
         keyname: &str,
-        ids: HashSet<SpaceTimeId>,
+        ids: Vec<Vec<u8>>,
         value: ValueEntry,
     ) -> Result<Output, Error>;
     fn delete_value(
         &self,
         spacename: &str,
         keyname: &str,
-        ids: HashSet<SpaceTimeId>,
+        ids: Vec<Vec<u8>>,
     ) -> Result<Output, Error>;
     fn select_value(
         &self,
         spacename: &str,
+        keyname: Vec<&str>,
+        id: Vec<Vec<u8>>,
+    ) -> Result<HashMap<Vec<u8>, Vec<(String, ValueEntry)>>, Error>;
+    fn show_values(
+        &self,
+        spacename: &str,
         keyname: &str,
-        id: HashSet<SpaceTimeId>,
-    ) -> Result<Output, Error>;
-    fn show_values(&self, spacename: &str, keyname: &str) -> Result<Output, Error>;
+    ) -> Result<HashMap<Vec<u8>, Vec<(String, ValueEntry)>>, Error>;
 
     //ユーザー操作系
     fn create_user(&self, username: &str, password: &str) -> Result<Output, Error>;

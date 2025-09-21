@@ -160,6 +160,19 @@ pub enum FilterBOOLEAN {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+pub enum FilterFOLAT {
+    Equal(f32),
+    NotEqual(f32),
+    GreaterThan(f32),
+    GreaterEqual(f32),
+    LessThan(f32),
+    LessEqual(f32),
+    Between(f32, f32),
+    In(Vec<f32>),
+    NotIn(Vec<f32>),
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum FilterINT {
     Equal(i32),
     NotEqual(i32),

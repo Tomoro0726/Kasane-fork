@@ -11,9 +11,9 @@ use kasane_logic::{
 
 use crate::json::input::Range;
 
-pub fn range(range: Range) -> Result<Vec<Vec<u8>>, String> {
+pub fn range(rng: Range) -> Result<Vec<Vec<u8>>, String> {
     let mut result: Vec<Vec<u8>> = Vec::new();
-    match range {
+    match rng {
         Range::Function(v) => match v {
             crate::json::input::Function::Spot(spot) => {
                 result.extend(id_to_bitmask(point(spot.zoom, spot.point1)))
@@ -24,9 +24,26 @@ pub fn range(range: Range) -> Result<Vec<Vec<u8>>, String> {
             crate::json::input::Function::Triangle(k) => result.extend(ids_to_bitmask(triangle(
                 k.zoom, k.point1, k.point2, k.point3,
             ))),
-            crate::json::input::Function::FilterValue(filter_value) => todo!(),
+            crate::json::input::Function::FilterValue(filter_value) => {}
         },
-        Range::Prefix(v) => {}
+        Range::Prefix(v) => match v {
+            crate::json::input::Prefix::AND(ranges) => {
+                let mut and: Vec<Vec<u8>> = vec![];
+                for a in ranges {
+                    and.extend(dedup_bitmasks(range(a)?));
+                }
+                return Ok(and_vecs_optimized(and));
+            }
+            crate::json::input::Prefix::OR(ranges) => {
+                let mut or: Vec<Vec<u8>> = vec![];
+                for a in ranges {
+                    or.extend(dedup_bitmasks(range(a)?));
+                }
+                return Ok(dedup_bitmasks(or));
+            }
+            crate::json::input::Prefix::XOR(ranges) => todo!(),
+            crate::json::input::Prefix::NOT(ranges) => todo!(),
+        },
         Range::IdSet(v) => {
             let mut ids: HashSet<SpaceTimeId> = HashSet::new();
             for id in v {
@@ -49,70 +66,105 @@ fn ids_to_bitmask(ids: HashSet<SpaceTimeId>) -> Vec<Vec<u8>> {
 }
 
 fn id_to_bitmask(ids: SpaceTimeId) -> Vec<Vec<u8>> {
-    let mut result = Vec::new();
-
+    let mut result = vec![];
     for id in ids.pure() {
-        let mut bytes = Vec::with_capacity(1 + (id.z as usize + 1) / 2);
-
-        // 先頭バイトは F軸符号
-        bytes.push(if id.f >= 0 { 1 } else { 0 });
-
-        let mut level = 0;
-        while level < id.z {
-            // 1レベル目の octant
-            let x0 = if is_even_after(id.x as i32, level.into()) {
+        let mut bits = Vec::with_capacity(1 + (id.z as usize) * 3);
+        bits.push(if id.f >= 0 { 1 } else { 0 });
+        for shift in 0..id.z {
+            bits.push(if is_even_after(id.x as i32, shift.into()) {
                 0
             } else {
                 1
-            };
-            let y0 = if is_even_after(id.y as i32, level.into()) {
+            });
+            bits.push(if is_even_after(id.y as i32, shift.into()) {
                 0
             } else {
                 1
-            };
-            let f0 = if is_even_after(id.f.abs() as i32, level.into()) {
+            });
+            bits.push(if is_even_after(id.f.abs() as i32, shift.into()) {
                 0
             } else {
                 1
-            };
-            let oct0 = (x0 << 2) | (y0 << 1) | f0; // 0..7
-
-            // 2レベル目の octant（存在する場合のみ）
-            let oct1 = if level + 1 < id.z {
-                let x1 = if is_even_after(id.x as i32, (level + 1).into()) {
-                    0
-                } else {
-                    1
-                };
-                let y1 = if is_even_after(id.y as i32, (level + 1).into()) {
-                    0
-                } else {
-                    1
-                };
-                let f1 = if is_even_after(id.f.abs() as i32, (level + 1).into()) {
-                    0
-                } else {
-                    1
-                };
-                (x1 << 2) | (y1 << 1) | f1 // 0..7
-            } else {
-                0 // 2レベル目がなければ0で埋める
-            };
-
-            // 1バイトに詰める（上位3bit: oct0, 次の3bit: oct1, 下位2bitは0）
-            let byte = (oct0 << 5) | (oct1 << 2);
-            bytes.push(byte);
-
-            level += 2; // 2レベル進める
+            });
         }
-
-        result.push(bytes);
+        result.push(bits);
     }
-
     result
 }
 
 /// zビット目以降を右シフトして偶奇判定
 fn is_even_after(dim: i32, z: u32) -> bool {
     ((dim >> z) & 1) == 0
+}
+
+fn dedup_bitmasks(mut masks: Vec<Vec<u8>>) -> Vec<Vec<u8>> {
+    // 短い順にソート
+    masks.sort_by_key(|m| m.len());
+
+    let mut result: Vec<Vec<u8>> = Vec::new();
+
+    for mask in masks {
+        // mask が既存のどれかの先頭を含んでいれば追加不要
+        if result
+            .iter()
+            .any(|existing| existing.len() <= mask.len() && mask[..existing.len()] == existing[..])
+        {
+            continue; // mask は既存に含まれるのでスキップ
+        }
+
+        // mask が既存の先頭に含まれる長いものを削除
+        result.retain(|existing| {
+            !(existing.len() > mask.len() && existing[..mask.len()] == mask[..])
+        });
+
+        result.push(mask);
+    }
+
+    result
+}
+
+/// ANDルールに従ってVec<Vec<u8>>を処理
+pub fn and_vecs_optimized(mut masks: Vec<Vec<u8>>) -> Vec<Vec<u8>> {
+    // 短い順にソート
+    masks.sort_by_key(|m| m.len());
+    let mut result: Vec<Vec<u8>> = Vec::new();
+
+    for mask in masks {
+        let mut keep_mask = true;
+
+        // 比較対象の既存マスクを残すかどうか決める
+        result.retain(|existing| {
+            if existing.len() == mask.len() && existing.last() == mask.last() {
+                // 同じ長さかつ最後のu8が同じ → 両方残す
+                true
+            } else if existing.len() < mask.len() {
+                // 既存が短い場合
+                if existing[..] == mask[..existing.len()] {
+                    // 短いものが長い方に部分一致 → 長い方を消す
+                    keep_mask = false;
+                    true // 既存は残す
+                } else {
+                    // 部分一致なし → 両方消す
+                    keep_mask = false;
+                    false // 既存を削除
+                }
+            } else {
+                // 既存が長い場合
+                if mask[..] == existing[..mask.len()] {
+                    // mask が先頭に一致 → 既存を消す
+                    false
+                } else {
+                    // 部分一致なし → 両方消す
+                    keep_mask = false;
+                    false
+                }
+            }
+        });
+
+        if keep_mask {
+            result.push(mask);
+        }
+    }
+
+    result
 }
