@@ -24,7 +24,7 @@ pub fn range(rng: Range) -> Result<Vec<Vec<u8>>, String> {
             crate::json::input::Function::Triangle(k) => result.extend(ids_to_bitmask(triangle(
                 k.zoom, k.point1, k.point2, k.point3,
             ))),
-            crate::json::input::Function::FilterValue(filter_value) => {}
+            //crate::json::input::Function::FilterValue(filter_value) => {}
         },
         Range::Prefix(v) => match v {
             crate::json::input::Prefix::AND(ranges) => {

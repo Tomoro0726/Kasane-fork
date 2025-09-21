@@ -201,7 +201,7 @@ pub enum Function {
     Spot(Spot),
     Line(Line),
     Triangle(Triangle),
-    FilterValue(FilterValue),
+    //FilterValue(FilterValue),
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
