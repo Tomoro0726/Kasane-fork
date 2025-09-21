@@ -3,9 +3,9 @@ import './CommandBuilder.css'
 
 const COMMAND_TYPES = {
   // Database Operations
-  'createSpace': { label: 'Create Space', fields: [{ name: 'spaceName', type: 'text', required: true }] },
-  'dropSpace': { label: 'Drop Space', fields: [{ name: 'spaceName', type: 'text', required: true }] },
-  'infoSpace': { label: 'Info Space', fields: [{ name: 'spaceName', type: 'text', required: true }] },
+  'createSpace': { label: 'Create Space', fields: [{ name: 'space_name', type: 'text', required: true }] },
+  'dropSpace': { label: 'Drop Space', fields: [{ name: 'space_name', type: 'text', required: true }] },
+  'infoSpace': { label: 'Info Space', fields: [{ name: 'space_name', type: 'text', required: true }] },
   'showSpaces': { label: 'Show Spaces', fields: [] },
   'version': { label: 'Version', fields: [] },
   
@@ -13,25 +13,25 @@ const COMMAND_TYPES = {
   'createKey': { 
     label: 'Create Key', 
     fields: [
-      { name: 'spaceName', type: 'text', required: true },
-      { name: 'keyName', type: 'text', required: true },
-      { name: 'keyType', type: 'select', required: true, options: ['INT', 'BOOLEAN', 'TEXT', 'FLOAT'] },
-      { name: 'keyMode', type: 'select', required: true, options: ['UniqueKey', 'MultiKey'] }
+      { name: 'space_name', type: 'text', required: true },
+      { name: 'key_name', type: 'text', required: true },
+      { name: 'key_type', type: 'select', required: true, options: ['INT', 'BOOLEAN', 'TEXT', 'FLOAT'] },
+      { name: 'key_mode', type: 'select', required: true, options: ['UniqueKey', 'MultiKey'] }
     ]
   },
   'dropKey': { 
     label: 'Drop Key', 
     fields: [
-      { name: 'spaceName', type: 'text', required: true },
-      { name: 'keyName', type: 'text', required: true }
+      { name: 'space_name', type: 'text', required: true },
+      { name: 'key_name', type: 'text', required: true }
     ]
   },
-  'showKeys': { label: 'Show Keys', fields: [{ name: 'spaceName', type: 'text', required: true }] },
+  'showKeys': { label: 'Show Keys', fields: [{ name: 'space_name', type: 'text', required: true }] },
   'infoKey': { 
     label: 'Info Key', 
     fields: [
-      { name: 'spaceName', type: 'text', required: true },
-      { name: 'keyName', type: 'text', required: true }
+      { name: 'space_name', type: 'text', required: true },
+      { name: 'key_name', type: 'text', required: true }
     ]
   },
   
@@ -39,12 +39,12 @@ const COMMAND_TYPES = {
   'createUser': { 
     label: 'Create User', 
     fields: [
-      { name: 'userName', type: 'text', required: true },
+      { name: 'user_name', type: 'text', required: true },
       { name: 'password', type: 'password', required: true }
     ]
   },
-  'dropUser': { label: 'Drop User', fields: [{ name: 'userName', type: 'text', required: true }] },
-  'infoUser': { label: 'Info User', fields: [{ name: 'userName', type: 'text', required: true }] },
+  'dropUser': { label: 'Drop User', fields: [{ name: 'user_name', type: 'text', required: true }] },
+  'infoUser': { label: 'Info User', fields: [{ name: 'user_name', type: 'text', required: true }] },
   'showUsers': { label: 'Show Users', fields: [] },
 }
 
