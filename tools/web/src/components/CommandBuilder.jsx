@@ -2,6 +2,9 @@ import { useState } from 'react'
 import './CommandBuilder.css'
 
 const COMMAND_TYPES = {
+  // Custom JSON Input
+  'customJson': { label: 'Custom JSON', fields: [{ name: 'json', type: 'textarea', required: true, placeholder: 'Enter custom JSON command...' }] },
+  
   // Database Operations
   'createSpace': { label: 'Create Space', fields: [{ name: 'space_name', type: 'text', required: true }] },
   'dropSpace': { label: 'Drop Space', fields: [{ name: 'space_name', type: 'text', required: true }] },
@@ -80,7 +83,15 @@ const CommandBuilder = ({ onAddCommand }) => {
     }
 
     let command
-    if (commandConfig.fields.length === 0) {
+    if (selectedCommand === 'customJson') {
+      // Handle custom JSON input
+      try {
+        command = JSON.parse(formData.json)
+      } catch (error) {
+        alert('Invalid JSON format: ' + error.message)
+        return
+      }
+    } else if (commandConfig.fields.length === 0) {
       // Simple commands like "version", "showSpaces", "showUsers"
       command = selectedCommand
     } else {
@@ -112,12 +123,24 @@ const CommandBuilder = ({ onAddCommand }) => {
       )
     }
     
+    if (field.type === 'textarea') {
+      return (
+        <textarea
+          value={value}
+          onChange={(e) => handleFieldChange(field.name, e.target.value)}
+          placeholder={field.placeholder || `Enter ${field.name}`}
+          required={field.required}
+          rows={10}
+        />
+      )
+    }
+    
     return (
       <input
         type={field.type}
         value={value}
         onChange={(e) => handleFieldChange(field.name, e.target.value)}
-        placeholder={`Enter ${field.name}`}
+        placeholder={field.placeholder || `Enter ${field.name}`}
         required={field.required}
       />
     )
@@ -133,6 +156,9 @@ const CommandBuilder = ({ onAddCommand }) => {
           onChange={(e) => handleCommandChange(e.target.value)}
         >
           <option value="">Select a command</option>
+          <optgroup label="Custom Input">
+            <option value="customJson">Custom JSON</option>
+          </optgroup>
           <optgroup label="Database Operations">
             <option value="createSpace">Create Space</option>
             <option value="dropSpace">Drop Space</option>
