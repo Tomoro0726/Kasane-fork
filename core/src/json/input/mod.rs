@@ -70,13 +70,13 @@ pub struct PatchValue {
     pub value: ValueEntry,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct UpdateValue {
-    pub space_name: String,
-    pub key_name: String,
-    pub range: Range,
-    pub value: ValueEntry,
-}
+// #[derive(Debug, Serialize, Deserialize, Clone)]
+// pub struct UpdateValue {
+//     pub space_name: String,
+//     pub key_name: String,
+//     pub range: Range,
+//     pub value: ValueEntry,
+// }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct DeleteValue {
@@ -208,8 +208,8 @@ pub enum Function {
 pub enum Prefix {
     AND(Vec<Range>),
     OR(Vec<Range>),
-    XOR(Vec<Range>),
-    NOT(Vec<Range>),
+    // XOR(Vec<Range>),
+    // NOT(Vec<Range>),
 }
 
 // ---------------------- Key / Space情報 ----------------------
@@ -347,7 +347,7 @@ pub enum Command {
     //Value操作系
     InsertValue(InsertValue),
     PatchValue(PatchValue),
-    UpdateValue(UpdateValue),
+    //UpdateValue(UpdateValue),
     DeleteValue(DeleteValue),
     SelectValue(SelectValue),
     ShowValues(ShowValues),

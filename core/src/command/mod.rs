@@ -22,8 +22,9 @@ use crate::command::select_value::select_value;
 use crate::command::show_keys::show_keys;
 use crate::command::show_spaces::show_spaces;
 use crate::command::show_user::show_users;
-use crate::command::update_value::update_value;
+//use crate::command::update_value::update_value;
 
+use crate::command::show_values::show_values;
 use crate::io::full::Storage;
 use crate::{
     command::version::version,
@@ -41,7 +42,6 @@ pub mod info_key;
 pub mod info_space;
 pub mod info_user;
 pub mod insert_value;
-pub mod line;
 pub mod patch_value;
 pub mod select_value;
 pub mod show_keys;
@@ -50,7 +50,7 @@ pub mod show_user;
 pub mod show_values;
 pub mod tools;
 pub mod triangle;
-pub mod update_value;
+//pub mod update_value;
 pub mod version;
 
 //関数のディスパッチ関数
@@ -73,10 +73,10 @@ pub fn process(cmd: Command, s: Arc<Storage>) -> Result<Output, Error> {
         //Value操作系
         Command::InsertValue(v) => insert_value(v, s),
         Command::PatchValue(v) => patch_value(v, s),
-        Command::UpdateValue(v) => update_value(v, s),
+        //Command::UpdateValue(v) => update_value(v, s),
         Command::DeleteValue(v) => delete_value(v, s),
         Command::SelectValue(v) => select_value(v, s),
-        Command::ShowValues(v) => todo!(),
+        Command::ShowValues(v) => show_values(v, s),
 
         //ツール系
         //Command::Transaction(v) => todo!(),

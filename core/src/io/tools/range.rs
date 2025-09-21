@@ -40,9 +40,8 @@ pub fn range(rng: Range) -> Result<Vec<Vec<u8>>, String> {
                     or.extend(dedup_bitmasks(range(a)?));
                 }
                 return Ok(dedup_bitmasks(or));
-            }
-            crate::json::input::Prefix::XOR(ranges) => todo!(),
-            crate::json::input::Prefix::NOT(ranges) => todo!(),
+            } // crate::json::input::Prefix::XOR(ranges) =>
+              // crate::json::input::Prefix::NOT(ranges) =>
         },
         Range::IdSet(v) => {
             let mut ids: HashSet<SpaceTimeId> = HashSet::new();

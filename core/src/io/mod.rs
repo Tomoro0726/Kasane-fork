@@ -90,13 +90,13 @@ pub trait StorageTrait {
         ids: Vec<Vec<u8>>,
         value: ValueEntry,
     ) -> Result<Output, Error>;
-    fn update_value(
-        &self,
-        spacename: &str,
-        keyname: &str,
-        ids: Vec<Vec<u8>>,
-        value: ValueEntry,
-    ) -> Result<Output, Error>;
+    // fn update_value(
+    //     &self,
+    //     spacename: &str,
+    //     keyname: &str,
+    //     ids: Vec<Vec<u8>>,
+    //     value: ValueEntry,
+    // ) -> Result<Output, Error>;
     fn delete_value(
         &self,
         spacename: &str,

@@ -586,15 +586,14 @@ impl StorageTrait for Storage {
         Ok(Output::Success)
     }
 
-    fn update_value(
-        &self,
-        spacename: &str,
-        keyname: &str,
-        ids: Vec<Vec<u8>>,
-        value: super::ValueEntry,
-    ) -> Result<crate::json::output::Output, Error> {
-        todo!()
-    }
+    // fn update_value(
+    //     &self,
+    //     spacename: &str,
+    //     keyname: &str,
+    //     ids: Vec<Vec<u8>>,
+    //     value: super::ValueEntry,
+    // ) -> Result<crate::json::output::Output, Error> {
+    // }
     fn delete_value(
         &self,
         spacename: &str,
